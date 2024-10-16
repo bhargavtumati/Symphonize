@@ -38,4 +38,6 @@
 		<section name="NewWizard.dialogBounds">
 		</section>
 	</section>
+	<section name="org.eclipse.ui.internal.views.markers.FiltersConfigurationDialog">
+	</section>
 </section>

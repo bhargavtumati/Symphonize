@@ -27,16 +27,10 @@
 	</section>
 	<section name="Maven2ProjectWizardArchifactPage">
 		<list key="package">
-			<item value="com.springwithoutboot.Demospring"/>
-			<item value="com.twg.setterinjection.myfirstproject"/>
 		</list>
 		<list key="groupId">
-			<item value="com.springwithoutboot"/>
-			<item value="com.twg.setterinjection"/>
 		</list>
 		<list key="artifactId">
-			<item value="Demospring"/>
-			<item value="myfirstproject"/>
 		</list>
 		<list key="projectNameTemplate">
 			<item value="[artifactId]"/>
@@ -83,6 +77,7 @@
 	</section>
 	<section name="MavenProjectImportWizardPage">
 		<list key="rootDirectory">
+			<item value="C:\Users\SESPL\eclipse-workspace\loginpage"/>
 			<item value="C:\Users\SESPL\eclipse-workspace\Simplewebapp"/>
 			<item value="C:\Users\SESPL\eclipse-workspace\springbootfirstapp"/>
 			<item value="C:\Users\SESPL\eclipse-workspace"/>
