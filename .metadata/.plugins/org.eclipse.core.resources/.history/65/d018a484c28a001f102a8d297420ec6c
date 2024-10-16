@@ -1,0 +1,10 @@
+package com.springboot.app;
+
+
+
+
+public abstract class Computer {
+
+	 public abstract void print();
+	
+}
