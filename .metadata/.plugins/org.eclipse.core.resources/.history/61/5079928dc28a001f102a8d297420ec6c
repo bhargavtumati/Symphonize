@@ -1,0 +1,11 @@
+package com.springboot.app;
+
+
+
+
+public abstract class Computer implements Compute {
+
+	 @Override
+	public abstract void print();
+	
+}
