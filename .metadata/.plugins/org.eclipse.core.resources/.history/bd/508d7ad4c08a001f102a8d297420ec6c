@@ -1,0 +1,10 @@
+package com.springboot.app;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public abstract class Computer {
+
+	 public abstract String print();
+	
+}

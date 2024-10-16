@@ -1,0 +1,14 @@
+package com.springboot.app;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class Laptop extends Computer {
+
+	public String print() {
+		return "This is a Laptop";
+	}
+	
+	
+	
+}

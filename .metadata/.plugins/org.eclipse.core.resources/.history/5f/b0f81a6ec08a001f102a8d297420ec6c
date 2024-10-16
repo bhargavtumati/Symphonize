@@ -1,0 +1,13 @@
+package com.springboot.app;
+
+
+
+public class Laptop extends Computer {
+
+	public String print() {
+		return "This is a Laptop";
+	}
+	
+	
+	
+}

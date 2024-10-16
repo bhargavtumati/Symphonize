@@ -1,0 +1,10 @@
+package com.springboot.app;
+
+
+public class Desktop extends Computer {
+
+     public String print() {
+    	 return "This is a Desktop";
+     }
+      
+}

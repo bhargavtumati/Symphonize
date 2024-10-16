@@ -1,0 +1,39 @@
+package com.springboot.app;
+
+import java.util.Date;
+
+public class Order {
+
+	
+	private String ProductId;
+	private String ProductName;
+	private Date orderDate;
+	private Customer customer;
+	
+	public String getProductId() {
+		return ProductId;
+	}
+	public void setProductId(String productId) {
+		ProductId = productId;
+	}
+	public String getProductName() {
+		return ProductName;
+	}
+	public void setProductName(String productName) {
+		ProductName = productName;
+	}
+	public Date getOrderDate() {
+		return orderDate;
+	}
+	public void setOrderDate(Date orderDate) {
+		this.orderDate = orderDate;
+	}
+	public Customer getCustomer() {
+		return customer;
+	}
+	public void setCustomer(Customer customer) {
+		this.customer = customer;
+	}
+	
+	
+}

@@ -1,0 +1,20 @@
+package com.springboot.app;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+
+
+@Component
+public class Dev {
+	
+	
+	
+	
+	public void build() {
+		//c.print();
+		System.out.println("JAi Hind");
+	}
+	
+
+}

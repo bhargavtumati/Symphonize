@@ -1,0 +1,12 @@
+package com.springboot.app;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class Computer {
+
+	
+	public String print() {
+		return "water is loading";
+	}
+}
