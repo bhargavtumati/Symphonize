@@ -24,10 +24,9 @@ public class UserService {
     	  
     	  Optional<users>  user = usersrepo.findById(loginRequest.getEmail());
     		  
-    		  if(user==null) {
-    			  return false;
-    			  
-    		  }
+    		  if (user.isPresent()) {
+    			    return false;
+    			}
     		  users user1 = user.get();
     		  
     		  if(!user1.getPassword().equals(loginRequest.getPassword())) {
