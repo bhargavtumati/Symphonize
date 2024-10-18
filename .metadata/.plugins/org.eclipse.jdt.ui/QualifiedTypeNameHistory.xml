@@ -4,4 +4,6 @@
     <fullyQualifiedTypeName name="com.symphonize.Simplewebapp.model.Product"/>
     <fullyQualifiedTypeName name="org.springframework.stereotype.Service"/>
     <fullyQualifiedTypeName name="org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.GenerationType"/>
+    <fullyQualifiedTypeName name="com.springboot.banking.mapper.AccountMapper"/>
 </qualifiedTypeNameHistroy>
