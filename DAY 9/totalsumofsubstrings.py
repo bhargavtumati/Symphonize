@@ -10,5 +10,5 @@ def substrings(n):
     return total_sum
 
 # Example usage:
-n = "1234"
+n = "248"
 print(substrings(n))  # Output will be the sum of all substrings modulo 1000000007
