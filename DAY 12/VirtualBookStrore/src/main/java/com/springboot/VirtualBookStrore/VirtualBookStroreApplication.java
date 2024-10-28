@@ -1,0 +1,14 @@
+package com.springboot.VirtualBookStrore;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
+public class VirtualBookStroreApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(VirtualBookStroreApplication.class, args);
+	}
+
+}

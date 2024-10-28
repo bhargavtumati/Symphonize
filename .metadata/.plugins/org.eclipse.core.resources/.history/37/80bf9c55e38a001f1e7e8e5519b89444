@@ -1,8 +1,0 @@
-package com.symphonize.Simplewebapp;
-
-public class ProductController {
-
-	public String getProducts() {
-		return "";
-	}
-}

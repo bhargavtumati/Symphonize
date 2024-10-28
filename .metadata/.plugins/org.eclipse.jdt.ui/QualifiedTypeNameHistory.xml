@@ -6,4 +6,5 @@
     <fullyQualifiedTypeName name="org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration"/>
     <fullyQualifiedTypeName name="jakarta.persistence.GenerationType"/>
     <fullyQualifiedTypeName name="com.springboot.banking.mapper.AccountMapper"/>
+    <fullyQualifiedTypeName name="com.springboot.VirtualBookStrore.Entity.Library"/>
 </qualifiedTypeNameHistroy>

@@ -1,7 +1,0 @@
-package com.springboot.app;
-
-public abstract class Desktop extends Computer {
-
-      abstract void print();
-      
-}
