@@ -7,4 +7,8 @@
     <fullyQualifiedTypeName name="jakarta.persistence.GenerationType"/>
     <fullyQualifiedTypeName name="com.springboot.banking.mapper.AccountMapper"/>
     <fullyQualifiedTypeName name="com.springboot.VirtualBookStrore.Entity.Library"/>
+    <fullyQualifiedTypeName name="org.springframework.http.ResponseEntity"/>
+    <fullyQualifiedTypeName name="org.springframework.http.HttpStatus"/>
+    <fullyQualifiedTypeName name="jakarta.persistence.TemporalType"/>
+    <fullyQualifiedTypeName name="com.springboot.blogServer.Repo.PostRepository"/>
 </qualifiedTypeNameHistroy>
