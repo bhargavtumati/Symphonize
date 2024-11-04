@@ -18,32 +18,25 @@ import com.springboot.blogServer.Service.CommentService;
 @RequestMapping("/bhargavBlog/")
 @CrossOrigin
 public class commentController {
-	
-	@Autowired
-	private CommentService commentservice;
-	
-	@PostMapping("/comment/create")
-	public ResponseEntity<?> createComment(@RequestParam Long postId, @RequestParam String postedBy, @RequestBody String content){
-		
-		try {
-			return ResponseEntity.ok(commentservice.createComment(postId, postedBy, content));
-		}
-		catch(Exception e) {
-			return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
-		}
-		
-	}
-	
-	@GetMapping("/getAllCommentsBy/{PostId}")
-	public ResponseEntity<?> getcommentsByPostId(@PathVariable Long PostId){
-		try {
-			return ResponseEntity.ok(commentservice.getCommentsByPostId(PostId));
-		}
-		catch(Exception e){
-			
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
-			
-		}
-	}
 
+    @Autowired
+    private CommentService commentservice;
+
+    @PostMapping("/comment/create")
+    public ResponseEntity<?> createComment(@RequestParam Long postId, @RequestParam String postedBy, @RequestBody String content) {
+        try {
+            return ResponseEntity.ok(commentservice.createComment(postId, postedBy, content));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getAllCommentsBy/{PostId}")
+    public ResponseEntity<?> getCommentsByPostId(@PathVariable Long PostId) {
+        try {
+            return ResponseEntity.ok(commentservice.getCommentsByPostId(PostId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Something went wrong");
+        }
+    }
 }

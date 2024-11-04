@@ -9,6 +9,6 @@ import com.springboot.blogServer.Entity.Post;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-	
+
    List<Post> findAllByNameContaining(String name);
 }

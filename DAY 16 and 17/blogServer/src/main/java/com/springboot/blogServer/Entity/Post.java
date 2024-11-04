@@ -1,12 +1,17 @@
 package com.springboot.blogServer.Entity;
 
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.Date;
-import java.util.List;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 public class Post {
@@ -23,14 +28,15 @@ public class Post {
 
     private String img;
 
-    
+    @Temporal(TemporalType.DATE)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private Date date;
 
     private int viewCount;
 
     private int likeCount;
 
-   
+
     private List<String> tags;
 
     public Post() {

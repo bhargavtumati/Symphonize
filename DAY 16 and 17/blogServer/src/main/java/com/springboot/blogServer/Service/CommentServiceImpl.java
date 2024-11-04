@@ -19,31 +19,33 @@ public class CommentServiceImpl implements CommentService {
 
 	@Autowired
 	private CommentRepository commentRepository;
-	
-	
+
+
 	@Autowired
 	private PostRepository postrepository;
-	
+
+	@Override
 	public Comment createComment(Long postid, String postBy, String content) {
-		
+
 		Optional<Post> optionalPost = postrepository.findById(postid);
 		if(optionalPost.isPresent()) {
 			Comment comment = new Comment();
-			comment.setId(postid);
+			
 			comment.setPost(optionalPost.get());
 			comment.setContent(content);
 			comment.setPostedBy(postBy);
 			comment.setCreatedAt(new Date());
-			
+
 			return commentRepository.save(comment);
 		}
 		else {
 			throw new EntityNotFoundException("Post not found");
 		}
-		
-		
+
+
 	}
-	
+
+	@Override
 	public List<Comment> getCommentsByPostId(Long postId){
 		return commentRepository.findByPostId(postId);
 	}

@@ -58,9 +58,9 @@ function Login () {
         <div className="container">
            
            <form onSubmit={handleSubmit}>
-           <h1> Please Login</h1>
+           <h1> Bhargav Blog</h1>
             <label>User ID:</label>
-            <input type="emial" placeholder="Enter your user id" value={email} onChange={setEmail}/>
+            <input type="email" placeholder="Enter your user id" value={email} onChange={setEmail}/>
             <br></br>
             <br></br>
             <label>Password:</label>

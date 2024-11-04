@@ -42,7 +42,9 @@ function Register () {
        }
        
 }
-    
+const redirectToLogin = () => {
+  window.location.href = "/login";
+}
     return (
        <div className="container">
       <form onSubmit={handleSubmit}>
@@ -82,7 +84,13 @@ function Register () {
         <br /><br />
 
         <button type="submit">Register</button>
+
+        <br />
+    <span>Already have an account? </span>
+    <button type="button" onClick={redirectToLogin}>Login</button>
+    
       </form>
+      
     </div>
     )
 }

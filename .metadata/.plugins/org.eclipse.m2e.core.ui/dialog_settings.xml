@@ -77,8 +77,10 @@
 	</section>
 	<section name="MavenProjectImportWizardPage">
 		<list key="rootDirectory">
-			<item value="C:\Users\SESPL\eclipse-workspace\DAY 16"/>
+			<item value="C:\Users\SESPL\eclipse-workspace\DAY 16 and 17"/>
+			<item value="C:\Users\SESPL\eclipse-workspace\DAY 16 and 17\blogServer"/>
 			<item value="C:\Users\SESPL\eclipse-workspace\DAY 16\blogServer"/>
+			<item value="C:\Users\SESPL\eclipse-workspace\DAY 16"/>
 			<item value="C:\Users\SESPL\eclipse-workspace\DAY 12 and 13\VirtualBookStrore"/>
 			<item value="C:\Users\SESPL\eclipse-workspace\DAY 15\StudentManagementSystem"/>
 			<item value="C:\Users\SESPL\eclipse-workspace\DAY 12\VirtualBookStrore"/>
@@ -90,8 +92,6 @@
 			<item value="C:\Users\SESPL\eclipse-workspace\loginpage"/>
 			<item value="C:\Users\SESPL\eclipse-workspace\Simplewebapp"/>
 			<item value="C:\Users\SESPL\eclipse-workspace\springbootfirstapp"/>
-			<item value="C:\Users\SESPL\eclipse-workspace"/>
-			<item value="C:\Users\SESPL\eclipse-workspace\demo"/>
 		</list>
 		<list key="projectNameTemplate">
 			<item value="[artifactId]"/>

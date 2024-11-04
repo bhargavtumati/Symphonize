@@ -9,6 +9,8 @@ public interface CommentService {
 	 Comment createComment(Long postid, String postBy, String content);
 
 	 List<Comment> getCommentsByPostId(Long postId);
-	
-	
+
+
+
+
 }
