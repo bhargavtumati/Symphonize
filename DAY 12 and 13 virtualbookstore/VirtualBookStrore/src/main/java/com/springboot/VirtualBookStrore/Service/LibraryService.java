@@ -8,7 +8,8 @@ import org.springframework.stereotype.Service;
 import com.springboot.VirtualBookStrore.Entity.Library;
 import com.springboot.VirtualBookStrore.Repo.LibraryRepo;
 
-
+import org.springframework.data.domain.Page; 
+import org.springframework.data.domain.PageRequest;
 
 @Service
 public class LibraryService {
@@ -39,10 +40,17 @@ public class LibraryService {
 	public List<Library> getAllBooks() {
 		// TODO Auto-generated method stub
 		List<Library> books = libraryrepository.findAll();
+
+
 		return books;
 		
 	}
 	
+	
+	public Page<Library> getPaginatedLibraries(int page, int size) {
+		PageRequest pageRequest = PageRequest.of(page, size); 
+		return libraryrepository.findAll(pageRequest);
+		}
 	
 	public Library AssignBook(Long Id, String Name, boolean availability, Long phoneNumber) {
 		
