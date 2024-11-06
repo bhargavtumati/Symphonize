@@ -1,5 +1,6 @@
 package com.springboot.blogServer.Controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +21,7 @@ import jakarta.persistence.EntityNotFoundException;
 @RequestMapping("/bhargavblog")
 public class postController {
 
+	@Autowired
     private final PostService postService;
 
     public postController(PostService postService) {
