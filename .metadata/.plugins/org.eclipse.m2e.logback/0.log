@@ -18257,3 +18257,682 @@ org.eclipse.core.runtime.CoreException: Launch configuration LoginpageApplicatio
 2024-11-06 18:54:58,531 [Worker-125: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
 2024-11-06 18:54:58,536 [Worker-125: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
 2024-11-06 18:54:58,539 [Worker-125: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 09:47:34,648 [Worker-1: Loading available Gradle versions] INFO  o.e.b.c.i.u.g.PublishedGradleVersions - Gradle version information cache is out-of-date. Trying to update.
+2024-11-07 09:50:46,829 [Worker-5: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 09:50:46,884 [Worker-5: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 09:50:46,889 [Worker-5: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 09:57:09,766 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 09:57:09,774 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 09:57:09,778 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:15:57,788 [Worker-16: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:15:57,795 [Worker-16: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:15:57,799 [Worker-16: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:19:44,466 [Worker-8: Building Workspace] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:19:44,470 [Worker-8: Building Workspace] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:19:44,473 [Worker-8: Building Workspace] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:19:54,108 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:19:54,113 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:19:54,118 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:20:08,389 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:20:08,394 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:20:08,399 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:20:18,556 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:20:18,560 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:20:18,564 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:20:28,127 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:20:28,140 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:20:28,144 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:21:24,992 [main] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:21:24,997 [main] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:21:25,001 [main] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:21:39,234 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:21:39,238 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:21:39,245 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:21:45,533 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:21:45,539 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:21:45,543 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:21:53,296 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:21:53,301 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:21:53,306 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:22:15,371 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:22:15,375 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:22:15,379 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:22:20,689 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:22:20,694 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:22:20,698 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:23:08,041 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:23:08,046 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:23:08,050 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:23:13,131 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:23:13,135 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:23:13,139 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:25:57,728 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:25:57,733 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:25:57,737 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:26:26,250 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:26:26,254 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:26:26,258 [Worker-17: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:27:30,398 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:27:30,402 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:27:30,405 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:30:38,693 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:30:38,732 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:30:38,740 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:32:48,351 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:32:48,357 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:32:48,361 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:33:29,198 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:33:29,201 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:33:29,205 [Worker-21: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:33:58,976 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:33:58,980 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:33:58,984 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:34:17,951 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:34:17,956 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:34:17,959 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:34:41,143 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:34:41,148 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:34:41,153 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:34:47,252 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:34:47,256 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:34:47,260 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:34:55,493 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:34:55,498 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:34:55,501 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:35:14,142 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:35:14,155 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:35:14,159 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:39:30,776 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:39:30,782 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:39:30,785 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:40:27,034 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:40:27,040 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:40:27,044 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:40:52,998 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:40:53,003 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:40:53,007 [Worker-20: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:41:23,626 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:41:23,631 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:41:23,635 [Worker-19: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:42:12,006 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:42:12,012 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:42:12,015 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:42:49,161 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:42:49,166 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:42:49,169 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:43:36,617 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:43:36,622 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:43:36,625 [Worker-2: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:49:41,655 [Worker-24: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:49:41,661 [Worker-24: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:49:41,666 [Worker-24: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:51:37,710 [Worker-24: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:51:37,723 [Worker-24: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:51:37,726 [Worker-24: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:51:53,606 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:51:53,611 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:51:53,615 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:57:04,880 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:57:04,884 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:57:04,887 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:58:50,537 [Worker-26: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:58:50,542 [Worker-26: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:58:50,546 [Worker-26: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 10:59:02,698 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 10:59:02,703 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 10:59:02,707 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:13:08,441 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:13:08,446 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:13:08,450 [Worker-8: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:16:18,047 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:16:18,053 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:16:18,057 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:16:20,085 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:16:20,089 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:16:20,092 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:30:30,793 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:30:30,798 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:30:30,801 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:31:17,893 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:31:17,898 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:31:17,902 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:32:04,980 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:32:04,985 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:32:04,989 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:33:36,952 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:33:36,956 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:33:36,961 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:33:46,708 [Worker-32: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:33:46,714 [Worker-32: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:33:46,717 [Worker-32: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:33:51,847 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:33:51,852 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:33:51,855 [Worker-29: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:35:41,403 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:35:41,407 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:35:41,411 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:42:49,584 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:42:49,589 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:42:49,593 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:43:48,100 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:43:48,104 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:43:48,108 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:51:28,247 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:51:28,251 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:51:28,254 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:53:24,316 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:53:24,321 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:53:24,325 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 11:53:50,699 [Worker-35: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 11:53:50,704 [Worker-35: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 11:53:50,708 [Worker-35: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:04:19,258 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:04:19,263 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:04:19,267 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:07:09,469 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:07:09,474 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:07:09,478 [Worker-22: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:08:56,030 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:08:56,034 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:08:56,038 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:10:19,366 [Worker-42: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:10:19,374 [Worker-42: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:10:19,377 [Worker-42: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:19:40,795 [Worker-45: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:19:40,802 [Worker-45: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:19:40,805 [Worker-45: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:21:56,259 [Worker-45: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:21:56,266 [Worker-45: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:21:56,269 [Worker-45: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:22:51,522 [Worker-46: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:22:51,529 [Worker-46: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:22:51,532 [Worker-46: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:37:45,760 [Worker-44: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:37:45,772 [Worker-44: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:37:45,778 [Worker-44: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:39:24,949 [Worker-40: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:39:24,954 [Worker-40: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:39:24,958 [Worker-40: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:40:02,723 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:40:02,728 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:40:02,731 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:44:41,495 [Worker-50: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:44:41,499 [Worker-50: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:44:41,502 [Worker-50: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:45:23,997 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:45:24,001 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:45:24,005 [Worker-28: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:49:48,484 [Worker-52: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:49:48,489 [Worker-52: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:49:48,493 [Worker-52: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:49:51,154 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:49:51,159 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:49:51,162 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:50:05,841 [Worker-52: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:50:05,846 [Worker-52: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:50:05,849 [Worker-52: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:50:18,309 [Worker-44: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:50:18,317 [Worker-44: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:50:18,321 [Worker-44: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 12:51:51,590 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 12:51:51,595 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 12:51:51,657 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 13:37:25,575 [Worker-55: Updating Maven Dependencies] ERROR o.e.m.j.i.l.MavenLaunchConfigurationListener - Launch configuration BitlabsApplication references closed project bitlabs
+org.eclipse.core.runtime.CoreException: Launch configuration BitlabsApplication references closed project bitlabs
+	at org.eclipse.jdt.launching.JavaRuntime.abort(JavaRuntime.java:1870)
+	at org.eclipse.jdt.launching.JavaRuntime.getJavaProject(JavaRuntime.java:1744)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.updateLaunchConfiguration(MavenLaunchConfigurationListener.java:66)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.launchConfigurationChanged(MavenLaunchConfigurationListener.java:52)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.run(LaunchManager.java:219)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.notify(LaunchManager.java:203)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setDirty(LaunchConfigurationWorkingCopy.java:527)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setAttribute(LaunchConfigurationWorkingCopy.java:415)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:409)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:435)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.mavenProjectChanged(MavenLaunchConfigurationListener.java:137)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.notifyProjectChangeListeners(ProjectRegistryManager.java:892)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.applyMutableProjectRegistry(ProjectRegistryManager.java:1042)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.lambda$0(ProjectRegistryRefreshJob.java:162)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.executeBare(MavenExecutionContext.java:458)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:339)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:278)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.run(ProjectRegistryRefreshJob.java:106)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2024-11-07 13:37:25,607 [Worker-55: Updating Maven Dependencies] ERROR o.e.m.j.i.l.MavenLaunchConfigurationListener - Launch configuration BitlabsApplication references closed project bitlabs
+org.eclipse.core.runtime.CoreException: Launch configuration BitlabsApplication references closed project bitlabs
+	at org.eclipse.jdt.launching.JavaRuntime.abort(JavaRuntime.java:1870)
+	at org.eclipse.jdt.launching.JavaRuntime.getJavaProject(JavaRuntime.java:1744)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.updateLaunchConfiguration(MavenLaunchConfigurationListener.java:66)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.launchConfigurationChanged(MavenLaunchConfigurationListener.java:52)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.run(LaunchManager.java:219)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.notify(LaunchManager.java:203)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setDirty(LaunchConfigurationWorkingCopy.java:527)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setAttribute(LaunchConfigurationWorkingCopy.java:415)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:410)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:435)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.mavenProjectChanged(MavenLaunchConfigurationListener.java:137)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.notifyProjectChangeListeners(ProjectRegistryManager.java:892)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.applyMutableProjectRegistry(ProjectRegistryManager.java:1042)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.lambda$0(ProjectRegistryRefreshJob.java:162)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.executeBare(MavenExecutionContext.java:458)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:339)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:278)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.run(ProjectRegistryRefreshJob.java:106)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2024-11-07 13:37:25,612 [Worker-55: Updating Maven Dependencies] ERROR o.e.m.j.i.l.MavenLaunchConfigurationListener - Launch configuration BitlabsApplication references closed project bitlabs
+org.eclipse.core.runtime.CoreException: Launch configuration BitlabsApplication references closed project bitlabs
+	at org.eclipse.jdt.launching.JavaRuntime.abort(JavaRuntime.java:1870)
+	at org.eclipse.jdt.launching.JavaRuntime.getJavaProject(JavaRuntime.java:1744)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.updateLaunchConfiguration(MavenLaunchConfigurationListener.java:66)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.launchConfigurationChanged(MavenLaunchConfigurationListener.java:52)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.run(LaunchManager.java:219)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.notify(LaunchManager.java:203)
+	at org.eclipse.debug.internal.core.LaunchManager.launchConfigurationChanged(LaunchManager.java:1960)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.writeNewFile(LaunchConfigurationWorkingCopy.java:380)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.doSave0(LaunchConfigurationWorkingCopy.java:259)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.doSave(LaunchConfigurationWorkingCopy.java:229)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.doSave(LaunchConfigurationWorkingCopy.java:187)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:411)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:435)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.mavenProjectChanged(MavenLaunchConfigurationListener.java:137)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.notifyProjectChangeListeners(ProjectRegistryManager.java:892)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.applyMutableProjectRegistry(ProjectRegistryManager.java:1042)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.lambda$0(ProjectRegistryRefreshJob.java:162)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.executeBare(MavenExecutionContext.java:458)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:339)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:278)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.run(ProjectRegistryRefreshJob.java:106)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2024-11-07 13:38:06,016 [Worker-49: Importing Maven projects] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: com.jobs:bitlabs:0.0.1-SNAPSHOT @ C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\pom.xml.
+2024-11-07 13:38:13,634 [Worker-49: Importing Maven projects] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /bitlabs/src/main/java
+2024-11-07 13:38:13,636 [Worker-49: Importing Maven projects] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding resource folder /bitlabs/src/main/resources
+2024-11-07 13:38:13,637 [Worker-49: Importing Maven projects] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding resource folder /bitlabs/src/main/resources
+2024-11-07 13:38:13,637 [Worker-49: Importing Maven projects] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding source folder /bitlabs/src/test/java
+2024-11-07 13:38:13,638 [Worker-49: Importing Maven projects] INFO  o.e.m.j.i.AbstractJavaProjectConfigurator - Adding resource folder /bitlabs/src/test/resources
+2024-11-07 13:38:14,130 [Worker-49: Importing Maven projects] INFO  o.e.m.c.i.p.ProjectConfigurationManager - Imported and configured 1 project(s) in 11 sec
+2024-11-07 13:38:14,920 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 13:38:14,935 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 13:38:14,941 [Worker-48: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 13:47:47,958 [Worker-56: Updating Maven Dependencies] ERROR o.e.m.j.i.l.MavenLaunchConfigurationListener - Launch configuration BitlabsApplication references closed project bitlabs
+org.eclipse.core.runtime.CoreException: Launch configuration BitlabsApplication references closed project bitlabs
+	at org.eclipse.jdt.launching.JavaRuntime.abort(JavaRuntime.java:1870)
+	at org.eclipse.jdt.launching.JavaRuntime.getJavaProject(JavaRuntime.java:1744)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.updateLaunchConfiguration(MavenLaunchConfigurationListener.java:66)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.launchConfigurationChanged(MavenLaunchConfigurationListener.java:52)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.run(LaunchManager.java:219)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.notify(LaunchManager.java:203)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setDirty(LaunchConfigurationWorkingCopy.java:527)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setAttribute(LaunchConfigurationWorkingCopy.java:415)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:409)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:435)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.mavenProjectChanged(MavenLaunchConfigurationListener.java:137)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.notifyProjectChangeListeners(ProjectRegistryManager.java:892)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.applyMutableProjectRegistry(ProjectRegistryManager.java:1042)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.lambda$0(ProjectRegistryRefreshJob.java:162)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.executeBare(MavenExecutionContext.java:458)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:339)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:278)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.run(ProjectRegistryRefreshJob.java:106)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2024-11-07 13:47:47,961 [Worker-56: Updating Maven Dependencies] ERROR o.e.m.j.i.l.MavenLaunchConfigurationListener - Launch configuration BitlabsApplication references closed project bitlabs
+org.eclipse.core.runtime.CoreException: Launch configuration BitlabsApplication references closed project bitlabs
+	at org.eclipse.jdt.launching.JavaRuntime.abort(JavaRuntime.java:1870)
+	at org.eclipse.jdt.launching.JavaRuntime.getJavaProject(JavaRuntime.java:1744)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.updateLaunchConfiguration(MavenLaunchConfigurationListener.java:66)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.launchConfigurationChanged(MavenLaunchConfigurationListener.java:52)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.run(LaunchManager.java:219)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.notify(LaunchManager.java:203)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setDirty(LaunchConfigurationWorkingCopy.java:527)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setAttribute(LaunchConfigurationWorkingCopy.java:415)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:410)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:435)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.mavenProjectChanged(MavenLaunchConfigurationListener.java:137)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.notifyProjectChangeListeners(ProjectRegistryManager.java:892)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.applyMutableProjectRegistry(ProjectRegistryManager.java:1042)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.lambda$0(ProjectRegistryRefreshJob.java:162)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.executeBare(MavenExecutionContext.java:458)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:339)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:278)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.run(ProjectRegistryRefreshJob.java:106)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2024-11-07 13:47:47,970 [Worker-56: Updating Maven Dependencies] ERROR o.e.m.j.i.l.MavenLaunchConfigurationListener - Launch configuration BitlabsApplication references closed project bitlabs
+org.eclipse.core.runtime.CoreException: Launch configuration BitlabsApplication references closed project bitlabs
+	at org.eclipse.jdt.launching.JavaRuntime.abort(JavaRuntime.java:1870)
+	at org.eclipse.jdt.launching.JavaRuntime.getJavaProject(JavaRuntime.java:1744)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.updateLaunchConfiguration(MavenLaunchConfigurationListener.java:66)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.launchConfigurationChanged(MavenLaunchConfigurationListener.java:52)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.run(LaunchManager.java:219)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.notify(LaunchManager.java:203)
+	at org.eclipse.debug.internal.core.LaunchManager.launchConfigurationChanged(LaunchManager.java:1960)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.writeNewFile(LaunchConfigurationWorkingCopy.java:380)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.doSave0(LaunchConfigurationWorkingCopy.java:259)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.doSave(LaunchConfigurationWorkingCopy.java:229)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.doSave(LaunchConfigurationWorkingCopy.java:187)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:411)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:435)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.mavenProjectChanged(MavenLaunchConfigurationListener.java:137)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.notifyProjectChangeListeners(ProjectRegistryManager.java:892)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.applyMutableProjectRegistry(ProjectRegistryManager.java:1042)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.lambda$0(ProjectRegistryRefreshJob.java:162)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.executeBare(MavenExecutionContext.java:458)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:339)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:278)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.run(ProjectRegistryRefreshJob.java:106)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2024-11-07 13:47:50,321 [Worker-53: Updating Maven Dependencies] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: com.jobs:bitlabs:0.0.1-SNAPSHOT @ C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\pom.xml.
+2024-11-07 13:53:46,271 [Worker-61: Building] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: com.jobs:bitlabs:0.0.1-SNAPSHOT @ C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\pom.xml.
+2024-11-07 13:53:47,330 [Worker-61: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 13:53:47,350 [Worker-61: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 13:53:47,356 [Worker-61: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 13:53:48,709 [Worker-59: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 13:53:48,716 [Worker-59: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 13:53:48,719 [Worker-59: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:00:20,253 [main] INFO  o.e.m.jdt.internal.UnitTestSupport - Updating BitlabsApplicationTests from maven configuration
+2024-11-07 14:04:16,493 [Worker-59: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:04:16,494 [Worker-59: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:04:16,499 [Worker-59: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:04:23,545 [Worker-69: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:04:23,551 [Worker-69: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:04:23,554 [Worker-69: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:05:23,562 [Worker-59: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:05:23,563 [Worker-59: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:05:23,566 [Worker-59: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:05:30,510 [main] INFO  o.e.m.jdt.internal.UnitTestSupport - Updating CompanyProfileServiceTest from maven configuration
+2024-11-07 14:10:58,292 [Worker-72: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:10:58,299 [Worker-72: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:10:58,304 [Worker-72: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:11:33,646 [Worker-72: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:11:33,647 [Worker-72: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:11:33,651 [Worker-72: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:14:59,253 [Worker-73: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:14:59,255 [Worker-73: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:14:59,258 [Worker-73: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:15:40,607 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409 [642])
+2024-11-07 14:15:40,615 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409
+2024-11-07 14:15:40,615 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\aopalliance-1.0.jar
+2024-11-07 14:15:40,616 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\guice-5.1.0.jar
+2024-11-07 14:15:40,616 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\httpclient-4.5.14.jar
+2024-11-07 14:15:40,616 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\httpcore-4.4.16.jar
+2024-11-07 14:15:40,616 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\jansi-2.4.1.jar
+2024-11-07 14:15:40,616 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\jcl-over-slf4j-1.7.36.jar
+2024-11-07 14:15:40,617 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-artifact-3.9.9.jar
+2024-11-07 14:15:40,617 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-builder-support-3.9.9.jar
+2024-11-07 14:15:40,617 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-compat-3.9.9.jar
+2024-11-07 14:15:40,617 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-core-3.9.9.jar
+2024-11-07 14:15:40,618 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-embedder-3.9.9.jar
+2024-11-07 14:15:40,618 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-model-3.9.9.jar
+2024-11-07 14:15:40,618 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-model-builder-3.9.9.jar
+2024-11-07 14:15:40,618 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-plugin-api-3.9.9.jar
+2024-11-07 14:15:40,618 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-repository-metadata-3.9.9.jar
+2024-11-07 14:15:40,619 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-api-1.9.22.jar
+2024-11-07 14:15:40,619 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-connector-basic-1.9.22.jar
+2024-11-07 14:15:40,619 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-impl-1.9.22.jar
+2024-11-07 14:15:40,619 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-named-locks-1.9.22.jar
+2024-11-07 14:15:40,619 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-provider-3.9.9.jar
+2024-11-07 14:15:40,620 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-spi-1.9.22.jar
+2024-11-07 14:15:40,620 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-transport-file-1.9.22.jar
+2024-11-07 14:15:40,620 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-transport-http-1.9.22.jar
+2024-11-07 14:15:40,620 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-transport-wagon-1.9.22.jar
+2024-11-07 14:15:40,621 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-util-1.9.22.jar
+2024-11-07 14:15:40,621 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-settings-3.9.9.jar
+2024-11-07 14:15:40,621 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-settings-builder-3.9.9.jar
+2024-11-07 14:15:40,621 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-shared-utils-3.4.2.jar
+2024-11-07 14:15:40,622 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\org.eclipse.sisu.inject-0.9.0.M3.jar
+2024-11-07 14:15:40,622 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\org.eclipse.sisu.plexus-0.9.0.M3.jar
+2024-11-07 14:15:40,622 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-build-api-0.0.7.jar
+2024-11-07 14:15:40,622 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-build-api-1.2.0.jar
+2024-11-07 14:15:40,623 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-cipher-2.0.jar
+2024-11-07 14:15:40,623 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-classworlds-2.8.0.jar
+2024-11-07 14:15:40,623 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-component-annotations-2.1.0.jar
+2024-11-07 14:15:40,624 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-interpolation-1.27.jar
+2024-11-07 14:15:40,624 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-sec-dispatcher-2.0.jar
+2024-11-07 14:15:40,624 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-utils-3.5.1.jar
+2024-11-07 14:15:40,624 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-xml-3.0.1.jar
+2024-11-07 14:15:40,625 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\wagon-file-3.5.3.jar
+2024-11-07 14:15:40,625 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\wagon-http-3.5.3.jar
+2024-11-07 14:15:40,625 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\wagon-http-shared-3.5.3.jar
+2024-11-07 14:15:40,625 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\wagon-provider-api-3.5.3.jar
+2024-11-07 14:15:40,626 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=com.google.guava_33.3.0.jre [16])
+2024-11-07 14:15:40,627 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\com.google.guava_33.3.0.jre.jar
+2024-11-07 14:15:40,627 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=slf4j.api_2.0.16 [1007])
+2024-11-07 14:15:40,628 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\slf4j.api_2.0.16.jar
+2024-11-07 14:15:40,628 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=jakarta.inject.jakarta.inject-api_1.0.5 [34])
+2024-11-07 14:15:40,628 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\jakarta.inject.jakarta.inject-api_1.0.5.jar
+2024-11-07 14:15:40,628 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=jakarta.annotation-api_1.3.5 [29])
+2024-11-07 14:15:40,629 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\jakarta.annotation-api_1.3.5.jar
+2024-11-07 14:15:40,629 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=org.apache.commons.cli_1.9.0 [78])
+2024-11-07 14:15:40,629 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.apache.commons.cli_1.9.0.jar
+2024-11-07 14:15:40,629 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=org.apache.commons.commons-codec_1.16.0 [81])
+2024-11-07 14:15:40,630 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.apache.commons.commons-codec_1.16.0.jar
+2024-11-07 14:15:40,630 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=com.google.guava.failureaccess_1.0.2 [17])
+2024-11-07 14:15:40,631 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\com.google.guava.failureaccess_1.0.2.jar
+2024-11-07 14:15:40,633 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.e.m.i.launch.MavenLaunchDelegate - Run build in "C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs":
+2024-11-07 14:15:40,634 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.e.m.i.launch.MavenLaunchDelegate -  mvn  -B -Dstyle.color=always test
+2024-11-07 14:17:15,848 [Worker-70: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:17:15,850 [Worker-70: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:17:15,854 [Worker-70: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:20:40,052 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409 [642])
+2024-11-07 14:20:40,053 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409
+2024-11-07 14:20:40,053 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\aopalliance-1.0.jar
+2024-11-07 14:20:40,054 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\guice-5.1.0.jar
+2024-11-07 14:20:40,054 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\httpclient-4.5.14.jar
+2024-11-07 14:20:40,054 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\httpcore-4.4.16.jar
+2024-11-07 14:20:40,054 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\jansi-2.4.1.jar
+2024-11-07 14:20:40,055 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\jcl-over-slf4j-1.7.36.jar
+2024-11-07 14:20:40,055 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-artifact-3.9.9.jar
+2024-11-07 14:20:40,055 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-builder-support-3.9.9.jar
+2024-11-07 14:20:40,055 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-compat-3.9.9.jar
+2024-11-07 14:20:40,055 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-core-3.9.9.jar
+2024-11-07 14:20:40,056 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-embedder-3.9.9.jar
+2024-11-07 14:20:40,056 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-model-3.9.9.jar
+2024-11-07 14:20:40,056 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-model-builder-3.9.9.jar
+2024-11-07 14:20:40,056 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-plugin-api-3.9.9.jar
+2024-11-07 14:20:40,057 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-repository-metadata-3.9.9.jar
+2024-11-07 14:20:40,057 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-api-1.9.22.jar
+2024-11-07 14:20:40,057 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-connector-basic-1.9.22.jar
+2024-11-07 14:20:40,057 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-impl-1.9.22.jar
+2024-11-07 14:20:40,057 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-named-locks-1.9.22.jar
+2024-11-07 14:20:40,058 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-provider-3.9.9.jar
+2024-11-07 14:20:40,058 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-spi-1.9.22.jar
+2024-11-07 14:20:40,058 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-transport-file-1.9.22.jar
+2024-11-07 14:20:40,058 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-transport-http-1.9.22.jar
+2024-11-07 14:20:40,058 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-transport-wagon-1.9.22.jar
+2024-11-07 14:20:40,059 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-resolver-util-1.9.22.jar
+2024-11-07 14:20:40,059 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-settings-3.9.9.jar
+2024-11-07 14:20:40,059 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-settings-builder-3.9.9.jar
+2024-11-07 14:20:40,059 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\maven-shared-utils-3.4.2.jar
+2024-11-07 14:20:40,059 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\org.eclipse.sisu.inject-0.9.0.M3.jar
+2024-11-07 14:20:40,060 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\org.eclipse.sisu.plexus-0.9.0.M3.jar
+2024-11-07 14:20:40,060 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-build-api-0.0.7.jar
+2024-11-07 14:20:40,060 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-build-api-1.2.0.jar
+2024-11-07 14:20:40,060 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-cipher-2.0.jar
+2024-11-07 14:20:40,060 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-classworlds-2.8.0.jar
+2024-11-07 14:20:40,061 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-component-annotations-2.1.0.jar
+2024-11-07 14:20:40,061 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-interpolation-1.27.jar
+2024-11-07 14:20:40,061 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-sec-dispatcher-2.0.jar
+2024-11-07 14:20:40,061 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-utils-3.5.1.jar
+2024-11-07 14:20:40,061 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\plexus-xml-3.0.1.jar
+2024-11-07 14:20:40,062 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\wagon-file-3.5.3.jar
+2024-11-07 14:20:40,062 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\wagon-http-3.5.3.jar
+2024-11-07 14:20:40,062 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\wagon-http-shared-3.5.3.jar
+2024-11-07 14:20:40,062 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.eclipse.m2e.maven.runtime_3.9.900.20240824-1409\jars\wagon-provider-api-3.5.3.jar
+2024-11-07 14:20:40,063 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=com.google.guava_33.3.0.jre [16])
+2024-11-07 14:20:40,063 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\com.google.guava_33.3.0.jre.jar
+2024-11-07 14:20:40,063 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=slf4j.api_2.0.16 [1007])
+2024-11-07 14:20:40,064 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\slf4j.api_2.0.16.jar
+2024-11-07 14:20:40,064 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=jakarta.inject.jakarta.inject-api_1.0.5 [34])
+2024-11-07 14:20:40,064 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\jakarta.inject.jakarta.inject-api_1.0.5.jar
+2024-11-07 14:20:40,065 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=jakarta.annotation-api_1.3.5 [29])
+2024-11-07 14:20:40,065 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\jakarta.annotation-api_1.3.5.jar
+2024-11-07 14:20:40,065 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=org.apache.commons.cli_1.9.0 [78])
+2024-11-07 14:20:40,067 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.apache.commons.cli_1.9.0.jar
+2024-11-07 14:20:40,067 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=org.apache.commons.commons-codec_1.16.0 [81])
+2024-11-07 14:20:40,067 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\org.apache.commons.commons-codec_1.16.0.jar
+2024-11-07 14:20:40,067 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - getClasspathEntries(Bundle=com.google.guava.failureaccess_1.0.2 [17])
+2024-11-07 14:20:40,068 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.eclipse.m2e.core.internal.Bundles - 	Entry: C:\Users\SESPL\.p2\pool\plugins\com.google.guava.failureaccess_1.0.2.jar
+2024-11-07 14:20:40,070 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.e.m.i.launch.MavenLaunchDelegate - Run build in "C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs":
+2024-11-07 14:20:40,070 [Worker-59: Launching Executing test in C__Users_SESPL_eclipse-workspace_Day 20 21 22 bitlabs jobs_bitlabs] INFO  o.e.m.i.launch.MavenLaunchDelegate -  mvn  -B -Dstyle.color=always test
+2024-11-07 14:21:13,736 [Worker-76: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:21:13,737 [Worker-76: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:21:13,740 [Worker-76: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:21:41,001 [Worker-70: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:21:41,002 [Worker-70: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:21:41,005 [Worker-70: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:23:20,072 [Worker-75: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:23:20,074 [Worker-75: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:23:20,077 [Worker-75: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:23:49,447 [Worker-72: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:23:49,449 [Worker-72: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:23:49,452 [Worker-72: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:24:36,244 [Worker-70: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:24:36,246 [Worker-70: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:24:36,249 [Worker-70: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:24:59,391 [Worker-70: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:24:59,392 [Worker-70: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:24:59,396 [Worker-70: Launching CompanyProfileServiceTest] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:25:20,080 [Worker-77: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:25:20,081 [Worker-77: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:25:20,084 [Worker-77: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:29:11,441 [Worker-77: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:29:11,442 [Worker-77: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:29:11,445 [Worker-77: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:31:09,073 [Worker-73: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:31:09,077 [Worker-73: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:31:09,080 [Worker-73: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:33:39,695 [Worker-81: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:33:39,699 [Worker-81: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:33:39,702 [Worker-81: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:33:52,871 [Worker-79: Launching BitlabsApplication] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:33:52,875 [Worker-79: Launching BitlabsApplication] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:33:52,879 [Worker-79: Launching BitlabsApplication] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:34:49,516 [Worker-77: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:34:49,523 [Worker-77: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:34:49,526 [Worker-77: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:35:35,732 [Worker-82: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:35:35,738 [Worker-82: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:35:35,741 [Worker-82: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:35:43,939 [Worker-82: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:35:43,943 [Worker-82: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:35:43,946 [Worker-82: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:37:22,672 [Worker-83: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:37:22,677 [Worker-83: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:37:22,680 [Worker-83: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:45:10,514 [Worker-84: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:45:10,520 [Worker-84: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:45:10,523 [Worker-84: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:45:12,392 [Worker-82: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:45:12,398 [Worker-82: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:45:12,402 [Worker-82: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:49:49,899 [Worker-79: Updating Maven Dependencies] INFO  o.e.m.c.i.l.LifecycleMappingFactory - Using org.eclipse.m2e.jdt.JarLifecycleMapping lifecycle mapping for MavenProject: com.springboot:blogServer:0.0.1-SNAPSHOT @ C:\Users\SESPL\eclipse-workspace\DAY 16 and 17 blog application\blogServer\pom.xml.
+2024-11-07 14:52:34,826 [Worker-79: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:52:34,831 [Worker-79: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:52:34,843 [Worker-79: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:53:14,783 [Worker-89: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:53:14,788 [Worker-89: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:53:14,791 [Worker-89: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:53:24,523 [Worker-87: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:53:24,528 [Worker-87: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:53:24,531 [Worker-87: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:53:35,452 [Worker-87: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:53:35,457 [Worker-87: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:53:35,460 [Worker-87: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:56:06,061 [Worker-79: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:56:06,066 [Worker-79: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:56:06,069 [Worker-79: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 14:59:59,545 [Worker-89: Launching BitlabsApplication] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 14:59:59,552 [Worker-89: Launching BitlabsApplication] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 14:59:59,555 [Worker-89: Launching BitlabsApplication] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 15:05:58,707 [Worker-90: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 15:05:58,712 [Worker-90: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 15:05:58,715 [Worker-90: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 15:07:01,902 [Worker-91: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 15:07:01,908 [Worker-91: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 15:07:01,912 [Worker-91: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 15:07:11,504 [Worker-92: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 15:07:11,510 [Worker-92: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 15:07:11,513 [Worker-92: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 15:10:07,185 [Worker-87: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 15:10:07,190 [Worker-87: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 15:10:07,193 [Worker-87: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 15:14:23,468 [Worker-93: Updating Maven Dependencies] ERROR o.e.m.j.i.l.MavenLaunchConfigurationListener - Launch configuration BlogServerApplication references closed project blogServer
+org.eclipse.core.runtime.CoreException: Launch configuration BlogServerApplication references closed project blogServer
+	at org.eclipse.jdt.launching.JavaRuntime.abort(JavaRuntime.java:1870)
+	at org.eclipse.jdt.launching.JavaRuntime.getJavaProject(JavaRuntime.java:1744)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.updateLaunchConfiguration(MavenLaunchConfigurationListener.java:66)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.launchConfigurationChanged(MavenLaunchConfigurationListener.java:52)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.run(LaunchManager.java:219)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.notify(LaunchManager.java:203)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setDirty(LaunchConfigurationWorkingCopy.java:527)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setAttribute(LaunchConfigurationWorkingCopy.java:415)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:409)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:435)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.mavenProjectChanged(MavenLaunchConfigurationListener.java:137)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.notifyProjectChangeListeners(ProjectRegistryManager.java:892)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.applyMutableProjectRegistry(ProjectRegistryManager.java:1042)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.lambda$0(ProjectRegistryRefreshJob.java:162)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.executeBare(MavenExecutionContext.java:458)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:339)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:278)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.run(ProjectRegistryRefreshJob.java:106)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2024-11-07 15:14:23,469 [Worker-93: Updating Maven Dependencies] ERROR o.e.m.j.i.l.MavenLaunchConfigurationListener - Launch configuration BlogServerApplication references closed project blogServer
+org.eclipse.core.runtime.CoreException: Launch configuration BlogServerApplication references closed project blogServer
+	at org.eclipse.jdt.launching.JavaRuntime.abort(JavaRuntime.java:1870)
+	at org.eclipse.jdt.launching.JavaRuntime.getJavaProject(JavaRuntime.java:1744)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.updateLaunchConfiguration(MavenLaunchConfigurationListener.java:66)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.launchConfigurationChanged(MavenLaunchConfigurationListener.java:52)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.run(LaunchManager.java:219)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.notify(LaunchManager.java:203)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setDirty(LaunchConfigurationWorkingCopy.java:527)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.setAttribute(LaunchConfigurationWorkingCopy.java:415)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:410)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:435)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.mavenProjectChanged(MavenLaunchConfigurationListener.java:137)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.notifyProjectChangeListeners(ProjectRegistryManager.java:892)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.applyMutableProjectRegistry(ProjectRegistryManager.java:1042)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.lambda$0(ProjectRegistryRefreshJob.java:162)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.executeBare(MavenExecutionContext.java:458)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:339)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:278)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.run(ProjectRegistryRefreshJob.java:106)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2024-11-07 15:14:23,473 [Worker-93: Updating Maven Dependencies] ERROR o.e.m.j.i.l.MavenLaunchConfigurationListener - Launch configuration BlogServerApplication references closed project blogServer
+org.eclipse.core.runtime.CoreException: Launch configuration BlogServerApplication references closed project blogServer
+	at org.eclipse.jdt.launching.JavaRuntime.abort(JavaRuntime.java:1870)
+	at org.eclipse.jdt.launching.JavaRuntime.getJavaProject(JavaRuntime.java:1744)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.updateLaunchConfiguration(MavenLaunchConfigurationListener.java:66)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.launchConfigurationChanged(MavenLaunchConfigurationListener.java:52)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.run(LaunchManager.java:219)
+	at org.eclipse.core.runtime.SafeRunner.run(SafeRunner.java:47)
+	at org.eclipse.debug.internal.core.LaunchManager$ConfigurationNotifier.notify(LaunchManager.java:203)
+	at org.eclipse.debug.internal.core.LaunchManager.launchConfigurationChanged(LaunchManager.java:1960)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.writeNewFile(LaunchConfigurationWorkingCopy.java:380)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.doSave0(LaunchConfigurationWorkingCopy.java:259)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.doSave(LaunchConfigurationWorkingCopy.java:229)
+	at org.eclipse.debug.internal.core.LaunchConfigurationWorkingCopy.doSave(LaunchConfigurationWorkingCopy.java:187)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:411)
+	at org.eclipse.m2e.jdt.internal.launch.MavenRuntimeClasspathProvider.disable(MavenRuntimeClasspathProvider.java:435)
+	at org.eclipse.m2e.jdt.internal.launch.MavenLaunchConfigurationListener.mavenProjectChanged(MavenLaunchConfigurationListener.java:137)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.notifyProjectChangeListeners(ProjectRegistryManager.java:892)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryManager.applyMutableProjectRegistry(ProjectRegistryManager.java:1042)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.lambda$0(ProjectRegistryRefreshJob.java:162)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.executeBare(MavenExecutionContext.java:458)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:339)
+	at org.eclipse.m2e.core.internal.embedder.MavenExecutionContext.execute(MavenExecutionContext.java:278)
+	at org.eclipse.m2e.core.internal.project.registry.ProjectRegistryRefreshJob.run(ProjectRegistryRefreshJob.java:106)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:63)
+2024-11-07 15:15:38,397 [Worker-86: Launching BitlabsApplication] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 15:15:38,404 [Worker-86: Launching BitlabsApplication] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 15:15:38,407 [Worker-86: Launching BitlabsApplication] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 15:18:57,824 [Worker-86: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 1 resource from src\main\resources to target\classes
+2024-11-07 15:18:57,829 [Worker-86: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - Copying 0 resource from src\main\resources to target\classes
+2024-11-07 15:18:57,832 [Worker-86: Building] INFO  o.a.m.s.f.DefaultMavenResourcesFiltering - skip non existing resourceDirectory C:\Users\SESPL\eclipse-workspace\Day 20 21 22 bitlabs jobs\bitlabs\src\test\resources
+2024-11-07 15:25:16,814 [Worker-0: Loading available Gradle versions] INFO  o.e.b.c.i.u.g.PublishedGradleVersions - Gradle version information cache is up-to-date. Trying to read.
