@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jobs.bitlabs.entity.CompanyProfile;
-import com.jobs.bitlabs.exception.CompanyIdAlreadyExistsException;
-import com.jobs.bitlabs.exception.InvalidTitleException;
+import com.jobs.bitlabs.exception.GeneralException;
 import com.jobs.bitlabs.repo.CompanyProfileRepo;
 
 
@@ -38,26 +37,26 @@ public class CompanyprofileServiceImpl implements CompanyProfileService {
     
 	public CompanyProfile createCompanyProfile(CompanyProfile companyprofile) {
 		if (companyprofilerepo.existsById(companyprofile.getCompanyId())) {
-			throw new CompanyIdAlreadyExistsException("Company Id already exists: " + companyprofile.getCompanyId()); 
+			throw new GeneralException("Company Id already exists: " + companyprofile.getCompanyId()); 
 			} 
 		if (SPECIAL_CHAR_PATTERN.matcher(companyprofile.getCompanyId()).find()) {
-			throw new InvalidTitleException("Company Id contains special characters: " + companyprofile.getCompanyId()); 
+			throw new GeneralException("Company Id contains special characters: " + companyprofile.getCompanyId()); 
 			}
 		if (SPECIAL_CHAR_PATTERN.matcher(companyprofile.getCompanyName()).find()) {
-			throw new InvalidTitleException("Company Name contains special characters: " + companyprofile.getCompanyName()); 
+			throw new GeneralException("Company Name contains special characters: " + companyprofile.getCompanyName()); 
 			}
 		if (!EMAIL_PATTERN.matcher(companyprofile.getCompanyMail()).find()) {
-			throw new InvalidTitleException("Company Mail is not Valid: " + companyprofile.getCompanyMail()); 
+			throw new GeneralException("Company Mail is not Valid: " + companyprofile.getCompanyMail()); 
 			} 
 		if (SPECIAL_CHAR_PATTERN.matcher(companyprofile.getRecruiterName()).find()) {
-			throw new InvalidTitleException("Recruiter Name contains special characters: " + companyprofile.getRecruiterName()); 
+			throw new GeneralException("Recruiter Name contains special characters: " + companyprofile.getRecruiterName()); 
 			}
 		String mobileNumberStr = String.valueOf(companyprofile.getCompanyMobileNumber());
 		if (!MOBILE_NUMBER_PATTERN.matcher(mobileNumberStr).find() & mobileNumberStr.length()!=10) {
-			throw new InvalidTitleException("Mobile Number Not valid: " + mobileNumberStr); 
+			throw new GeneralException("Mobile Number Not valid: " + mobileNumberStr); 
 			}
 		if (companyprofile.getCompanyAddress().length()<90) {
-			throw new InvalidTitleException("Please provide full Address. "); 
+			throw new GeneralException("Please provide full Address. "); 
 			}
 		return companyprofilerepo.save(companyprofile);
 	}
@@ -68,12 +67,12 @@ public class CompanyprofileServiceImpl implements CompanyProfileService {
 	
 	public String deleteCompanyProfile(String companyId) { 
 		if (companyId == null || companyId.isEmpty()) {
-			throw new InvalidTitleException("Company ID must not be null or empty");
+			throw new GeneralException("Company ID must not be null or empty");
 			} 
 		try { if (companyprofilerepo.existsById(companyId)) { 
 			companyprofilerepo.deleteById(companyId); return "deleted"; 
 			} 
-		else { throw new InvalidTitleException("Company ID not found: " + companyId); 
+		else { throw new GeneralException("Company ID not found: " + companyId); 
 		} 
 		} 
 		catch (Exception e) { 

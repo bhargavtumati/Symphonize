@@ -6,11 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.jobs.bitlabs.entity.CompanyJob;
+import com.jobs.bitlabs.exception.GeneralException;
 import com.jobs.bitlabs.repo.CompanyJobRepo;
 import com.jobs.bitlabs.repo.CompanyProfileRepo;
-import com.jobs.bitlabs.exception.CompanyIdNotYetRegisteredException;
-import com.jobs.bitlabs.exception.InvalidTitleException; 
-import com.jobs.bitlabs.exception.JobIdAlreadyExistsException; 
+
 import java.util.regex.Pattern;
 
 
@@ -38,20 +37,20 @@ public class CompanyJobServiceImpl implements CompanyJobService {
 
 	public CompanyJob postJob(CompanyJob companyjob) {
 		if (SPECIAL_CHAR_PATTERN.matcher(companyjob.getJobId()).find()) {
-			throw new InvalidTitleException("Job ID contains special characters: " + companyjob.getJobId()); 
+			throw new GeneralException("Job ID contains special characters: " + companyjob.getJobId()); 
 			}
 		if (companyjobrepo.existsById(companyjob.getJobId())) { 
-			throw new JobIdAlreadyExistsException("Job ID already exists: " + companyjob.getJobId()); 
+			throw new GeneralException("Job ID already exists: " + companyjob.getJobId()); 
 			} 
 		
 		if (SPECIAL_CHAR_PATTERN.matcher(companyjob.getJobTitle()).find()) {
-			throw new InvalidTitleException("Job Title contains special characters: " + companyjob.getJobTitle()); 
+			throw new GeneralException("Job Title contains special characters: " + companyjob.getJobTitle()); 
 			}
 		if (companyjob.getJobDescription().equals(null)) {
-			throw new InvalidTitleException("Job Description is null: " + companyjob.getJobDescription()); 
+			throw new GeneralException("Job Description is null: " + companyjob.getJobDescription()); 
 			}
 		if (!companyprofilerepo.existsById(companyjob.getCompanyId())) {
-			throw new CompanyIdNotYetRegisteredException("Company not yet registered: please register " + companyjob.getCompanyId()); 
+			throw new GeneralException("Company not yet registered: please register " + companyjob.getCompanyId()); 
 			} 
 		
 		
