@@ -11,8 +11,8 @@ public class GlobalExceptionHandler {
 
    
 
-    @ExceptionHandler(GeneralException.class)
-    public ResponseEntity<ErrorResponse> handleCompanyIdAlreadyExistsException(GeneralException ex, WebRequest request) {
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<ErrorResponse> handleXustomException(CustomException ex, WebRequest request) {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),

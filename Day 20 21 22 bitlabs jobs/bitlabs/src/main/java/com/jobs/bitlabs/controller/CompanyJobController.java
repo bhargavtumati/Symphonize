@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.jobs.bitlabs.entity.CompanyJob;
+import com.jobs.bitlabs.dto.CompanyJobDto;
 import com.jobs.bitlabs.service.CompanyJobService;
 
 
@@ -20,19 +20,17 @@ public class CompanyJobController {
 	@Autowired
 	private CompanyJobService companyjobservice;
 
-	public CompanyJobController(CompanyJobService companyjobservice) {
-		super();
-		this.companyjobservice = companyjobservice;
-	}
+	
 	
 	
 	@PostMapping("postJob")
-	public CompanyJob createjob(CompanyJob companyprofile) {
-		return companyjobservice.postJob(companyprofile);
+	public CompanyJobDto createjob(CompanyJobDto companyprofiledto) {
+		
+		return companyjobservice.postJob(companyprofiledto);
 	}
 	
 	@GetMapping("getAllJobs")
-	public List<CompanyJob> getAlljobs() {
+	public List<CompanyJobDto> getAlljobs() {
 		return companyjobservice.getAllJobs();
 	}
 	
