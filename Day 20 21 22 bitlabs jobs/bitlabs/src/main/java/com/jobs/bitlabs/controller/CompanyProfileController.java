@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/company-profiles")
+@RequestMapping("bitlabs.com")
 public class CompanyProfileController {
 
     private final CompanyProfileService companyProfileService;
@@ -33,7 +33,7 @@ public class CompanyProfileController {
                     content = @Content(schema = @Schema(implementation = CompanyProfileDto.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping(consumes = {"multipart/form-data"})
+    @PostMapping(value = "/createProfile",consumes = {"multipart/form-data"})
     public ResponseEntity<CompanyProfileDto> createCompanyProfile(
             @RequestParam String companyId,
             @RequestParam String recruiterName,
@@ -59,8 +59,8 @@ public class CompanyProfileController {
                     content = @Content(schema = @Schema(implementation = CompanyProfileDto.class))),
             @ApiResponse(responseCode = "404", description = "Company Profile not found")
     })
-    @GetMapping("/{companyId}")
-    public ResponseEntity<CompanyProfileDto> getCompanyProfile(@PathVariable String companyId) {
+    @GetMapping("/getCompanyProfileById")
+    public ResponseEntity<CompanyProfileDto> getCompanyProfile(@RequestParam String companyId) {
         Optional<CompanyProfileDto> companyProfileDto = companyProfileService.getCompanyProfileById(companyId);
         return companyProfileDto.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
@@ -70,8 +70,8 @@ public class CompanyProfileController {
             @ApiResponse(responseCode = "204", description = "Company Profile deleted"),
             @ApiResponse(responseCode = "404", description = "Company Profile not found")
     })
-    @DeleteMapping("/{companyId}")
-    public ResponseEntity<Void> deleteCompanyProfile(@PathVariable String companyId) {
+    @DeleteMapping("deleteCompanyProfileById")
+    public ResponseEntity<Void> deleteCompanyProfile(@RequestParam String companyId) {
         companyProfileService.deleteCompanyProfile(companyId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
