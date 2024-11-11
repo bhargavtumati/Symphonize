@@ -1,121 +1,108 @@
 package com.jobs.bitlabs.entity;
 
-import java.util.Date;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
-import com.jobs.bitlabs.payloads.CompanyAddress;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-
+import jakarta.persistence.Lob;
+import java.util.Objects;
 
 @Entity
 public class CompanyProfile {
 
     @Id
-    @Column(name = "CompanyId", updatable = false, nullable = false)
-    private String CompanyId;
-    private String CompanyName;
-    private String CompanyMail;
-    private String profileImage;
-    private String RecruiterName;
-    private Long CompanyMobileNumber;
-    @Embedded
-	private CompanyAddress companyaddress;
-    @Temporal(TemporalType.DATE)
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    private Date registeredDate;
+    private String companyId;
 
+    @Lob
+    private byte[] logo;
+    
+    private String companyName;
+
+    private String recruiterName;
+    
+    
+    private  String companyAddress;
+    
+    
+    private Long companyNumber;
+
+    // Constructors
     public CompanyProfile() {
-        super();
+    	super();
+    	
     }
 
-	public CompanyProfile(String companyId, String companyName, String companyMail, String profileImage,
-			String recruiterName, Long companyMobileNumber, CompanyAddress companyaddress, Date registeredDate) {
+    public CompanyProfile(String companyId, byte[] logo, String companyName, String recruiterName,
+			String companyAddress, Long companyNumber) {
 		super();
-		CompanyId = companyId;
-		CompanyName = companyName;
-		CompanyMail = companyMail;
-		this.profileImage = profileImage;
-		RecruiterName = recruiterName;
-		CompanyMobileNumber = companyMobileNumber;
-		this.companyaddress = companyaddress;
-		this.registeredDate = registeredDate;
+		this.companyId = companyId;
+		this.logo = logo;
+		this.companyName = companyName;
+		this.recruiterName = recruiterName;
+		this.companyAddress = companyAddress;
+		this.companyNumber = companyNumber;
 	}
 
-	public String getCompanyId() {
-		return CompanyId;
+    // Getters and Setters
+   
+  
+    public String getCompanyId() {
+		return companyId;
 	}
 
 	public void setCompanyId(String companyId) {
-		CompanyId = companyId;
+		this.companyId = companyId;
+	}
+
+	public byte[] getLogo() {
+		return logo;
+	}
+
+	public void setLogo(byte[] logo) {
+		this.logo = logo;
 	}
 
 	public String getCompanyName() {
-		return CompanyName;
+		return companyName;
 	}
 
 	public void setCompanyName(String companyName) {
-		CompanyName = companyName;
-	}
-
-	public String getCompanyMail() {
-		return CompanyMail;
-	}
-
-	public void setCompanyMail(String companyMail) {
-		CompanyMail = companyMail;
-	}
-
-	public String getProfileImage() {
-		return profileImage;
-	}
-
-	public void setProfileImage(String profileImage) {
-		this.profileImage = profileImage;
+		this.companyName = companyName;
 	}
 
 	public String getRecruiterName() {
-		return RecruiterName;
+		return recruiterName;
 	}
 
 	public void setRecruiterName(String recruiterName) {
-		RecruiterName = recruiterName;
+		this.recruiterName = recruiterName;
 	}
 
-	public Long getCompanyMobileNumber() {
-		return CompanyMobileNumber;
+	public String getCompanyAddress() {
+		return companyAddress;
 	}
 
-	public void setCompanyMobileNumber(Long companyMobileNumber) {
-		CompanyMobileNumber = companyMobileNumber;
+	public void setCompanyAddress(String companyAddress) {
+		this.companyAddress = companyAddress;
 	}
 
-	public CompanyAddress getCompanyaddress() {
-		return companyaddress;
+	public Long getCompanyNumber() {
+		return companyNumber;
 	}
 
-	public void setCompanyaddress(CompanyAddress companyaddress) {
-		this.companyaddress = companyaddress;
-	}
-
-	public Date getRegisteredDate() {
-		return registeredDate;
-	}
-
-	public void setRegisteredDate(Date registeredDate) {
-		this.registeredDate = registeredDate;
+	public void setCompanyNumber(Long companyNumber) {
+		this.companyNumber = companyNumber;
 	}
 
 	
-	
-
-	
-
-    
+	// Equals and hashCode
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CompanyProfile that = (CompanyProfile) o;
+        return Objects.equals(companyId, that.companyId);
+    }
+	@Override
+    public int hashCode() {
+        return Objects.hash(companyId);
+    }
 }

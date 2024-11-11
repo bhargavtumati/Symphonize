@@ -1,16 +1,17 @@
 package com.jobs.bitlabs.service;
 
 
-import java.util.List;
 
 
 import com.jobs.bitlabs.dto.CompanyProfileDto;
 
-public interface CompanyProfileService {
+import java.util.Optional;
 
-	CompanyProfileDto createCompanyProfile(CompanyProfileDto companyProfileDto) ;
-	
-	List<CompanyProfileDto> getAllCompanyProfiles();
-	
-	String deleteCompanyProfile(String CompanyId);
+public interface CompanyProfileService  {
+
+   CompanyProfileDto saveCompanyProfile(CompanyProfileDto companyProfiledto) ;
+
+    Optional<CompanyProfileDto> getCompanyProfileById(String companyIddto) ;
+
+    public void deleteCompanyProfile(String companyId);
 }

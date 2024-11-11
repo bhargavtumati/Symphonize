@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.jobs.bitlabs.dto.CompanyJobDto;
 import com.jobs.bitlabs.exception.CustomException;
 import com.jobs.bitlabs.repo.CompanyJobRepo;
-import com.jobs.bitlabs.repo.CompanyProfileRepo;
+import com.jobs.bitlabs.repo.CompanyProfileRepository;
 import com.jobs.bitlabs.dto.CompanyJobdtoMapper;
 import com.jobs.bitlabs.entity.CompanyJob;
 
@@ -19,21 +19,21 @@ import java.util.stream.Collectors;
 @Service
 public class CompanyJobServiceImpl implements CompanyJobService {
 
-	@Autowired
+	
+	
+	
+	private CompanyProfileRepository companyprofilerepo;
+	
 	private CompanyJobRepo companyjobrepo;
-	@Autowired
-	private CompanyProfileRepo companyprofilerepo;
 	
-	public CompanyJobServiceImpl() {
-		super();
-		
-	}
+	
 
-	
-	public CompanyJobServiceImpl(CompanyJobRepo companyjobrepo, CompanyProfileRepo companyprofilerepo) {
+	@Autowired
+	public CompanyJobServiceImpl(CompanyProfileRepository companyprofilerepo, CompanyJobRepo companyjobrepo ) {
 		super();
-		this.companyjobrepo = companyjobrepo;
 		this.companyprofilerepo =  companyprofilerepo;
+		this.companyjobrepo = companyjobrepo;
+		
 	}
 
 	private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[^a-zA-Z0-9 ]");
@@ -41,7 +41,7 @@ public class CompanyJobServiceImpl implements CompanyJobService {
 	public CompanyJobDto postJob(CompanyJobDto companyjobdto) {
 		
 		
-		CompanyJob companyjob = CompanyJobdtoMapper.mapToCompanyJob(companyjobdto);
+		
 		
 		
 		
@@ -63,7 +63,7 @@ public class CompanyJobServiceImpl implements CompanyJobService {
 			throw new CustomException("Company not yet registered: please register " + companyjobdto.getCompanyId()); 
 			} 
 		
-		
+		CompanyJob companyjob = CompanyJobdtoMapper.mapToCompanyJob(companyjobdto);
 		CompanyJob savedcompanyjob = companyjobrepo.save(companyjob);
 		return CompanyJobdtoMapper.mapToCompanyJobDto(savedcompanyjob); 
 		}

@@ -3,6 +3,12 @@ package com.jobs.bitlabs.dto;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+
 
 
 
@@ -13,7 +19,10 @@ public class CompanyJobDto {
 
 	private String JobId;
 	private String JobTitle;
+	 @Column(length = 5000)
 	private String JobDescription;
+	@Temporal(TemporalType.DATE)
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 	private Date jobposteddate;
 	private String CompanyId;
     private String Qualification;
