@@ -1,6 +1,7 @@
 package com.jobs.bitlabs.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,9 @@ public class JobSeekerServieceImpl implements JobSeekerService {
 
 	@Autowired
 	private CompanyJobRepo companyJobRepo;
+	
+	@Autowired
+	private NotificationService notificationService;
 	
 	
 	
@@ -150,14 +154,15 @@ public class JobSeekerServieceImpl implements JobSeekerService {
 	   JobSeekerDto userDto = this.UserToDto(user);
 	    CompanyJobDto jobDto = this.JobToDto(job);
 	    if (isUserQualifiedForJob(userDto, jobDto)) {
-	    	user.getAppliedJobs().add(job);
+	    	user.getAppliedJobStatus().put(job,"applied job");
  
 	        // Add the user to the job's list of applicants
-	        job.getJobApplicants().add(user);
+	        job.getApplicantStatus().put(user,"applied job");
  
 	        // Save the updated entities to the database
 	        JobSeekerRepo.save(user);  // Persist the updated user
-	        companyJobRepo.save(job);    
+	        companyJobRepo.save(job);   
+	        notificationService.createNotification(job.getCompanyId()  ,jobId, userId);
 	        return true; 
 	    }
 	    return false; 
@@ -201,10 +206,34 @@ public class JobSeekerServieceImpl implements JobSeekerService {
 		                .anyMatch(jobLocation -> jobLocation.equals(location)));
 
 		// Return true if all criteria match
-		System.out.println(matchesQualification +" "+ matchesExperience+" "+ matchesSkills +" "+ matchesLocation);
 		return matchesQualification && matchesExperience && matchesSkills && matchesLocation;
 	}
+	
 
+     public String viewJobStatus(String companyjobid, Long id) {
+		
+		
+		JobSeeker jobseeker = this.JobSeekerRepo.findById(id)
+				.orElseThrow(() -> new CustomException("jobseeker not found with id: " + id));
+		
+		Map<CompanyJob,String> jobsmap = jobseeker.getAppliedJobStatus();
+		
+		for (Map.Entry<CompanyJob, String> entry : jobsmap.entrySet()) {
+		    CompanyJob companyJob = entry.getKey();
+		    String status = entry.getValue();
+
+		    if (companyJob.getJobId().equals(companyjobid)) {
+		    	return status;
+		    	
+		    }
+		}
+		
+       
+		return "company job not found";
+		
+				
+		
+	}
 
 
 }

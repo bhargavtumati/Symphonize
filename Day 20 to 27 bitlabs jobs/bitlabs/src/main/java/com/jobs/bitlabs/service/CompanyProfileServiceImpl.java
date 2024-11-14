@@ -15,7 +15,11 @@ import com.jobs.bitlabs.repo.CompanyProfileRepo;
 @Service
 public class CompanyProfileServiceImpl implements CompanyProfileService {
 
-    private final CompanyProfileRepo companyProfileRepo;
+	@Autowired
+    private CompanyProfileRepo companyProfileRepo;
+   
+
+   
 
     @Autowired
     public CompanyProfileServiceImpl(CompanyProfileRepo companyProfileRepo) {

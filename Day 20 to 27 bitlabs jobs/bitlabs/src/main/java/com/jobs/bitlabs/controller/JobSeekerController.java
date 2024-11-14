@@ -97,15 +97,15 @@ public class JobSeekerController {
 		return new ResponseEntity<JobSeekerDto>(userDto, HttpStatus.OK);
 	}
 
-	/*@Operation(summary = "update All")
-	@PutMapping("/update ")
+	@Operation(summary = "update company profile")
+	@PutMapping("/updateProfile ")
 	public ResponseEntity<JobSeekerDto> updateJobSeeker( @RequestParam Long jobseekerid, @Valid @RequestBody JobSeekerDto JobSeekerDto) {
 		if (!JobSeekerService.isValidSpecialization(JobSeekerDto.getQualification(), JobSeekerDto.getSpecialization())) {
 			throw new CustomException("Invalid specialization for the selected qualification");
 		}
 		JobSeekerDto updatedUser = JobSeekerService.updateUser(jobseekerid, JobSeekerDto);
 		return new ResponseEntity<>(updatedUser, HttpStatus.OK);
-	}*/
+	}
 	
 	@Operation(summary = "apply job")
 	@PutMapping("/applyjob ")
@@ -123,5 +123,14 @@ public class JobSeekerController {
 		
 		return new ResponseEntity<>(list, HttpStatus.OK);
 	}
+	
+	@Operation(summary = "view status")
+	@GetMapping("/viewStatus")
+	public ResponseEntity<String> getStatus(@RequestParam Long jobseekerId,@RequestParam String companyjobid) {
+		String status= JobSeekerService.viewJobStatus(companyjobid,  jobseekerId);
+		
+		return new ResponseEntity<>(status, HttpStatus.OK);
+	}
+	
 
 }

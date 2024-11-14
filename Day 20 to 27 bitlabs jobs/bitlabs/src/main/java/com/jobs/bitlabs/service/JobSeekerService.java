@@ -15,4 +15,5 @@ public interface JobSeekerService {
 	JobSeekerDto updateUser(Long id, JobSeekerDto userDto);
 	
 	List<CompanyJobDto> getRecommendedJobs(Long userId);
+	String viewJobStatus(String companyjobid, Long id);
 }

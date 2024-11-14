@@ -1,5 +1,6 @@
 package com.jobs.bitlabs.controller;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -16,11 +17,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jobs.bitlabs.dto.CompanyJobDto;
+import com.jobs.bitlabs.entity.JobSeeker;
 import com.jobs.bitlabs.enums.PefferedLocation;
 import com.jobs.bitlabs.enums.Qualification;
 import com.jobs.bitlabs.enums.Skills;
 import com.jobs.bitlabs.service.CompanyJobService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -90,6 +93,23 @@ public class CompanyJobController {
 		int activejobs = companyjobservice.getCountOfActiveJobs() ;
 		 return new ResponseEntity<>(activejobs, HttpStatus.OK);
 		
+	}
+	
+	@Operation(summary = "change status")
+	@GetMapping("/changeStatus")
+	public ResponseEntity<String> getStatus(@RequestParam Long jobseekerId,@RequestParam String companyjobid,@RequestParam String changedstatus ) {
+		String status= companyjobservice.changeJobSeekerJobStatus(companyjobid,  jobseekerId, changedstatus);
+		
+		return new ResponseEntity<>(status, HttpStatus.OK);
+	}
+	
+	
+	@Operation(summary = "filterdata")
+	@GetMapping("/filterdata")
+	public ResponseEntity<List<JobSeeker>> filterData(@RequestParam Long Experience,@RequestParam String companyjobid ) throws IOException{
+		List<JobSeeker> shortlist = companyjobservice.FilterData(Experience,  companyjobid);
+		
+		return new ResponseEntity<>(shortlist, HttpStatus.OK);
 	}
 	
 	

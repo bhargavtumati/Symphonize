@@ -1,7 +1,8 @@
 package com.jobs.bitlabs.entity;
 
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.jobs.bitlabs.enums.PefferedLocation;
@@ -9,19 +10,20 @@ import com.jobs.bitlabs.enums.Qualification;
 import com.jobs.bitlabs.enums.Skills;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.MapKeyJoinColumn;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.JoinColumn;
 
 
 @Entity
@@ -54,9 +56,11 @@ public class CompanyJob {
 	private String JobType;
 	private Boolean Status;
 	
-	@ManyToMany(mappedBy = "appliedJobs")
-	@JsonIgnore
-	private Set<JobSeeker> JobApplicants = new HashSet<>();
+    @ElementCollection
+    @CollectionTable(name = "companyjob_applicant_status", joinColumns = @JoinColumn(name = "job_id"))
+    @MapKeyJoinColumn(name = "job_seeker_id")  // Maps each JobSeeker to an application status
+    @Column(name = "application_status")
+    private Map<JobSeeker, String> applicantStatus = new HashMap<>();
 
 	
 	public CompanyJob() {
@@ -66,9 +70,10 @@ public class CompanyJob {
 
 
 	public CompanyJob(String jobId, String jobTitle, String jobDescription, Date jobposteddate, String companyId,
-			@NotNull(message = "Qualification is required.") Qualification qualification, Long experienceMin, Long experienceMax,
-			Set<com.jobs.bitlabs.enums.Skills> skills, Long salaryMin, Long salaryMax,
-			Set<PefferedLocation> preferdJobLocation, String jobType, Boolean status, Set<JobSeeker> jobApplicants) {
+			com.jobs.bitlabs.enums.@NotNull(message = "Qualification is required.") Qualification qualification,
+			Long experienceMin, Long experienceMax, Set<com.jobs.bitlabs.enums.Skills> skills, Long salaryMin,
+			Long salaryMax, Set<PefferedLocation> preferdJobLocation, String jobType, Boolean status,
+			Map<JobSeeker, String> applicantStatus) {
 		super();
 		JobId = jobId;
 		JobTitle = jobTitle;
@@ -84,7 +89,7 @@ public class CompanyJob {
 		PreferdJobLocation = preferdJobLocation;
 		JobType = jobType;
 		Status = status;
-		JobApplicants = jobApplicants;
+		this.applicantStatus = applicantStatus;
 	}
 
 
@@ -228,15 +233,18 @@ public class CompanyJob {
 	}
 
 
-	public Set<JobSeeker> getJobApplicants() {
-		return JobApplicants;
+	public Map<JobSeeker, String> getApplicantStatus() {
+		return applicantStatus;
 	}
 
 
-	public void setJobApplicants(Set<JobSeeker> jobApplicants) {
-		JobApplicants = jobApplicants;
+	public void setApplicantStatus(Map<JobSeeker, String> applicantStatus) {
+		this.applicantStatus = applicantStatus;
 	}
 
+
+	
+	
 
 
 

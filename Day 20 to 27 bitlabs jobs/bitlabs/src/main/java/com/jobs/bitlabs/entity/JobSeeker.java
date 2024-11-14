@@ -1,7 +1,8 @@
 package com.jobs.bitlabs.entity;
 
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -10,7 +11,9 @@ import com.jobs.bitlabs.enums.Qualification;
 import com.jobs.bitlabs.enums.Skills;
 import com.jobs.bitlabs.payloads.Address;
 
-import jakarta.persistence.CascadeType;
+
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,9 +22,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.MapKeyJoinColumn;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
@@ -71,26 +73,23 @@ public class JobSeeker {
 	@Lob
 	private byte[] resume;
 	
-	@ManyToMany(cascade = CascadeType.PERSIST)
-	@JoinTable(
-	    name = "user_job_applications",
-	    joinColumns = @JoinColumn(name = "user_id"),
-	    inverseJoinColumns =@JoinColumn(name = "job_id")
-	)
-	private Set<CompanyJob> appliedJobs = new HashSet<>();
+
+	
+    @ElementCollection
+    @CollectionTable(name = "jobseeker_application_status", joinColumns = @JoinColumn(name = "job_seeker_id"))
+    @MapKeyJoinColumn(name = "job_id")  // Maps each CompanyJob to an application status
+    @Column(name = "application_status")
+    private Map<CompanyJob, String> appliedJobStatus = new HashMap<>();
 	
 	public JobSeeker() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-	
-	
-	
 
 	public JobSeeker(Long id, String name, String email, String whatsappnumber,
 			@NotNull(message = "Qualification is required.") Qualification qualification, String specialization,
 			int totalExperience, Set<PefferedLocation> preferdJobLocation, Address address, Date dateOfBirth,
-			Set<Skills> skills, byte[] profileImage, byte[] resume, Set<CompanyJob> appliedJobs) {
+			Set<Skills> skills, byte[] profileImage, byte[] resume, Map<CompanyJob, String> appliedJobStatus) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -105,11 +104,8 @@ public class JobSeeker {
 		this.skills = skills;
 		this.profileImage = profileImage;
 		this.resume = resume;
-		this.appliedJobs = appliedJobs;
+		this.appliedJobStatus = appliedJobStatus;
 	}
-
-
-
 
 	public Long getId() {
 		return id;
@@ -179,8 +175,8 @@ public class JobSeeker {
 		return address;
 	}
 
-	public void setAddress(Address string) {
-		this.address = string;
+	public void setAddress(Address address) {
+		this.address = address;
 	}
 
 	public Date getDateOfBirth() {
@@ -215,14 +211,21 @@ public class JobSeeker {
 		this.resume = resume;
 	}
 
-	public Set<CompanyJob> getAppliedJobs() {
-		return appliedJobs;
+	public Map<CompanyJob, String> getAppliedJobStatus() {
+		return appliedJobStatus;
 	}
 
-	public void setAppliedJobs(Set<CompanyJob> appliedJobs) {
-		this.appliedJobs = appliedJobs;
+	public void setAppliedJobStatus(Map<CompanyJob, String> appliedJobStatus) {
+		this.appliedJobStatus = appliedJobStatus;
 	}
 
+
+
+	
+	
+	
+
+	
 	
 	
 
