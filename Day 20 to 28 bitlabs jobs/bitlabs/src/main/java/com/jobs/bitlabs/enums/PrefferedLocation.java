@@ -1,6 +1,6 @@
 package com.jobs.bitlabs.enums;
 
-public enum PefferedLocation {
+public enum PrefferedLocation {
 
 	Chennai, Thiruvananthapuram, Bangalore, Hyderabad, Coimbatore, Kochi, Madurai, Mysore, Thanjavur, Pondicherry,
 	Vijayawada

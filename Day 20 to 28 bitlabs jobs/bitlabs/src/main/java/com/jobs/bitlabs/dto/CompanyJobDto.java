@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.jobs.bitlabs.enums.PefferedLocation;
+import com.jobs.bitlabs.enums.PrefferedLocation;
 import com.jobs.bitlabs.enums.Qualification;
 import com.jobs.bitlabs.enums.Skills;
 
@@ -43,7 +43,7 @@ public class CompanyJobDto {
 	private Long SalaryMax;
 	@ElementCollection
 	@Enumerated(EnumType.STRING)
-	private Set<PefferedLocation> PreferdJobLocation;
+	private Set<PrefferedLocation> PreferdJobLocation;
 	private String JobType;
 	private Boolean Status;
 	
@@ -60,7 +60,7 @@ public class CompanyJobDto {
 	public CompanyJobDto(String jobId, String jobTitle, String jobDescription, Date jobposteddate , String companyId,
 			Qualification qualification, Long experienceMin, Long experienceMax,
 			Set<com.jobs.bitlabs.enums.Skills> skills, Long salaryMin, Long salaryMax,
-			Set<PefferedLocation> preferdJobLocation, String jobType, Boolean status) {
+			Set<PrefferedLocation> preferdJobLocation, String jobType, Boolean status) {
 		super();
 		JobId = jobId;
 		JobTitle = jobTitle;
@@ -235,14 +235,14 @@ public class CompanyJobDto {
 
 
 
-	public Set<PefferedLocation> getPreferdJobLocation() {
+	public Set<PrefferedLocation> getPreferdJobLocation() {
 		return PreferdJobLocation;
 	}
 
 
 
 
-	public void setPreferdJobLocation(Set<PefferedLocation> preferdJobLocation) {
+	public void setPreferdJobLocation(Set<PrefferedLocation> preferdJobLocation) {
 		PreferdJobLocation = preferdJobLocation;
 	}
 

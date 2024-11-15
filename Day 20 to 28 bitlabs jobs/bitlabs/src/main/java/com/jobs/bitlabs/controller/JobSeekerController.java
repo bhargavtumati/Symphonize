@@ -22,7 +22,7 @@ import com.jobs.bitlabs.dto.CompanyJobDto;
 import com.jobs.bitlabs.dto.CompanyProfileDto;
 import com.jobs.bitlabs.dto.JobSeekerDto;
 import com.jobs.bitlabs.enums.JobStatus;
-import com.jobs.bitlabs.enums.PefferedLocation;
+import com.jobs.bitlabs.enums.PrefferedLocation;
 import com.jobs.bitlabs.enums.Qualification;
 import com.jobs.bitlabs.enums.Skills;
 
@@ -62,7 +62,7 @@ public class JobSeekerController {
 	          @RequestParam Qualification qualification,
 	          @RequestParam String specialization,
 	          @RequestParam int totalExperience,
-	          @RequestParam Set<PefferedLocation> PreferedJobLocation,
+	          @RequestParam Set<PrefferedLocation> PreferedJobLocation,
 	          @RequestParam String addressLine,
 	            @RequestParam String city,
 	            @RequestParam String state,
@@ -113,7 +113,7 @@ public class JobSeekerController {
 	          @RequestParam Qualification qualification,
 	          @RequestParam String specialization,
 	          @RequestParam int totalExperience,
-	          @RequestParam Set<PefferedLocation> PreferedJobLocation,
+	          @RequestParam Set<PrefferedLocation> PreferedJobLocation,
 	          @RequestParam String addressLine,
 	            @RequestParam String city,
 	            @RequestParam String state,

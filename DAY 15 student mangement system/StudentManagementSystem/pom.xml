@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.springboot</groupId>
-	<artifactId>VirtualBookStrore</artifactId>
+	<artifactId>StudentManagementSystem</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>VirtualBookStrore</name>
+	<name>StudentManagementSystem</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>

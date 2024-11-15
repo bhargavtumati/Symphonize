@@ -51,10 +51,7 @@ public class LibraryController {
 		return library;
 	}
 	
-	@GetMapping("/getPaginatedLibraries") 
-	public Page<Library> getPaginatedLibraries( @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "10") int size) {
-		return libraryservice.getPaginatedLibraries(page, size); 
-		}
+	
 	//get All Books REST API
 	@GetMapping("/getAllBooks")
 	public List<Library> getAllBooks() {
@@ -74,13 +71,6 @@ public class LibraryController {
 	    Library library = libraryservice.AssignBook(Id, userName, availability, phoneNumber);
 	    return library;
 	}
-
-	@DeleteMapping("/deleteBook/{Id}")
-	public String DeleteBook(@PathVariable Long Id) {
-		
-		String message = libraryservice.deleteBook(Id);
-		return message;
-	}
 	
 	@PutMapping("/changeAvailability/{Id}")
 	public String changeAvailability(@PathVariable Long Id) {
@@ -90,6 +80,17 @@ public class LibraryController {
 		return message;
 	}
 	
+	@GetMapping("/getPaginatedLibraries") 
+	public Page<Library> getPaginatedLibraries( @RequestParam(value = "page", defaultValue = "0") int page, @RequestParam(value = "size", defaultValue = "10") int size) {
+		return libraryservice.getPaginatedLibraries(page, size); 
+		}
+	
+	@DeleteMapping("/deleteBook/{Id}")
+	public String DeleteBook(@PathVariable Long Id) {
+		
+		String message = libraryservice.deleteBook(Id);
+		return message;
+	}
 	
 	
 

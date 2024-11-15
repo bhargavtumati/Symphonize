@@ -22,7 +22,7 @@ import com.jobs.bitlabs.dto.CompanyJobDto;
 import com.jobs.bitlabs.dto.CompanyProfileDto;
 import com.jobs.bitlabs.entity.JobSeeker;
 import com.jobs.bitlabs.enums.JobStatus;
-import com.jobs.bitlabs.enums.PefferedLocation;
+import com.jobs.bitlabs.enums.PrefferedLocation;
 import com.jobs.bitlabs.enums.Qualification;
 import com.jobs.bitlabs.enums.Skills;
 import com.jobs.bitlabs.service.CompanyJobService;
@@ -62,7 +62,7 @@ public class CompanyJobController {
 			  @RequestParam  Set<Skills> Skills,
 	          @RequestParam  Long SalaryMin,
 			  @RequestParam  Long SalaryMax,
-			  @RequestParam  Set<PefferedLocation> PreferedJobLocation,
+			  @RequestParam  Set<PrefferedLocation> PreferedJobLocation,
 			  @RequestParam  String JobType,
 			  @RequestParam  Boolean Status
 			
@@ -93,7 +93,7 @@ public class CompanyJobController {
 			  @RequestParam  Set<Skills> Skills,
 	          @RequestParam  Long SalaryMin,
 			  @RequestParam  Long SalaryMax,
-			  @RequestParam  Set<PefferedLocation> PreferedJobLocation,
+			  @RequestParam  Set<PrefferedLocation> PreferedJobLocation,
 			  @RequestParam  String JobType,
 			  @RequestParam  Boolean Status
 			
