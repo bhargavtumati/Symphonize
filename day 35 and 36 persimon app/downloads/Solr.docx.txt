@@ -1,0 +1,10 @@
+Solr  
+Resume .parsing
+Word/pdf   > text  > json
+
+
+Llm  (Large Language Models)
+     jd related questions
+Chatgpt, gemini, 
+
+Technologies: Python, FAST API
