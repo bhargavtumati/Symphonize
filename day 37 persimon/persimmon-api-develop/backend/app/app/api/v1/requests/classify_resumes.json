@@ -1,0 +1,18 @@
+{
+    "jd": {
+      "id": 101,
+      "client": "XYZ, Inc.",
+      "fulltext": "... full job description ...",
+      "role": "... role ..."
+    },
+    "resume": {
+      "fulltext": "... resume text ...",
+      "candidate": {
+        "id": 1001,
+        "name": "John Doe",
+        "phone": "+1.123.123.1234",
+        "email": "john.doe@example.com"
+      }
+    }
+  }
+  
