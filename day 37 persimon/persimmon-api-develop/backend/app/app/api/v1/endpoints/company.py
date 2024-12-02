@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 from fastapi import Depends, HTTPException
-from app.helpers.firebase_helper import verify_firebase_token
+#from app.helpers.firebase_helper import verify_firebase_token
 from app.models.company import Company as CompanyModel
 from sqlalchemy.orm import Session
 from app.db.session import get_db
@@ -13,7 +13,7 @@ api_reference: dict[str, str] = {"api_reference": "https://github.com/symphonize
 @router.get("")
 def get_company_by_domain(
     domain: str,  # The domain will be passed as a query parameter
-    token: dict = Depends(verify_firebase_token),
+   # token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
 ):
     try:

@@ -1,6 +1,6 @@
-import boto3
+#import boto3
 from io import BytesIO
-from joblib import load
+#from joblib import load
 import os
 from google.cloud import storage
 from google.oauth2 import service_account
@@ -31,11 +31,11 @@ def load_model_from_s3(bucket_name, model_key):
     The loaded model.
   """
 
-  s3 = boto3.client('s3')
-  obj = s3.get_object(Bucket=bucket_name, Key=model_key)
-  model_bytes = obj['Body'].read()
-  model = load(BytesIO(model_bytes))
-  return model
+ # s3 = boto3.client('s3')
+  #obj = s3.get_object(Bucket=bucket_name, Key=model_key)
+ # model_bytes = obj['Body'].read()
+ # model = load(BytesIO(model_bytes))
+ # return model
 
 
 

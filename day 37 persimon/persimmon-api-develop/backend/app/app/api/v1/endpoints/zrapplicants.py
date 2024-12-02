@@ -48,6 +48,8 @@ async def classify_applicant(
 
 @router.get("/{applicant_id}")
 def get_applicants(applicant_id: int) -> GetResponseBase:
+
+    
     return create_response(
         message=f"Get applicant by id {applicant_id}", data={}, meta=meta
     )

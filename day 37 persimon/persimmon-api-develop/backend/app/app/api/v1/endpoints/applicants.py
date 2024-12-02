@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.helpers import db_helper as dbh,solr_helper as solrh
 from fastapi import APIRouter, UploadFile, File
-from app.helpers.firebase_helper import verify_firebase_token
+#from app.helpers.firebase_helper import verify_firebase_token
 from app.helpers.math_helper import get_pagination
 from app.models.applicant import Applicant
 from app.models.stages import Stages
@@ -33,27 +33,27 @@ async def upload_resumes(
     job_code:str,
     files: List[UploadFile] = File(...),
     session: Session = Depends(get_db),
-    token: dict = Depends(verify_firebase_token)
+   # token: dict = Depends(verify_firebase_token)
 ):
     
     allowed_extensions = {"pdf", "docx"}  
     errors = []
     success_files = []
     flatten_resumes = []
-    created_by = token['email']
+    #created_by = token['email']
     for file in files:
         file_extension = file.filename.split('.')[-1].lower()
         if file_extension not in allowed_extensions:
             detail= f"File '{file.filename}' has an unsupported file extension. Only '.pdf' and '.docx' files are allowed."
             errors.append(detail)
             continue
-        file_success, error_message, flatten_resume = await ap.process_resume(file, session,created_by,job_id,job_code)
+    #    file_success, error_message, flatten_resume = await ap.process_resume(file, session,created_by,job_id,job_code)
         
-        if file_success:
-            success_files.append(file.filename)
+      #  if file_success:
+      #      success_files.append(file.filename)
             if flatten_resume:
                 flatten_resumes.append(flatten_resume)
-        if error_message:
+     #   if error_message:
             errors.append(error_message)
 
     return {
@@ -70,7 +70,7 @@ def get_applicants(
     page: int,
     stage_uuid: Optional[str] = None,
     name: Optional[str] = None,
-    token: dict = Depends(verify_firebase_token),
+   # token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)):
     try:
         page_size = 20
@@ -95,10 +95,10 @@ async def partial_update(
     job_id: int,
     applicants: ApplicantPartialUpdate,
     session: Session = Depends(get_db),
-    token: dict = Depends(verify_firebase_token)
+   # token: dict = Depends(verify_firebase_token)
 ):
     try:
-        updated_by = token['email']
+     #   updated_by = token['email']
         applicant_uuids = applicants.applicant_uuids
         stage_uuid = applicants.stage_uuid
         stage_name = ''
@@ -143,7 +143,7 @@ async def partial_update(
                     raise HTTPException(status_code=404, detail=f'Applicant with id as {applicant_id} was not found')
 
                 existing_applicant.stage_uuid = stage_uuid
-                existing_applicant.meta.update(dbh.update_meta(existing_applicant.meta, updated_by))
+           #     existing_applicant.meta.update(dbh.update_meta(existing_applicant.meta, updated_by))
                 existing_applicant.update(session=session)
 
         return {

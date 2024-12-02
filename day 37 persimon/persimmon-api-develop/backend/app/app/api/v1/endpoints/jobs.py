@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.response_schema import create_response
 from app.api.v1.endpoints.models.job_model import JobModel, JobPartialUpdate
-from app.helpers.firebase_helper import verify_firebase_token
+#from app.helpers.firebase_helper import verify_firebase_token
 from app.helpers import math_helper as mathh, db_helper as dbh ,jd_helper as jdh, solr_helper as solrh
 from app.models.company import Company
 from app.models.job import Job
@@ -19,11 +19,11 @@ meta: dict[str, str] = {"api_reference": "https://github.com/symphonize/persimmo
 @router.post('')
 def create_job( 
     job: JobModel,
-    token: dict = Depends(verify_firebase_token),
+    #token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
 ):
     try:
-        created_by = token['email']
+        created_by ="bharat@gmail.com"# token['email']
         company_code = ''
         enhanced_description = None
         if job.is_posted_for_client:
@@ -85,10 +85,10 @@ def get_jobs(
     title: Optional[str] = None,
     location: Optional[str] = None,
     client_name: Optional[str] = None,
-    token: dict = Depends(verify_firebase_token),
+   # token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)):
     try:
-        created_by = token['email']
+        created_by = "bharat@gmail.com" #token['email']
         page_size = 12
         company = Company.get_by_name(session=session, company_name=client_name)
         total_count = Job.get_count(session=session, id=id, title=title, location=location, company=company, created_by_email=created_by, client_name=client_name)
@@ -126,7 +126,7 @@ def get_jobs(
 def update_job(
     id: int,
     job: JobModel,
-    token: dict = Depends(verify_firebase_token),
+   # token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
 ):
     try:
@@ -220,7 +220,7 @@ def update_job(
 @router.get('/{id}')
 def get_job_by_id(
     id: int,
-    token: dict = Depends(verify_firebase_token),
+   # token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)):
     try:
         job_data: Job = Job.get_by_id(session=session, id=id)
@@ -239,7 +239,7 @@ def get_job_by_id(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
+"""
 @router.patch("/{id}")
 def update_job_partial(id: int, job_update: JobPartialUpdate, session: Session = Depends(get_db), token: dict = Depends(verify_firebase_token)):
     try:
@@ -260,3 +260,4 @@ def update_job_partial(id: int, job_update: JobPartialUpdate, session: Session =
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+        """

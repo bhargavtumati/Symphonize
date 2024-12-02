@@ -7,7 +7,7 @@ from fastapi import Depends, HTTPException
 from app.models.company import Company
 from app.models.recruiter import Recruiter
 from app.api.v1.endpoints.models.recruiter_model import RecruiterModel
-from app.helpers.firebase_helper import verify_firebase_token
+#from app.helpers.firebase_helper import verify_firebase_token
 from app.helpers.regex_helper import get_domain_from_email
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -24,7 +24,7 @@ def get_recruiters() -> GetResponseBase:
 @router.post("")
 async def create_recruiter_endpoint( 
     recruiter: RecruiterModel, 
-    token: dict = Depends(verify_firebase_token),
+ #   token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
 ):
     try:
@@ -35,7 +35,7 @@ async def create_recruiter_endpoint(
         email_domain = get_domain_from_email(recruiter.email_id)
 
         company_record = Company.get_by_domain(session=session, domain=email_domain)
-        created_by = token['email']
+        created_by = "bharat@gmail.cpom"#token['email']
         if company_record:
             company_id = company_record.id
         else:
@@ -78,7 +78,7 @@ async def create_recruiter_endpoint(
 @router.get('/{email_id}')
 def verify_recruiter_by_email(
     email_id: str,
-    token: dict = Depends(verify_firebase_token),
+ #   token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
     ):
     try:

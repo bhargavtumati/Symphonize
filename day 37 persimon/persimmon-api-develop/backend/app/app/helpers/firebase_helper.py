@@ -35,3 +35,4 @@ async def verify_firebase_token(credentials: HTTPAuthorizationCredentials = Secu
         return decoded_token  # Decoded token contains user information
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
+    

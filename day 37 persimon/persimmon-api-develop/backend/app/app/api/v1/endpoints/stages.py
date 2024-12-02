@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.helpers.firebase_helper import verify_firebase_token
+#from app.helpers.firebase_helper import verify_firebase_token
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.stages import Stages
@@ -17,7 +17,7 @@ api_reference: dict[str, str] = {"api_reference": "https://github.com/symphonize
 @router.get("")
 def get_stages(
     job_id: int,
-    token: dict = Depends(verify_firebase_token),
+   # token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
 ):
     try:
@@ -41,11 +41,11 @@ def get_stages(
 async def update_stages(
     job_id: int,
     stages: StagesPartialUpdate,
-    token: dict = Depends(verify_firebase_token),
+    #token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
 ):
     try:
-        updated_by =  token['email']
+      #  updated_by =  token['email']
         stages_dict = stages.model_dump()
         existing_stages: Stages = Stages.get_by_id(session=session, job_id=job_id)
         if not existing_stages:
@@ -89,11 +89,11 @@ async def update_stages(
                 existing_applicants: list[Applicant] = Applicant.get_by_stage_uuid(session=session, stage_uuid=removed_stage_uuid)
                 for applicant in existing_applicants:
                     applicant.stage_uuid = existing_stages.stages[0]['uuid']
-                    applicant.meta.update(dbh.update_meta(applicant.meta, updated_by))
+               #     applicant.meta.update(dbh.update_meta(applicant.meta, updated_by))
                     applicant.update(session=session)
 
 
-        existing_stages.meta.update(dbh.update_meta(existing_stages.meta, updated_by))
+      #  existing_stages.meta.update(dbh.update_meta(existing_stages.meta, updated_by))
         existing_stages.stages = [existing_stages.stages[0]] + stages_dict['stages']
         existing_stages.update(session=session)
 

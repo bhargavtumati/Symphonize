@@ -1,8 +1,8 @@
 from app.helpers import ai_helper as aih 
 from pydantic import BaseModel
-from app.helpers.firebase_helper import verify_firebase_token
+#from app.helpers.firebase_helper import verify_firebase_token
 from typing import Optional
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter()
 
@@ -13,7 +13,7 @@ class JDRequest(BaseModel):
 @router.post('/generate-job-description')
 async def generate_job_description(
     jd: JDRequest,
-    token: dict = Depends(verify_firebase_token)
+    #token: dict = Depends(verify_firebase_token)
 ):
     try:
         full_input = (jd.input or '') + '\n' + jd.prompt + '\n' + 'Give me only text of length less than 2000 characters'
