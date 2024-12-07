@@ -46,30 +46,32 @@ class ApplicantPartialUpdate(BaseModel):
 
 # Model for Industry Type
 class IndustryType(BaseModel):
-    name: Optional[str]=None
-    pref: Optional[str]=None
-    max: Optional[int]=None
-    min: Optional[int]=None
+    name: Optional[str] = None
+    pref: Optional[str] = None
+    max: Optional[int] = None
+    min: Optional[int] = None
 
 
 # Model for Remuneration
 class Remuneration(BaseModel):
-    name: Optional[str]=None
-    max: Optional[int]=None
-    min: Optional[int]=None
+    name: Optional[str] = None
+    max: Optional[int] = None
+    min: Optional[int] = None
 
 
 # Model for Skills and Soft Skills
 class Skill(BaseModel):
-    name: Optional[str]=None
-    pref: Optional[str]=None
-    value: Optional[int]=None
+    name: Optional[str] = None
+    pref: Optional[str] = None
+    value: Optional[int] = None
+
 
 class SoftSkill(BaseModel):
-    name: Optional[str]=None
-    pref: Optional[str]=None
-    min_value: Optional[str]=None
-    max_value: Optional[str]=None
+    name: Optional[str] = None
+    pref: Optional[str] = None
+    min_value: Optional[str] = None
+    max_value: Optional[str] = None
+
 
 # Model for Responsibilities
 class Responsibilities(BaseModel):
@@ -78,64 +80,63 @@ class Responsibilities(BaseModel):
 
 # Model for Pedigree Specifications
 class Specification(BaseModel):
-    spec: Optional[str]=None
-    qualification: Optional[str]=None
-    institution_name: Optional[str]=None
+    spec: Optional[str] = None
+    qualification: Optional[str] = None
+    institution_name: Optional[str] = None
 
 
 # Model for Pedigree
 class Pedigree(BaseModel):
-    name: Optional[str]=None
+    name: Optional[str] = None
     specifications: Optional[List[Specification]] = None
 
 
 # Model for Availability
 class Availability(BaseModel):
-    name: Optional[str]=None
-    value: Optional[int]=None
+    name: Optional[str] = None
+    value: Optional[int] = None
 
 
 # Model for Work Mode
 class WorkMode(BaseModel):
-    value: Optional[str]=None
+    value: Optional[str] = None
 
 
 # Model for Location
 class Location(BaseModel):
-    first_priority: Optional[str]=None
-    second_priority: Optional[str]=None
+    first_priority: Optional[str] = None
+    second_priority: Optional[str] = None
 
 
 # Model for Transition Behavior
 class TransitionBehaviour(BaseModel):
-    name: Optional[str]=None
-    preference: Optional[str]=None
-    value: Optional[int]=None
+    name: Optional[str] = None
+    preference: Optional[str] = None
+    value: Optional[int] = None
 
 
 # Model for Advanced Filters
 class AdvancedFilter(BaseModel):
-    name: Optional[str]=None
-    preference: Optional[str]=None
-    value: Optional[int]=None
+    name: Optional[str] = None
+    preference: Optional[str] = None
+    value: Optional[int] = None
 
 
 # Main Filters Model
 class Filters(BaseModel):
-    industry_type: Optional[List[IndustryType]]  =None 
-    remuneration: Optional[Remuneration]  =None
-    skills: Optional[List[Skill]] =None
-    responsibilities: Optional[List[str]] =None
-    pedigree: Optional[List[Pedigree]] =None
-    availability: Optional[Availability] =None
-    workmode: Optional[WorkMode] =None
-    location: Optional[Location] =None
-    soft_skills: Optional[List[SoftSkill]] =None
-    transition_behaviour: Optional[List[TransitionBehaviour]] =None
-    advanced_filters: Optional[List[AdvancedFilter]] =None
+    industry_type: Optional[List[IndustryType]] = None
+    remuneration: Optional[Remuneration] = None
+    skills: Optional[List[Skill]] = None
+    responsibilities: Optional[List[str]] = None
+    pedigree: Optional[List[Pedigree]] = None
+    availability: Optional[Availability] = None
+    workmode: Optional[WorkMode] = None
+    location: Optional[Location] = None
+    soft_skills: Optional[List[SoftSkill]] = None
+    transition_behaviour: Optional[List[TransitionBehaviour]] = None
+    advanced_filters: Optional[List[AdvancedFilter]] = None
 
 
 # Root Model
 class FilterRequest(BaseModel):
     filters: Filters
-

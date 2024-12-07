@@ -60,7 +60,7 @@ async def get_bearer_token() -> str:
 
 async def get_attachment_by_id(candidate_id, attachment_id):
     bearer_token = await get_bearer_token()
-    url = f'{BASE_URL}/Candidates/{candidate_id}/Attachments/{attachment_id}'
+    url = f"{BASE_URL}/Candidates/{candidate_id}/Attachments/{attachment_id}"
     headers = {"Authorization": f"Bearer {bearer_token}"}
 
     async with httpx.AsyncClient() as client:
@@ -79,7 +79,7 @@ async def get_attachment_by_id(candidate_id, attachment_id):
 
 async def get_attachments(candidate_id):
     bearer_token = await get_bearer_token()
-    url = f'{BASE_URL}/Candidates/{candidate_id}/Attachments'
+    url = f"{BASE_URL}/Candidates/{candidate_id}/Attachments"
     headers = {"Authorization": f"Bearer {bearer_token}"}
     print(headers)
     print(url)
@@ -98,7 +98,7 @@ async def get_attachments(candidate_id):
 
 async def download_attachment_by_id(candidate_id, attachment_id):
     bearer_token = await get_bearer_token()
-    url = f'{BASE_URL}/Candidates/{candidate_id}/Attachments/{attachment_id}'
+    url = f"{BASE_URL}/Candidates/{candidate_id}/Attachments/{attachment_id}"
     headers = {"Authorization": f"Bearer {bearer_token}"}
 
     async with httpx.AsyncClient() as client:
@@ -117,16 +117,17 @@ async def download_attachment_by_id(candidate_id, attachment_id):
                 status_code=file_response.status_code, detail="File download failed"
             )
 
+
 async def get_job_by_id(job_id):
     bearer_token = await get_bearer_token()
-    url = f'{BASE_URL}/JobOpenings/{job_id}'
+    url = f"{BASE_URL}/JobOpenings/{job_id}"
     headers = {"Authorization": f"Bearer {bearer_token}"}
 
     async with httpx.AsyncClient() as client:
         response = await client.get(url, headers=headers)
 
         if response.status_code == 200:
-            job_detail = response.json()['data'][0]['Job_Description']
+            job_detail = response.json()["data"][0]["Job_Description"]
             return {"job": {"id": job_id, "job_description": job_detail}}
         else:
             raise HTTPException(
@@ -134,9 +135,10 @@ async def get_job_by_id(job_id):
                 detail=f"Failed to get job description from job: {job_id}",
             )
 
+
 async def get_applicant_by_id(applicant_id):
     bearer_token = await get_bearer_token()
-    url = f'{BASE_URL}/Applications/{applicant_id}'
+    url = f"{BASE_URL}/Applications/{applicant_id}"
     headers = {"Authorization": f"Bearer {bearer_token}"}
 
     async with httpx.AsyncClient() as client:
@@ -150,9 +152,10 @@ async def get_applicant_by_id(applicant_id):
                 detail=f"Failed to get applicant details for: {applicant_id}",
             )
 
+
 async def update_applicant_by_id(applicant_id, applicant_details):
     bearer_token = await get_bearer_token()
-    url = f'{BASE_URL}/Applications/{applicant_id}'
+    url = f"{BASE_URL}/Applications/{applicant_id}"
     headers = {"Authorization": f"Bearer {bearer_token}"}
     async with httpx.AsyncClient() as client:
         response = await client.put(url, data=applicant_details, headers=headers)

@@ -106,9 +106,8 @@ Here is the resume:
 """
 
 
-
 def extract_features_from_jd(
-    text:str,
+    text: str,
     prompt_template: str = EXTRACT_FEATURES_FROM_JOBDESCRIPTION2,
     enable_parser: bool = False,
     output_format: str = "json",
@@ -116,11 +115,14 @@ def extract_features_from_jd(
     api_key: Optional[str] = None,  # Optional parameter for flexibility
 ) -> str:
 
-
     if not text:
-        return json.dumps({"error": "No text could be extracted from the file or provided text is empty."})
-    
-    soup = BeautifulSoup(text, 'html.parser')
+        return json.dumps(
+            {
+                "error": "No text could be extracted from the file or provided text is empty."
+            }
+        )
+
+    soup = BeautifulSoup(text, "html.parser")
     text = soup.get_text(separator="\n", strip=True)
 
     # Initialize LLM with the provided API key
@@ -128,9 +130,9 @@ def extract_features_from_jd(
         google_api_key=os.getenv("GEMINI_API_KEY"),  # Replace with your actual key
         model="gemini-pro",
         temperature=0.7,
-        top_p=0.85
+        top_p=0.85,
     )
-    
+
     print(f"the text data is : {text}")
 
     prompt = PromptTemplate(

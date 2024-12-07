@@ -1,0 +1,29 @@
+hr:
+  name: "HR Agent"
+  description: "Responsible for evaluating HR-related responses."
+  tools:
+    - "NLPAnalysisTool"
+    - "ScoringTool"
+    - "DatabaseTool"
+
+technical:
+  name: "Technical Agent"
+  description: "Responsible for evaluating technical skills."
+  tools:
+    - "NLPAnalysisTool"
+    - "ScoringTool"
+    - "DatabaseTool"
+
+manager:
+  name: "Manager Agent"
+  description: "Responsible for evaluating managerial responses."
+  tools:
+    - "NLPAnalysisTool"
+    - "ScoringTool"
+    - "DatabaseTool"
+
+reporter:
+  name: "Reporter Agent"
+  description: "Responsible for generating candidate reports."
+  tools:
+    - "ReportGeneratorTool"

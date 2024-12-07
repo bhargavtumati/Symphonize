@@ -1,6 +1,4 @@
-from fastapi import (
-    FastAPI, Request
-)
+from fastapi import FastAPI, Request
 from app.api.v1.api import api_router as api_router_v1
 from app.core.config import settings
 from contextlib import asynccontextmanager
@@ -12,11 +10,12 @@ from app.db.session import SessionLocal
 from app.models.master_data import MasterData
 from app.models.job import Job
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     print("startup fastapi")
-    session = SessionLocal() 
+    session = SessionLocal()
     try:
         MasterData.seed_master_data(session=session)
         Job.load_enhanced_jd(session=session)
@@ -28,7 +27,6 @@ async def lifespan(app: FastAPI):
         session.close()
         # shutdown
         print("shutdown fastapi")
-    
 
 
 # Core Application Instance
@@ -49,6 +47,7 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_headers=["*"],
     )
 
+
 @app.get("/")
 async def root():
     """
@@ -66,13 +65,15 @@ app.include_router(api_router_v1, prefix=settings.API_V1_STR)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     errors = exc.errors()
     custom_errors = []
-    
+
     for error in errors:
-        custom_errors.append({
-            "loc": error['loc'],
-            "msg": error['msg'].replace('Value error, ',''),  
-            "input": error.get('input')
-        })
+        custom_errors.append(
+            {
+                "loc": error["loc"],
+                "msg": error["msg"].replace("Value error, ", ""),
+                "input": error.get("input"),
+            }
+        )
 
     return JSONResponse(
         status_code=422,

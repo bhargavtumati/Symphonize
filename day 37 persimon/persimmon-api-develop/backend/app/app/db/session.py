@@ -16,6 +16,7 @@ engine = create_engine(
 
 SessionLocal = sessionmaker(engine)
 
+
 # Define a session dependency in FastAPI
 def get_db():
     session = SessionLocal()

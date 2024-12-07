@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, Session
 from sqlalchemy import func
 from app.helpers.db_helper import get_metadata
 
+
 class ZrJob(Base):
     __tablename__ = "zrjob"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -16,7 +17,11 @@ class ZrJob(Base):
 
     @classmethod
     def get_by_id(cls, session: Session, job_id: str):
-        return session.query(cls).filter(func.jsonb_extract_path_text(cls.detail, 'job', 'id') == job_id).first()
+        return (
+            session.query(cls)
+            .filter(func.jsonb_extract_path_text(cls.detail, "job", "id") == job_id)
+            .first()
+        )
 
     def create(self, session: Session):
         self.meta = get_metadata()

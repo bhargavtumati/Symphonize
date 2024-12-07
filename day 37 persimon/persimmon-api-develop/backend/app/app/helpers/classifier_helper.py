@@ -18,9 +18,11 @@ from tensorflow.keras.models import load_model
 import subprocess
 import sys
 
+
 def download_model(model_name="en_core_web_sm"):
     """Download the SpaCy model if it's not already installed."""
     subprocess.check_call([sys.executable, "-m", "spacy", "download", model_name])
+
 
 def load_spacy_model(model_name="en_core_web_sm"):
     """Load the SpaCy model, downloading it if necessary."""
@@ -32,16 +34,19 @@ def load_spacy_model(model_name="en_core_web_sm"):
         print(f"Model {model_name} not found. Downloading it now...")
         download_model(model_name)
         return spacy.load(model_name)
-    
+
+
 def run_once():
     nltk.download("stopwords")
+
 
 def extract_features(text):
     nlp = load_spacy_model("en_core_web_sm")
     doc = nlp(text)
     pos_tags = [token.pos_ for token in doc]
     entities = [ent.label_ for ent in doc.ents]
-    return ' '.join(pos_tags + entities)
+    return " ".join(pos_tags + entities)
+
 
 def preprocess_text(text):
     no_punctuation = [char for char in text if char not in string.punctuation]
@@ -54,15 +59,31 @@ def preprocess_text(text):
     processed_words = [ps.stem(word) for word in words if word not in stop_words]
     return " ".join(processed_words)
 
+
 def get_absolute_path(relative_path):
     return Path(__file__).parent / relative_path
+
 
 def load(type: str, version: str):
     current_directory = os.getcwd()
     if type == "classifier":
-        file_to_be_loaded = os.path.join(current_directory, "app", "ml", "models", "classifiers", f"resume_classifier-{version}.pkl")
+        file_to_be_loaded = os.path.join(
+            current_directory,
+            "app",
+            "ml",
+            "models",
+            "classifiers",
+            f"resume_classifier-{version}.pkl",
+        )
     elif type == "vectorizer":
-        file_to_be_loaded = os.path.join(current_directory, "app", "ml", "models", "vectorizers", f"vectorizer-{version}.pkl")
+        file_to_be_loaded = os.path.join(
+            current_directory,
+            "app",
+            "ml",
+            "models",
+            "vectorizers",
+            f"vectorizer-{version}.pkl",
+        )
 
     # Check if the file exists before attempting to open it
     if os.path.exists(file_to_be_loaded):
@@ -72,6 +93,7 @@ def load(type: str, version: str):
         print(f"Error: File not found at {file_to_be_loaded}")
         raise FileNotFoundError(f"File not found: {file_to_be_loaded}")
 
+
 # TODO: deprecate the below two and use the above load(...) method
 def load_model_classifier(version):
     return load("classifier", version=version)
@@ -80,23 +102,24 @@ def load_model_classifier(version):
 def load_vectorizer(version):
     return load("vectorizer", version=version)
 
+
 def load_lstm_model(version):
     current_directory = os.getcwd()
-    file_to_be_loaded = os.path.join(current_directory, "app", "ml", "models", "classifiers", f"lstm_model.h5")
+    file_to_be_loaded = os.path.join(
+        current_directory, "app", "ml", "models", "classifiers", f"lstm_model.h5"
+    )
     if os.path.exists(file_to_be_loaded):
         return load_model(file_to_be_loaded)  # Keras model loading
     else:
         raise FileNotFoundError(f"File not found: {file_to_be_loaded}")
 
-class_labels = {
-    0: "Match",
-    1: "Moderate Match",
-    2: "Not Match"
-}
+
+class_labels = {0: "Match", 1: "Moderate Match", 2: "Not Match"}
 
 get_class_key = lambda value: next(
     (k for k, v in class_labels.items() if v == value), None
 )
+
 
 def classify_message(message, model_version, vectorizer_version):
     preprocessed_message = preprocess_text(message)
@@ -108,9 +131,10 @@ def classify_message(message, model_version, vectorizer_version):
     predicted_class_label = class_labels[prediction[0]]
     return predicted_class_label, prediction_probs[0]
 
-def classify_lstm(message,selected_model_classifier):
+
+def classify_lstm(message, selected_model_classifier):
     tokenizer = Tokenizer(num_words=10000)
-    input_text=extract_features(message)
+    input_text = extract_features(message)
     tokenizer.fit_on_texts([input_text])
     sequences = tokenizer.texts_to_sequences([input_text])
     max_sequence_length = 500
@@ -118,6 +142,7 @@ def classify_lstm(message,selected_model_classifier):
     model = load_lstm_model(selected_model_classifier)
     prediction = model.predict(data)
     return prediction
+
 
 def process_resumes(
     job_description,
@@ -133,11 +158,7 @@ def process_resumes(
     run_once()  # Ensure the models are initialized
 
     results = []
-    class_labels_lstm_model = {
-        0: "match",
-        1: "moderate match",
-        2: "not match"
-    }
+    class_labels_lstm_model = {0: "match", 1: "moderate match", 2: "not match"}
 
     for file in files:
         # Read the PDF and extract text
@@ -155,26 +176,31 @@ def process_resumes(
                 if predictions.shape[1] > 2:
                     predicted_index = np.argmax(predictions, axis=1)[0]
                 else:
-                    predicted_index = 0 
+                    predicted_index = 0
                 predicted_label = class_labels_lstm_model[predicted_index]
 
                 probabilities = "; ".join(
-                    [f"{class_labels_lstm_model[i].capitalize()}: {prob:.4f}" for i, prob in enumerate(predictions[0])]
+                    [
+                        f"{class_labels_lstm_model[i].capitalize()}: {prob:.4f}"
+                        for i, prob in enumerate(predictions[0])
+                    ]
                 )
                 if len(prediction) > predicted_index:
-                    score = prediction[predicted_index][predicted_index]*100
+                    score = prediction[predicted_index][predicted_index] * 100
                 else:
                     score = np.max(predictions[0]) * 100
-            
+
                 # Store LSTM prediction results
-                results.append({
-                    "Candidate Name": datah.get_candidate_name(file.filename),
-                    "Result": predicted_label,
-                    "Score": score,
-                    "Probabilities": probabilities,  # Convert to a list for JSON serialization
-                    "Job Title": job_title,
-                    "Company/Client": company_name or "Not provided",
-                })
+                results.append(
+                    {
+                        "Candidate Name": datah.get_candidate_name(file.filename),
+                        "Result": predicted_label,
+                        "Score": score,
+                        "Probabilities": probabilities,  # Convert to a list for JSON serialization
+                        "Job Title": job_title,
+                        "Company/Client": company_name or "Not provided",
+                    }
+                )
             else:
                 print(f"No valid predictions for file: {file.filename}")
                 return f"No valid predictions for file: {file.filename}"
@@ -193,14 +219,16 @@ def process_resumes(
             score = probs[get_class_key(result)] * 100
 
             # Append the classification results
-            results.append({
-                "Candidate Name": candidate_name,
-                "Result": result,
-                "Score": score,
-                "Probabilities": probabilities,
-                "Job Title": job_title,
-                "Company/Client": company_name or "Not provided",
-            })
+            results.append(
+                {
+                    "Candidate Name": candidate_name,
+                    "Result": result,
+                    "Score": score,
+                    "Probabilities": probabilities,
+                    "Job Title": job_title,
+                    "Company/Client": company_name or "Not provided",
+                }
+            )
 
     # Convert results to DataFrame and JSON
     if results:

@@ -32,7 +32,9 @@ async def get_attachment_by_id(
         candidate_id=candidate_id, attachment_id=attachment_id
     )
     return create_response(
-        message="Successfully retrieved and converted attachment", data=data, meta=api_reference
+        message="Successfully retrieved and converted attachment",
+        data=data,
+        meta=api_reference,
     )
 
 

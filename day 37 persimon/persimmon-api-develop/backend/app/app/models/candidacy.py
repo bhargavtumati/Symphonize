@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, Session
 from sqlalchemy import ForeignKey
 from app.helpers.db_helper import get_metadata
 
+
 class Candidacy(Base):
     __tablename__ = "candidacy"
     id: Mapped[int] = mapped_column(primary_key=True)

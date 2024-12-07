@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, Session
 from app.helpers.db_helper import get_metadata
 from sqlalchemy import func
 
+
 class Resume(Base):
     __tablename__ = "resume"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -16,7 +17,14 @@ class Resume(Base):
 
     @classmethod
     def get_by_id(cls, session: Session, attachment_id: str):
-        return session.query(cls).filter(func.jsonb_extract_path_text(cls.detail, 'attachment', 'id') == attachment_id).first()
+        return (
+            session.query(cls)
+            .filter(
+                func.jsonb_extract_path_text(cls.detail, "attachment", "id")
+                == attachment_id
+            )
+            .first()
+        )
 
     def create(self, session: Session):
         self.meta = get_metadata()

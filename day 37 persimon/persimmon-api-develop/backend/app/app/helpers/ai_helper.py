@@ -15,7 +15,7 @@ load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 def get_gemini_ai_response(input: str):
-    model = genai.GenerativeModel(os.getenv("GENAI"))
+    model = genai.GenerativeModel(os.getenv("CHAT_GENAI"))
     response = model.generate_content(input)
     return response.text
 
@@ -141,6 +141,7 @@ async def extract_features_from_resume(
         model=os.getenv("CHAT_GENAI"),
         temperature=0.7,
         top_p=0.85
+        
     )
     
     prompt = PromptTemplate(

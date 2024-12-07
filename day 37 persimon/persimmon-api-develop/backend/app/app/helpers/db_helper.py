@@ -1,5 +1,7 @@
 import time
+
 CURRENT_USER = "persimmon-dev@symphonize.com"
+
 
 def get_metadata():
     timestamp = time.time()
@@ -12,7 +14,8 @@ def get_metadata():
         },
     }
 
+
 def update_meta(meta: dict, email: str):
-    meta['audit']['updated_at'] = time.time()
-    meta['audit']['updated_by']['email'] = email
+    meta["audit"]["updated_at"] = time.time()
+    meta["audit"]["updated_by"]["email"] = email
     return meta

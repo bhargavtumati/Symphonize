@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, Session
 from app.helpers.db_helper import get_metadata
 
+
 class ZrApplicant(Base):
     __tablename__ = "zrapplicant"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -21,9 +22,8 @@ class ZrApplicant(Base):
     @classmethod
     def get_by_id(cls, session: Session, applicant_id: str):
         return session.query(cls).filter_by(applicant_id=applicant_id).first()
-    
+
     def create(self, session: Session):
         self.meta = get_metadata()
         session.add(self)
         session.commit()
-

@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-import os 
+import os
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import HTTPException, Security
 import firebase_admin
@@ -11,7 +11,7 @@ firebase_config = {
     "type": os.getenv("FIREBASE_TYPE"),
     "project_id": os.getenv("FIREBASE_PROJECT_ID"),
     "private_key_id": os.getenv("FIREBASE_PRIVATE_KEY_ID"),
-    "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"), 
+    "private_key": os.getenv("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
     "client_email": os.getenv("FIREBASE_CLIENT_EMAIL"),
     "client_id": os.getenv("FIREBASE_CLIENT_ID"),
     "auth_uri": os.getenv("FIREBASE_AUTH_URI"),
@@ -27,12 +27,14 @@ firebase_admin.initialize_app(cred)
 # Security setup
 security = HTTPBearer()
 
+
 # Dependency to verify token
-async def verify_firebase_token(credentials: HTTPAuthorizationCredentials = Security(security)):
+async def verify_firebase_token(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+):
     token = credentials.credentials
     try:
         decoded_token = auth.verify_id_token(token)
         return decoded_token  # Decoded token contains user information
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
-    
