@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Text Size</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #f4f4f9;
+    }
+
+    .responsive-text {
+      text-align: center;
+      color: #336;
+    }
+
+    .responsive-text h1 {
+      font-size: 10vw; /* Scales to 10% of the viewport width */
+      margin: 0;
+      color: rgb(249, 8, 40);
+    }
+
+    .responsive-text h2 {
+      font-size: 5vw; /* Scales to 5% of the viewport width */
+      margin: 0;
+      color: rgb(6, 246, 6);
+    }
+
+    .responsive-text h3 {
+      font-size: 3vw; /* Scales to 3% of the viewport width */
+      margin: 0;
+      color: rgb(104, 14, 249);
+    }
+  </style>
+</head>
+<body>
+  <div class="responsive-text">
+    <h1>Welcome</h1>
+    <h2>to</h2>
+    <h3>bitLabs</h3>
+  </div>
+</body>
+</html>

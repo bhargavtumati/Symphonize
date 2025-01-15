@@ -16,7 +16,7 @@ import asyncio
 import uuid
 from typing import List, Optional, Dict
 
-PDF_OUTPUT_PATH = "/tmp"  # Temporary directory for storing converted PDF files
+PDF_OUTPUT_PATH = os.getenv('TEMP', '/tmp')  # Temporary directory for storing converted PDF files
 BUCKET_NAME = 'persimmon-ai'
 
 
@@ -127,7 +127,7 @@ async def process_resume(file, session: Session,created_by,job_id,job_code) -> T
         if file_success:
             try:
                 flatten_resume = await jsonh.flatten_resume_data(generated_json)
-                flatten_resume['orignal_resume'] = gcp_paths["original_resume"]
+                flatten_resume['original_resume'] = gcp_paths["original_resume"]
                 flatten_resume['processed_resume'] = gcp_paths["processed_resume"]
 
                 if flatten_resume:

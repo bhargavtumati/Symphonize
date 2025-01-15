@@ -1,0 +1,27 @@
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PIP_DEFAULT_TIMEOUT=100
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /code
+
+RUN apt update && \
+    apt install -y curl libpq-dev gcc openjdk-17-jdk && \
+    apt clean && rm -rf /var/lib/apt/lists/*
+
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \
+    ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry && \
+    poetry config virtualenvs.create false
+
+COPY app/pyproject.toml app/poetry.lock* /code/
+RUN poetry lock --no-update
+
+ARG INSTALL_DEV=false
+RUN bash -c "if [ \"$INSTALL_DEV\" == 'true' ]; then poetry install --no-root; else poetry install --no-root --only main; fi"
+
+ENV PYTHONPATH=/code
+
+EXPOSE 8000
+
+# CMD ["/bin/sh", "-c", "uvicorn app.main:app --reload --workers 3 --host 0.0.0.0 --port 8000"]

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Navigation Bar</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    /* Navigation Bar Container */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #333;
+      color: white;
+    }
+
+    /* Logo */
+    .navbar .logo {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    /* Navigation Links */
+    .navbar .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .navbar .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 1em;
+    }
+
+    .navbar .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* Hamburger Menu (hidden by default) */
+    .navbar .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .navbar .hamburger div {
+      width: 25px;
+      height: 3px;
+      background-color: white;
+      margin: 4px 0;
+    }
+
+    /* Mobile Menu (hidden by default) */
+    .mobile-menu {
+      display: none;
+      flex-direction: column;
+      background-color: #333;
+      padding: 10px 0;
+    }
+
+    .mobile-menu a {
+      padding: 10px;
+      text-align: center;
+      color: white;
+      text-decoration: none;
+    }
+
+    .mobile-menu a:hover {
+      background-color: #444;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .navbar .nav-links {
+        display: none;
+      }
+
+      .navbar .hamburger {
+        display: flex;
+      }
+
+      .mobile-menu {
+        display: none;
+      }
+
+      .mobile-menu.active {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">bitLabs</div>
+    <div class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="hamburger" onclick="toggleMobileMenu()">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#services">Services</a>
+    <a href="#contact">Contact</a>
+  </div>
+
+  <script>
+    // Toggle Mobile Menu Visibility
+    function toggleMobileMenu() {
+      const mobileMenu = document.getElementById("mobileMenu");
+      mobileMenu.classList.toggle("active");
+    }
+  </script>
+</body>
+</html>

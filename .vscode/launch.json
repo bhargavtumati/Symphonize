@@ -1,0 +1,28 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "DepartmentFetch",
+            "request": "launch",
+            "mainClass": "com.springboot.Department.DepartmentFetch",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "DepartmentApplication",
+            "request": "launch",
+            "mainClass": "com.springboot.Department.DepartmentApplication",
+            "projectName": ""
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-BankingApplication<banking>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.springboot.banking.BankingApplication",
+            "projectName": "banking",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

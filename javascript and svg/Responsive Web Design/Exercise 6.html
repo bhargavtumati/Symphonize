@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Webpage</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      color: #333;
+    }
+
+    /* Header */
+    .header {
+      background-color: #a50000;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 2em;
+    }
+
+    /* Main Container */
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background-color: #d32f2f;
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .sidebar a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #a50000;
+      border-radius: 4px;
+      text-align: center;
+    }
+
+    .sidebar a:hover {
+      background-color: #870000;
+    }
+
+    /* Main Content */
+    .main {
+      background-color: white;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    .main h1 {
+      margin-bottom: 10px;
+    }
+
+    .main p {
+      line-height: 1.6;
+    }
+
+    /* Right Sidebar */
+    .right-sidebar {
+      background-color: #ff4d4d;
+      padding: 20px;
+      border-radius: 8px;
+      color: white;
+    }
+
+    .right-sidebar h2 {
+      margin-bottom: 10px;
+    }
+
+    .right-sidebar p {
+      margin-bottom: 15px;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: #a50000;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      margin-top: 20px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar, .right-sidebar {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    Video Games
+  </div>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <a href="#">Breath of the Wild</a>
+      <a href="#">Super Mario Odyssey</a>
+      <a href="#">Animal Crossing: New Horizons</a>
+      <a href="#">Mario Kart 8 Deluxe</a>
+    </div>
+
+    <!-- Main Section -->
+    <div class="main">
+      <h1>Nintendo</h1>
+      <p>
+        Nintendo is a Japanese multinational consumer electronics and video game company headquartered in Kyoto. Nintendo has been making some of the best-selling consoles and video games for over four decades.
+      </p>
+    </div>
+
+    <!-- Right Sidebar -->
+    <div class="right-sidebar">
+      <h2>What?</h2>
+      <p>Nintendo is a company that makes video games and consoles.</p>
+
+      <h2>Where?</h2>
+      <p>Nintendo is a multinational company with headquarters based in Kyoto, Japan.</p>
+
+      <h2>How?</h2>
+      <p>You can find Nintendo products on Amazon or the official Nintendo website.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Learn more about Nintendo and their products on the official Nintendo website.
+  </div>
+</body>
+</html>
