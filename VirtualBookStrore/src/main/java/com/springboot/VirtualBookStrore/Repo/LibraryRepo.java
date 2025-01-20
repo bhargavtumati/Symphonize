@@ -9,6 +9,5 @@ import com.springboot.VirtualBookStrore.Entity.Library;
 
 @Repository
 public interface LibraryRepo extends JpaRepository<Library, Long> {
-    @SuppressWarnings("null")
     Page<Library> findAll(Pageable pageable);
 }

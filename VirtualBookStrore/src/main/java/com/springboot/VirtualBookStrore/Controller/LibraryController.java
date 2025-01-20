@@ -3,7 +3,7 @@ package com.springboot.VirtualBookStrore.Controller;
 
 
 import java.util.List;
-import java.util.Map;
+
 
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.springboot.VirtualBookStrore.Entity.AssignBookRequest;
 import com.springboot.VirtualBookStrore.Entity.Library;
 import com.springboot.VirtualBookStrore.Service.LibraryService;
 
@@ -39,6 +40,13 @@ public class LibraryController {
 	@PostMapping("/addBook")
 	public Library addBook(@RequestBody Library library){
 		
+        if (library.getAvailabilty()) { if (library.getUserName() != null || library.getPhoneNumber() != 0) { 
+			throw new IllegalArgumentException("Username and phone number should not be provided if the book is available.");
+		 } } 
+		 else { if (library.getUserName() == null && library.getPhoneNumber() == 0) { 
+			throw new IllegalArgumentException("Username and phone number must be provided if the book is not available.");
+		 } }
+
 		libraryservice.addBook(library);
 		return library;
 		
@@ -62,15 +70,17 @@ public class LibraryController {
 	
 
 	// Assign Book Rest API
-	@PutMapping("/assignBook/{Id}")
-	public Library assignBook(@PathVariable Long Id, @RequestBody Map<String, Object> request) {
-	    String userName = (String) request.get("userName");
-	    Long phoneNumber = ((Number) request.get("phoneNumber")).longValue();
-	    Boolean availability = false;
+    @PutMapping("/assignBook/{Id}")
+    public Library assignBook(@PathVariable Long Id, @RequestBody AssignBookRequest request) {
+    String userName = request.getUserName();
+    Long phoneNumber = request.getPhoneNumber();
+    Boolean availability = false;
 
-	    Library library = libraryservice.AssignBook(Id, userName, availability, phoneNumber);
-	    return library;
-	}
+    Library library = libraryservice.AssignBook(Id, userName, availability, phoneNumber);
+    return library;
+    }
+
+	
 	
 	@PutMapping("/changeAvailability/{Id}")
 	public String changeAvailability(@PathVariable Long Id) {
