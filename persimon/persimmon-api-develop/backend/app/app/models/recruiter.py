@@ -6,13 +6,13 @@ from app.helpers.db_helper import get_metadata
 
 class Recruiter(Base):
     __tablename__ = 'recruiter'
-    
+    __table_args__ = {'schema': 'public'}
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     full_name: Mapped[str] = mapped_column(String(length=255), nullable=False)
     whatsapp_number: Mapped[str] = mapped_column(String(length=20), nullable=False) 
     designation: Mapped[str] = mapped_column(String(length=255), nullable=False)
     linkedin_url: Mapped[str] = mapped_column(String(length=2048), nullable=False) 
-    company_id: Mapped[int] = mapped_column(Integer, ForeignKey('company.id'), nullable=False)
+    company_id: Mapped[int] = mapped_column(Integer, ForeignKey('public.company.id'), nullable=False)
     email_id: Mapped[str] = mapped_column(String(length=255), nullable=False, unique=True)
     meta: Mapped[list[dict]] = mapped_column(JSONB)  
 

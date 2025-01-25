@@ -6,9 +6,10 @@ from app.helpers.db_helper import get_metadata
 
 class Stages(Base):
     __tablename__ = 'stages'
+    __table_args__ = {'schema': 'public'}
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    recruiter_id: Mapped[int] = mapped_column(Integer, ForeignKey('recruiter.id'))
-    job_id: Mapped[int] = mapped_column(Integer, ForeignKey('job.id'))
+    recruiter_id: Mapped[int] = mapped_column(Integer, ForeignKey('public.recruiter.id'))
+    job_id: Mapped[int] = mapped_column(Integer, ForeignKey('public.job.id'))
     stages: Mapped[list[dict]] = mapped_column(JSONB, nullable=False)
     meta: Mapped[dict] = mapped_column(JSONB, nullable=False)
 

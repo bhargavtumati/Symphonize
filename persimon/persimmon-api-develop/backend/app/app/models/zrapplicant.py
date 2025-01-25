@@ -5,6 +5,7 @@ from app.helpers.db_helper import get_metadata
 
 class ZrApplicant(Base):
     __tablename__ = "zrapplicant"
+    __table_args__ = {'schema': 'public'}
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     description: Mapped[str]

@@ -1,7 +1,7 @@
 from app.models.base import Base
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, Session,aliased
-from sqlalchemy import Enum, Boolean, ForeignKey, String, Integer, desc, Float, DateTime, func, asc, and_, Case, label
+from sqlalchemy import Enum, Boolean, ForeignKey, String, Integer, desc, Float, DateTime, func, asc, and_, Case, label, or_
 import enum
 from app.helpers.db_helper import get_metadata
 from app.models.company import Company
@@ -31,6 +31,7 @@ class JobStatusTypeEnum(enum.Enum):
 # Model definition
 class Job(Base):
     __tablename__ = "job"
+    __table_args__ = {'schema': 'public'}
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     # Mandatory fields with non-nullable constraint
@@ -52,7 +53,7 @@ class Job(Base):
     #Toggle field for client posting
     is_posted_for_client: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    company_id: Mapped[int] = mapped_column(Integer, ForeignKey('company.id'))
+    company_id: Mapped[int] = mapped_column(Integer, ForeignKey('public.company.id'))
     ai_clarifying_questions: Mapped[list[dict]] = mapped_column(JSONB, default=[])
 
     # New fields for publishing options
@@ -91,6 +92,8 @@ class Job(Base):
                 'allow_retrieve': True
             }
 
+
+    
     @classmethod
     def get_count(cls, session: Session, code: str, title: str, location: str, company: Company, client_name:str, created_by_email: str,target_date: str, posted_on : str) -> int:
         query = session.query(cls)
@@ -183,11 +186,28 @@ class Job(Base):
     def get_by_code(cls, session: Session, code: str):
         job = session.query(cls).filter(cls.code == code).first()
         return job
-
+    
+    
     @classmethod
-    def get_jobs_by_domain(cls, session:Session, domain:str):
-        return session.query(cls).filter(and_(cls.meta["audit"]["created_by"]["email"].astext.ilike(f"%{domain}%"),
-        cls.publish_on_career_page == True)).order_by(desc(cls.meta['audit']['created_at'])).all()
+    def search_jobs_by_domain(cls, session: Session, domain: str, search_term: str = None):
+        query = session.query(cls).filter(
+            and_(
+                func.split_part(cls.meta["audit"]["created_by"]["email"].astext, '@', 2) == domain,
+                cls.publish_on_career_page == True,
+                cls.status == JobStatusTypeEnum.ACTIVE,
+            )
+        )
+
+        if search_term:
+            query = query.filter(
+                or_(
+                    cls.location.ilike(f"%{search_term}%"),  
+                    cls.title.ilike(f"%{search_term}%"), 
+                )
+            )
+
+        query = query.order_by(desc(cls.meta['audit']['created_at']))
+        return query.all()
     
     @classmethod
     def load_enhanced_jd(cls, session: Session):

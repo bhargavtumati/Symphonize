@@ -6,9 +6,10 @@ from app.helpers.db_helper import get_metadata
 
 class Candidacy(Base):
     __tablename__ = "candidacy"
+    __table_args__ = {'schema': 'public'}
     id: Mapped[int] = mapped_column(primary_key=True)
-    job_id: Mapped[int] = mapped_column(ForeignKey("zrjob.id"))
-    resume_id: Mapped[int] = mapped_column(ForeignKey("resume.id"))
+    job_id: Mapped[int] = mapped_column(ForeignKey("public.zrjob.id"))
+    resume_id: Mapped[int] = mapped_column(ForeignKey("public.resume.id"))
     match: Mapped[list[dict]] = mapped_column(JSONB)
     meta: Mapped[list[dict]] = mapped_column(JSONB)
 

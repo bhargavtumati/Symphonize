@@ -8,11 +8,11 @@ on:
         required: true 
 env:
   PROJECT_ID: ${{ secrets.CLOUD_RUN_PROJECT_NAME }}
-  REGION_PROD: us-west2
-  REGION_STAGE: us-west1
+  REGION_PROD: asia-south1
+  REGION_qa: asia-south1
   REGION_DEV: asia-south1
   REPO_NAME: persimmon-api
-  REPO_NAME_STAGE: persimmon-api-stage
+  REPO_NAME_qa: persimmon-api-qa
   REPO_NAME_DEV: persimmon-api-dev
  
 jobs:
@@ -71,10 +71,10 @@ jobs:
           --platform "managed" \
           --allow-unauthenticated \
 
-  build-and-deploy-stage:
+  build-and-deploy-qa:
     name: Setup, Build, and Deploy
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/QA'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -103,17 +103,17 @@ jobs:
  
       - name: Build and tag the docker image
         run: |-
-          docker build backend --tag gcr.io/$PROJECT_ID/$REPO_NAME_STAGE:$GITHUB_SHA
+          docker build backend --tag gcr.io/$PROJECT_ID/$REPO_NAME_qa:$GITHUB_SHA
  
       - name: Push the image to the Google Container Registry (GCR)
         run: |-
-          docker push gcr.io/$PROJECT_ID/$REPO_NAME_STAGE:$GITHUB_SHA
+          docker push gcr.io/$PROJECT_ID/$REPO_NAME_qa:$GITHUB_SHA
           
       - name: Deploy
         run: |-
-          gcloud run deploy $REPO_NAME_STAGE \
-          --region $REGION_STAGE \
-          --image gcr.io/$PROJECT_ID/$REPO_NAME_STAGE:$GITHUB_SHA \
+          gcloud run deploy $REPO_NAME_qa \
+          --region $REGION_qa \
+          --image gcr.io/$PROJECT_ID/$REPO_NAME_qa:$GITHUB_SHA \
           --port 8000 \
           --platform "managed" \
           --allow-unauthenticated \
@@ -121,7 +121,7 @@ jobs:
   build-and-deploy-dev:
     name: Setup, Build, and Deploy to dev
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/main'
+    if: github.ref != 'refs/heads/QA' && github.ref != 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v3

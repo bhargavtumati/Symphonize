@@ -9,6 +9,7 @@ import json
 
 class MasterData(Base):
     __tablename__ = 'master_data'
+    __table_args__ = {'schema': 'public'}
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     value: Mapped[dict] = mapped_column(JSONB, nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)

@@ -36,9 +36,10 @@ class CompanyModel(BaseModel):
         is_non_empty(value=linkedin, field_name=COMPANY_LINKEDIN_FIELD)
         validate_linkedin_company_url(value=linkedin)
         validate_url(url=linkedin)
+        #Is the validate_length function is required
         validate_length(value=linkedin, min_len=5, max_len=100, field_name=COMPANY_LINKEDIN_FIELD)
-        if not re.match(r'^https://(www\.)?linkedin\.com/company/[a-zA-Z0-9\-_]{3,}(/.*)?/?$', linkedin):
-            raise ValueError("The LinkedIn URL contains invalid characters")
+        if not re.match(r'^https://(www\.)?linkedin\.com/company/[a-zA-Z0-9\-_]{3,}/$', linkedin):
+            raise ValueError("Please enter a valid Company LinkedIn URL")
         return linkedin
 
     @field_validator('number_of_employees')

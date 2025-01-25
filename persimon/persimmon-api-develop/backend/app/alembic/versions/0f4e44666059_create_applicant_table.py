@@ -25,7 +25,7 @@ def upgrade() -> None:
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
         sa.Column('details', JSONB, nullable=False),
         sa.Column('stage_uuid', sa.String, nullable=False),
-        sa.Column('job_id',sa.Integer, sa.ForeignKey('job.id')),
+        sa.Column('job_id',sa.Integer, sa.ForeignKey('public.job.id')),
         sa.Column('meta', JSONB ,nullable=False )
     )
 

@@ -22,8 +22,8 @@ def upgrade() -> None:
     op.create_table(
         'stages',
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('recruiter_id', sa.Integer, sa.ForeignKey('recruiter.id')),
-        sa.Column('job_id', sa.Integer, sa.ForeignKey('job.id')),
+        sa.Column('recruiter_id', sa.Integer, sa.ForeignKey('public.recruiter.id')),
+        sa.Column('job_id', sa.Integer, sa.ForeignKey('public.job.id')),
         sa.Column('stages', JSONB, nullable=False),
         sa.Column('meta', JSONB, nullable=False)
     )

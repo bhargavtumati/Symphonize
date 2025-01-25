@@ -65,10 +65,10 @@
 
 		<!-- MySQL Dependency -->
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.26</version>
-		</dependency>
+              <groupId>org.postgresql</groupId>
+              <artifactId>postgresql</artifactId>
+              <version>42.6.0</version> <!-- Use the latest version available -->
+        </dependency>
 
 		<dependency>
 			<groupId>org.modelmapper</groupId>

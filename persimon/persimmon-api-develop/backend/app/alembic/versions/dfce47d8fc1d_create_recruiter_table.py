@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.Column('whatsapp_number', sa.String(length=20), nullable=False),
         sa.Column('designation', sa.String(length=255), nullable=False),
         sa.Column('linkedin_url', sa.String(length=2048), nullable=False),
-        sa.Column('company_id', sa.Integer, sa.ForeignKey('company.id'), nullable=False),
+        sa.Column('company_id', sa.Integer, sa.ForeignKey('public.company.id'), nullable=False),
         sa.Column('email_id', sa.String(length=255), nullable=False, unique=True),
         sa.Column('meta', postgresql.JSONB, nullable=True)
     )

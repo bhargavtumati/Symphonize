@@ -22,7 +22,7 @@ url = config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 target_metadata = None
-
+target_schema = "public"
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
@@ -53,6 +53,27 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+# def run_migrations_online() -> None:
+#     """Run migrations in 'online' mode.
+
+#     In this scenario we need to create an Engine
+#     and associate a connection with the context.
+
+#     """
+#     connectable = engine_from_config(
+#         config.get_section(config.config_ini_section, {}),
+#         prefix="sqlalchemy.",
+#         poolclass=pool.NullPool,
+#     )
+
+#     with connectable.connect() as connection:
+#         context.configure(
+#             connection=connection, target_metadata=target_metadata
+#         )
+
+#         with context.begin_transaction():
+#             context.run_migrations()
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
@@ -67,8 +88,11 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
+        # Include schema configuration
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            version_table_schema=target_schema,  # Specify schema for alembic_version table
         )
 
         with context.begin_transaction():

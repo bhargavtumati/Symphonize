@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 from pydantic import BaseModel
 from fastapi import Depends, HTTPException
 from app.helpers.firebase_helper import verify_firebase_token
@@ -32,7 +32,9 @@ def get_company_by_domain(
             "industry_type": company_record.industry_type,
             "linkedin": company_record.linkedin,
             "domain": company_record.domain,
-            "type": company_record.type.name
+            "type": company_record.type.name,
+            "status": status.HTTP_200_OK,
+            "messsage": "Company details retrieved successfully"
         }
         
     except HTTPException as e:

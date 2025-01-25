@@ -1,9 +1,11 @@
 import json
 import logging
 import os
+import traceback
 import uuid
 from typing import Dict, List, Optional
 from uuid import UUID
+from fastapi.responses import JSONResponse
 import httpx
 import requests
 from dotenv import load_dotenv
@@ -15,6 +17,7 @@ from app.api.v1.endpoints.models.applicant_model import (
 from app.db.session import get_db
 from app.helpers import db_helper as dbh, gcp_helper as gcph, solr_helper as solrh, date_helper as dateh
 from app.helpers.firebase_helper import verify_firebase_token
+from app.helpers.otlpless_helper import verify_otpless_token
 from app.helpers.math_helper import get_pagination
 from app.models.applicant import Applicant
 from app.models.job import Job
@@ -173,7 +176,7 @@ async def get_applicants_filter(
     token: dict = Depends(verify_firebase_token)
 ):
     try:
-        db_job = Job.get_id_by_code(
+        db_job = Job.get_by_code(
             session = session, 
             code = job_code
         )
@@ -215,7 +218,7 @@ async def get_applicants_filter(
         documents = solr_response_with_filters.get("response", {}).get("docs", [])
         N = total_count
         for i,document in enumerate(documents):
-            percentile = ((N-i)/N)*100
+            percentile = ((N-i-(pagination['offset']))/N)*100
             document["score"] = math.ceil(percentile)
         
         # Return the response from Solr
@@ -228,9 +231,11 @@ async def get_applicants_filter(
         }
 
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
     except HTTPException as e:
+        traceback.print_exc()
         raise str(e)
 
 @router.get("/{uuid}")
@@ -244,11 +249,10 @@ async def get_applicant(
             uuid_obj = UUID(uuid)
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid or Required UUID")
-        applicant_exists: Applicant = Applicant.get_by_uuid(session=session, uuid=str(uuid))
+        applicant_exists: Applicant = Applicant.get_by_uuid(session=session, uuid=uuid)
+        applicant_exists.details['applied_date'] = dateh.convert_epoch_to_utc(applicant_exists.meta["audit"]["created_at"])
         if not applicant_exists:
             raise HTTPException(status_code=404, detail="Applicant not found")
-        applicant_exists.details['applied_date'] = dateh.convert_epoch_to_utc(applicant_exists.meta["audit"]["created_at"])
-        
         return {
             "message": "Applicant details retrieved successfully",
             "status": status.HTTP_200_OK,
@@ -267,14 +271,18 @@ async def get_applicant(
 
 @router.get("/{uuid}/resume")
 def get_resume(
-    uuid: UUID,
+    uuid: str,
     action: str = "view",
     session: Session = Depends(get_db),
     token: dict = Depends(verify_firebase_token)
 ):
     """Retrieve a PDF file from GCP and send it back to the client."""
     try:
-        applicant_exists: Applicant = Applicant.get_by_uuid(session=session, uuid=str(uuid))
+        try:
+            uuid_obj = UUID(uuid)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid or Required UUID")
+        applicant_exists: Applicant = Applicant.get_by_uuid(session=session, uuid=uuid)
         if not applicant_exists:
             raise HTTPException(status_code=404, detail="Applicant not found")
         file_path = applicant_exists.details["original_resume"].replace(f'/{PERSIMMON_DATA_BUCKET}/', '')
@@ -298,7 +306,7 @@ async def create_applicant_in_career_page(
     linkedin_url: str,
     file: UploadFile = File(...),
     session: Session = Depends(get_db), 
-    token: str = Depends(verify_firebase_token)  
+    token: str = Depends(verify_otpless_token)  
 ):
     allowed_extensions = {"pdf", "docx"}  
     file_extension = file.filename.split('.')[-1].lower()

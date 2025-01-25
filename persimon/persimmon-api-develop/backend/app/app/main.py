@@ -16,18 +16,19 @@ from app.models.job import Job
 async def lifespan(app: FastAPI):
     # Startup
     print("startup fastapi")
-    session = SessionLocal() 
-    try:
-        MasterData.seed_master_data(session=session)
-        Job.load_enhanced_jd(session=session)
-        yield
-    except Exception as e:
-        session.rollback()
-        print(f"Error seeding data: {e}")
-    finally:
-        session.close()
-        # shutdown
-        print("shutdown fastapi")
+    yield
+    # session = SessionLocal() 
+    # try:
+    #     MasterData.seed_master_data(session=session)
+    #     Job.load_enhanced_jd(session=session)
+    #     yield
+    # except Exception as e:
+    #     session.rollback()
+    #     print(f"Error seeding data: {e}")
+    # finally:
+    #     session.close()
+    #     # shutdown
+    print("shutdown fastapi")
     
 
 

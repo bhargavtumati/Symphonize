@@ -36,6 +36,8 @@ from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import func
+from sqlalchemy import cast, String
 
 security = HTTPBearer()
 
@@ -263,7 +265,7 @@ async def extract_text(
                 }
 
                 # Send the message to Pub/Sub
-                pubsub_response = await gcph.send_message_to_pubsub(pubsub_message, topic_name="invoke-api")
+                pubsub_response = await gcph.send_message_to_pubsub(pubsub_message, topic_name=os.getenv("TOPIC_NAME"))
                 logger.info(f"Pub/Sub message sent: {pubsub_response}")
             except Exception as e:
                 logger.error(f"Failed to send Pub/Sub message: {str(e)}")
@@ -516,8 +518,8 @@ async def upload_resumes(
             print(f"successfully written to destination")
             uploaded_files.append(destination)
         except Exception as e:
-            print(f"exception while converting document to text: {e}")
-            errors.append(e)
+            print(f"exception while converting document to text: {str(e)}")
+            errors.append(str(e))
 
     end_time = time.time()
     duration = round(end_time - start_time, 2)
@@ -577,14 +579,14 @@ async def upload_resumes(
                 }
             }
             # pubsub_response = await gcph.send_message_to_pubsub(pubsub_message,topic_name="document-to-text")  # Call the service function
-            pubsub_response = await gcph.send_message_to_pubsub(pubsub_message,topic_name="invoke-api")  # Call the service function
+            pubsub_response = await gcph.send_message_to_pubsub(pubsub_message,topic_name=os.getenv("TOPIC_NAME")) # Call the service function
             logger.info(f"Pub/Sub message sent: {pubsub_response}")
         except Exception as e:
             logger.error(f"Failed to send Pub/Sub message: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to send Pub/Sub message: {str(e)}")
 
     # Return the response
-    return JSONResponse({
+    return {
         "uploaded_files": uploaded_files,
         "errors": errors,
         "total_files": len(files),
@@ -593,7 +595,7 @@ async def upload_resumes(
         "upload_duration_seconds": duration,
         "job_code": job_code,
         "pubsub_status": "Message sent successfully"
-    })
+    }
 
 
 class FlattenForDatabase(BaseModel):
@@ -987,12 +989,11 @@ async def leagacy_flattern_resume_data_from_solr(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
 @router.post("/get-status")
 async def process_file_paths(
     payload: FilePathPayload,
     session: Session = Depends(get_db),
-    token :dict = Depends(verify_firebase_token)
+    token: dict = Depends(verify_firebase_token)
 ):
     try:
         file_paths = payload.file_paths
@@ -1000,35 +1001,32 @@ async def process_file_paths(
         if not file_paths:
             raise HTTPException(status_code=400, detail="File paths list cannot be empty")
 
+        # Fetch all applicants in a single database call
+        applicants = Applicant.get_all_by_original_path(session=session, file_paths=file_paths)
+        print("the type of applicants",type(applicants))
+        if not applicants:
+            raise HTTPException(status_code=404, detail="No matching records found for the provided file paths")
+
         statuses = []
         overall_statuses = []
-        process = ""
 
-        for path in file_paths:
-            print("Processing file path:", path)
-            applicant = Applicant.get_id_by_original_path(session=session, gcp_path=path)
-            print("Applicant record fetched:", applicant)
+        # Process the fetched applicants
+        for applicant in applicants:
+            # Parse the status JSON
+            status_json = applicant.status  # Assuming `status` is stored as JSON
+            overall_statuses.append(status_json.get("overall_status") if status_json else None)
+            
+            if isinstance(status_json, dict):
+                statuses.append(
+                    {
+                        "resume": applicant.details["original_resume"],  # Use the `gcp_path` from the applicant record
+                        "stages_status": status_json  # Assuming `status` contains stages
+                    }
+                )
 
-            if applicant:
-                # Parse the status JSON
-                status_json = applicant.status  # Assuming `status` is stored as JSON
-                overall_statuses.append(status_json.get("overall_status"))
-                if isinstance(status_json, dict):
-                    # Check if the condition for deletion is met
-                        # Add the applicant status to the response
-                    statuses.append(
-                        {
-                                "resume": path,
-                                "stages_status": status_json,  # Assuming `status` contains stages
-                        }
-                    )
-        if "In progress" in overall_statuses:
-            process = "Not Completed"
-        else:
-            process = "Completed"
+        # Determine the overall process status
+        process = "Not Completed" if "In progress" in overall_statuses else "Completed"
 
-        if not statuses:
-            raise HTTPException(status_code=404, detail="No matching records found for the provided file paths")
         return {
             "statuses": statuses,
             "process" : process

@@ -11,6 +11,7 @@ connect_args = {"check_same_thread": False}
 
 engine = create_engine(
     settings.DATABASE_URI,
+    connect_args={"options": "-csearch_path=public"},
     echo=True,
 )
 

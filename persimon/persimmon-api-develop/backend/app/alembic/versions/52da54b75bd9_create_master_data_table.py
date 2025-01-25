@@ -9,8 +9,9 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import JSONB
-
+from app.models.master_data import MasterData
 
 # revision identifiers, used by Alembic.
 revision: str = '52da54b75bd9'
@@ -26,7 +27,11 @@ def upgrade() -> None:
         sa.Column('value', JSONB, nullable=False),
         sa.Column('type', sa.String, nullable=False)
     )
-
+    #Commit the transaction to ensure table is created
+    bind = op.get_bind()
+    session = Session(bind=bind)
+    session.commit()
+    MasterData.seed_master_data(session=session)
 
 def downgrade() -> None:
     op.drop_table('master_data')

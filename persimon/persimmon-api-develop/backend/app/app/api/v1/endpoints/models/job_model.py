@@ -43,10 +43,10 @@ class JobModel(BaseModel):
     @field_validator("description")
     def validate_description(cls, description):
         is_non_empty(value=description, field_name=JOB_DESCRIPTION_FIELD)
-        if len(description) < 50:
-            raise ValueError(f"{JOB_DESCRIPTION_FIELD} is too short. Please add more details")
-        if len(description) > 2000:
-            raise ValueError(f"{JOB_DESCRIPTION_FIELD} is too long. Please limit it to 2000 characters")
+        if len(description) < 3000:
+            raise ValueError(f"{JOB_DESCRIPTION_FIELD} must contain a minimum of 3000 characters")
+        # if len(description) > 4000:
+        #     raise ValueError(f"{JOB_DESCRIPTION_FIELD} is too long. Please limit it to 4000 characters")
         return description
         
     @field_validator('team_size')

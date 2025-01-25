@@ -4,16 +4,18 @@ from sqlalchemy import String, func, desc, ForeignKey, and_
 from sqlalchemy.orm import Mapped, mapped_column, Session
 from app.helpers.db_helper import get_metadata
 from sqlalchemy.ext.mutable import MutableDict
+from typing import List
 
 
 class Applicant(Base):
     __tablename__ = "applicant"
+    __table_args__ = {'schema': 'public'}
     id: Mapped[int] = mapped_column(primary_key=True)
     details : Mapped[list[dict]] = mapped_column(JSONB,nullable=False) 
     status : Mapped[list[dict]] = mapped_column(JSONB,nullable=True) 
     uuid: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     stage_uuid : Mapped[str] = mapped_column(String,nullable=False)
-    job_id: Mapped[int] = mapped_column(ForeignKey("job.id"))
+    job_id: Mapped[int] = mapped_column(ForeignKey("public.job.id"))
     meta: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSONB),nullable=False)
 
     # TODO: Implement stringify
@@ -39,6 +41,10 @@ class Applicant(Base):
     @classmethod
     def get_id_by_original_path(cls, session: Session, gcp_path: str):
         return session.query(Applicant).filter(Applicant.details["original_resume"].astext == gcp_path).scalar()
+
+    @classmethod
+    def get_all_by_original_path(cls, session: Session, file_paths: List[str]):
+        return session.query(cls).filter(Applicant.details["original_resume"].astext.in_(file_paths)).all()
 
     @classmethod
     def get_count(cls, session: Session, job_id : int, stage_uuid:str) -> int:

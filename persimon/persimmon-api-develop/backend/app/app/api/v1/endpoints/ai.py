@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from app.api.v1.endpoints.models.resume_model import ResumeParseRequest
 from app.helpers.firebase_helper import verify_firebase_token, get_base_url
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from tempfile import SpooledTemporaryFile
 from sqlalchemy.orm import Session
 from app.db.session import get_db
@@ -15,6 +15,7 @@ from sqlalchemy.orm.attributes import flag_modified
 import json
 import logging
 import os
+import time
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -43,12 +44,16 @@ async def generate_job_description(
             + "\n"
             + jd.prompt
             + "\n"
-            + "Please generate a job description that includes all the skills and expertise mentioned above, ensuring the total length is less than 2000 characters, including spaces."
+            + "Please generate a job description that includes all the skills and expertise mentioned above, ensuring the total number of characters are strictly above 3500, including spaces, special characters also."
         )
 
         ai_response = aih.get_gemini_ai_response(input=full_input)
 
-        return {"job_description": ai_response}
+        return {
+            "job_description": ai_response,
+            "status": status.HTTP_200_OK,
+            "message": "Job description generated successfully"
+            }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -62,7 +67,6 @@ class TextToJsonRequest(BaseModel):
 
 
 from pathlib import Path
-
 
 @router.post("/text-to-json")
 async def text_to_json(
@@ -86,14 +90,41 @@ async def text_to_json(
             with open(request.source, "r") as reader:
                 text = reader.read()
             generated_json = await aih.extract_features_from_resume(text)
+            #print("this is beofre the 1st exception", generated_json)
             with open(destination, "w") as writer:
                 writer.write(generated_json)
             file_upload = str(destination)
             logger.info(f"========= successfully written to {destination}")
         except Exception as e:
-            raise HTTPException(
-                status_code=400, detail="the llm response is not generated"
-            )
+            if "429" in str(e) or "ResourceExhausted" in str(e):
+                print("Rate limit hit. Adjust API usage or increase quotas.")
+                #raise ValueError("Rate limit hit. Adjust API usage or increase quotas.")
+                time.sleep(60)
+                generated_json = await aih.extract_features_from_resume(text)
+                #10 retries
+                for retry_count in range(10):  # Retry up to 10 times
+                    generated_json = await aih.extract_features_from_resume(text)
+
+                    if "429" not in str(generated_json) and "ResourceExhausted" not in str(generated_json):
+                        print(f"Success after {retry_count + 1} attempt(s).")
+                        break  # Exit the retry loop on success
+
+                    print(f"Rate limit hit. Retrying... ({retry_count + 1}/10)")
+                    time.sleep(60)  # 1-minute delay before retrying
+
+                # Check if retries were exhausted without success
+                if generated_json is None or "429" in str(generated_json) or "ResourceExhausted" in str(generated_json):
+                    raise ValueError("Rate limit hit after maximum retries. Adjust API usage or increase quotas.")
+                with open(destination, "w") as writer:
+                    writer.write(generated_json)
+                print("the file upload will be happening to the destination ", destination)
+                file_upload = str(destination)
+              #1min delay 
+              #retry mechanism to work on that file .
+            else:
+                raise HTTPException(
+                    status_code=400, detail=f"the llm response is not generated"
+                )
 
         api_end_time = datetime.now(timezone.utc)
         if file_upload:
@@ -110,7 +141,7 @@ async def text_to_json(
             if not existing_applicant:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Applicant with id as {applicant_id} was not found",
+                    detail=f"Applicant was not found",
                 )
 
             existing_applicant.status["stages"].append(status)
@@ -138,7 +169,7 @@ async def text_to_json(
                 }
 
                 pubsub_response = await gcph.send_message_to_pubsub(
-                    pubsub_message, topic_name="invoke-api"
+                    pubsub_message, topic_name = os.getenv("TOPIC_NAME")
                 )
                 logger.info(f"Pub/Sub message sent: {pubsub_response}")
             except Exception as e:
@@ -156,7 +187,7 @@ async def text_to_json(
             return {
                 "status": "success",
                 "message": f"generated {str(destination)} from {str(source)}",
-                "generated_json": generated_json,
+                "generated_json": str(generated_json),
                 "destination": file_upload,
             }
         else:
@@ -189,7 +220,7 @@ async def text_to_json(
             logger.error(f"Failed to update applicant status: {str(ex)}")
 
         # Raise the original exception
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 
 
 @router.post("/legacy-extract-features-from-resumes-llm")
@@ -287,7 +318,7 @@ async def legacy_gemini_response(
             if not existing_applicant:
                 raise HTTPException(
                     status_code=404,
-                    detail=f"Applicant with id as {applicant_id} was not found",
+                    detail=f"Applicant with id as was not found",
                 )
 
             existing_applicant.details = details

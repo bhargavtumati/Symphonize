@@ -43,35 +43,31 @@ Here is the job description:
 """
 
 EXTRACT_FEATURES_FROM_JOBDESCRIPTION2 = """
-You are given a resume text copied by a user. 
-Your task is to extract specific details from the resume and structure them into a JSON file. 
+You are given a job description text copied by a user. 
+Your task is to extract specific details from the job description and structure them into a JSON file. 
 Respond only with valid JSON. Do not write an introduction or summary.
 Instead of null, Not provided, or None values, always provide plausible or imaginary values based on context or assumptions.
 Do not use backticks followed by json in your response.
 
 The required keys are: 
-    industry_type: The industry type of the Company that is given in job description for job applicants (Based on the company comeup with some values Ex: "IT Services and IT Consulting", "Banking", "Investment Management") . 
-    skills: The list of skills mentioned in the job description. 
-    responsibilities : List of responsibilities mentioned in the job description , try to come up with the short 2 to 3 word terms for responsibilities. 
-    overall_experience: Total number of years of experience a candidate has.
-    availability: The availability provided in job description, which should be an integer and can be one of the following: 0, 15, 30, 60, 90 and 99.
-    softskills: A list of Softskills mentioned in the job description.
-    transition_behaviour: The candidate's transition behaviour based of company switch, which should be an integer and can be categorized to one of the following : 0, 1, 2, 3, 4, 5. 
-    clarifying_questions: Identify all fields with placeholder values ("Not provided", "Any", `0`, etc.), default values, or empty lists or with missing information, and generate clarifying questions in more precise, contextual way and reduce ambiguity. For example:
+    skills: The list of **technical skills** (e.g., programming languages, tools, frameworks, methodologies) mentioned in the job description. These must be categorized separately from soft skills. 
+    responsibilities: A list of short terms (2-3 words) summarizing responsibilities mentioned in the job description. This must always be a **list of strings** (e.g., ["Designing solutions", "Leading projects"]). 
+    overall_experience: Total number of years of experience a candidate has. 
+    availability: The availability provided in the job description, which should be an integer and can be one of the following: 0, 15, 30, 60, 90, and 99.
+    softskills: A list of **soft skills** (e.g., communication, mentoring, collaboration) mentioned in the job description. Soft skills should not overlap with technical skills and must be categorized separately.
+    transition_behaviour: The candidate's transition behaviour based on company switch, which should be an integer and can be categorized into one of the following: 0, 1, 2, 3, 4, 5.
+    clarifying_questions: Identify all fields with placeholder values ("Not provided", "Any", `0`, etc.), default values, or empty lists or with missing information, and generate clarifying questions in a more precise, contextual way to reduce ambiguity. For example:
     - If "softskills" is an empty list, ask: "What soft skills are important for this role?"
     - If "availability" is `0`, ask: "What is the expected availability for this role (in days)?"
     - If no responsibilities are provided, ask: "Can you provide a list of key responsibilities for this job?"
 
-The required keys in industry type are:
-    name: Type of the industry given in description (if it is not there come up with something using job description)
-    preference : the preference that given in job description (if the thing is not given come up with some value amoung these 1. Good to have ,2. Prefer to have , 3.Must have)
-    min_experience: the minimum experience in working in that industry (give the scale in terms of 0-9)
-    max_experience: the maximum experience in working in that industry (give the scale in terms of 0-9) 
-
 The required keys in each skill are:
-    name: name of the skill
-    preference: the preference that given in job description (if the thing is not given come up with some value amoung these 1. Good to have ,2. Prefer to have , 3.Must have)
-    experience: number of years of experience
+    name: name of the technical skill
+    pref: the preference given in the job description, must be one of these exact values:
+        1. "Good to have"
+        2. "Preferred to have" 
+        3. "Must have"
+    value: number of years of experience [0-10]
     rating: a rating from 0-10 based on the following scale:
       - 0: Minimal to none
       - 1: Minimal
@@ -87,13 +83,21 @@ The required keys in each skill are:
 
 The required keys in each soft skill are:
     name: name of the soft skill
-    preference: the preference that given in job description (if the thing is not given come up with some value amoung these 1. Good to have ,2. Prefer to have , 3.Must have)
-    rating: a rating should be based on the following scale:
+    pref: the preference given in the job description, must be one of these exact values:
+        1. "Good to have"
+        2. "Preferred to have" 
+        3. "Must have"
+    rating: a rating based on the following scale:
       - 0: Basic
       - 1: Medium
       - 2: Advanced
 
-Here is the resume:
+**Additional instructions**: 
+- Ensure soft skills and technical skills are categorized properly. For example, "mentoring," "collaboration," and "communication" should always fall under "softskills," while skills like "Java," "testing," or "design patterns" should fall under "skills."
+- If a skill or term fits into both categories, use the context to decide the most appropriate category.
+- Avoid duplication of skills across the "skills" and "softskills" lists.
+
+Here is the job description:
 {job_description}
 """
 
@@ -105,7 +109,7 @@ def extract_features_from_jd(
     ai_clarifying_questions: Optional[List[QuestionAnswerDict]] = None,
     enable_parser: bool = False,
     output_format: str = "json",
-    max_retries: int = 2,
+    max_retries: int = 4,
     api_key: Optional[str] = None,  # Optional parameter for flexibility
 ) -> str:
 

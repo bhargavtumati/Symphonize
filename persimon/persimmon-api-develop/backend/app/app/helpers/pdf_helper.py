@@ -5,9 +5,9 @@ import os,io
 from tika import parser
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-import aiofiles
-import tempfile
-
+import aiofiles, tempfile, textwrap
+from docx import Document
+from io import BytesIO
 
 def get_text_from_stream(stream):
     text = ""
@@ -91,5 +91,57 @@ async def convert_docx_to_pdf(text:str, output_path: str):
         print(f"Failed to convert given in the pdf conversion function to PDF: {e}")
         return None
 
+def convert_docx_to_pdf_stream(docx_data: bytes) -> BytesIO:
+    """Converts DOCX file data to PDF and returns it as a BytesIO object."""
+    document = Document(BytesIO(docx_data))
 
+    pdf_output = BytesIO()
+    c = canvas.Canvas(pdf_output, pagesize=letter)
+    c.setFont("Helvetica", 12)
 
+    width, height = letter  # Page size width and height
+    y_position = height - 40  # Initial position to start drawing text on the PDF
+    line_height = 14  # Space between lines
+    margin = 30  # Left margin for text
+    page_width = width - 2 * margin
+
+    def draw_text(text, y_pos, font_name="Helvetica", font_size=12):
+        """Helper function to draw wrapped text with custom font and size."""
+        c.setFont(font_name, font_size)
+        c.drawString(margin, y_pos, text)
+
+    def wrap_text(text, max_width):
+        """Wrap text to fit the specified width."""
+        wrapped_lines = []
+        wrapper = textwrap.TextWrapper(width=int(max_width / 6)) 
+        lines = wrapper.wrap(text)
+        wrapped_lines.extend(lines)
+        return wrapped_lines
+
+    for para in document.paragraphs:
+        lines = wrap_text(para.text, page_width)
+
+        for line in lines:
+            if y_position <= line_height: 
+                c.showPage()  
+                c.setFont("Helvetica", 12)
+                y_position = height - 40  
+
+            is_bold = any(run.bold for run in para.runs if run.bold is not None)
+            is_italic = any(run.italic for run in para.runs if run.italic is not None)
+
+            if is_bold:
+                draw_text(line, y_position, font_name="Helvetica-Bold", font_size=12)
+            elif is_italic:
+                draw_text(line, y_position, font_name="Helvetica-Oblique", font_size=12)
+            else:
+                draw_text(line, y_position)
+
+            y_position -= line_height
+
+        if para.text:  
+            y_position -= 5 
+
+    c.save()
+    pdf_output.seek(0)  
+    return pdf_output

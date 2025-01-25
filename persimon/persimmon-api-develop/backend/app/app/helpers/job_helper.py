@@ -44,6 +44,7 @@ def enhance_jd(jd: str, job: Job):
     jd.setdefault("team_size", {})
     jd.setdefault("location", {})
     jd.setdefault("workmode", {})
+    jd.setdefault("industry_type", [])
     jd["salary"]["max_value"] = job.max_salary
     jd["salary"]["min_value"] = job.min_salary
     jd["company_size"]["value"] =  job.company.number_of_employees
@@ -53,4 +54,10 @@ def enhance_jd(jd: str, job: Job):
     jd["location"]["first_priority"] = job.location
     jd["location"]["second_priority"] = "Any"
     jd["workmode"]["value"] = "Any"
+    jd["industry_type"] = [{
+        "name": job.company.industry_type,
+        "pref": "Must have",
+        "min": job.min_experience,
+        "max": job.max_experience
+    }]
     return jd

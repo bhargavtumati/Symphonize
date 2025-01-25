@@ -36,7 +36,7 @@ def upgrade() -> None:
         sa.Column('target_date', sa.DateTime, nullable=False),
         sa.Column('description', sa.String, nullable=False),
         sa.Column('is_posted_for_client', sa.Boolean, default=False),
-        sa.Column('company_id', sa.Integer, sa.ForeignKey('company.id')),
+        sa.Column('company_id', sa.Integer, sa.ForeignKey('public.company.id')),
         sa.Column('ai_clarifying_questions', JSONB, default=[]),
         sa.Column('publish_on_career_page', sa.Boolean, default=True),
         sa.Column('publish_on_job_boards', JSONB, default=[]),

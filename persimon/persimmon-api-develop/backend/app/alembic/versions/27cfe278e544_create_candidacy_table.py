@@ -22,8 +22,8 @@ def upgrade() -> None:
     op.create_table(
         'candidacy',
         sa.Column('id', sa.Integer, primary_key=True),
-        sa.Column('job_id', sa.Integer, sa.ForeignKey('zrjob.id')),
-        sa.Column('resume_id', sa.Integer, sa.ForeignKey('resume.id')),
+        sa.Column('job_id', sa.Integer, sa.ForeignKey('public.zrjob.id')),
+        sa.Column('resume_id', sa.Integer, sa.ForeignKey('public.resume.id')),
         sa.Column('match', JSONB),
         sa.Column('meta', JSONB),
     )

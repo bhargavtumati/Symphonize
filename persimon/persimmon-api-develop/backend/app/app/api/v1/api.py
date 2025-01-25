@@ -3,6 +3,7 @@ from app.api.v1.endpoints import (
     ai,
     applicants,
     candidates,
+    careerpage,
     company,
     jobs,
     resumes,
@@ -15,6 +16,7 @@ api_router = APIRouter()
 api_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 api_router.include_router(applicants.router, prefix="/applicants", tags=["applicants"])
 api_router.include_router(candidates.router, prefix="/candidates", tags=["candidates"])
+api_router.include_router(careerpage.router, prefix="/careerpage", tags=["careerpage"])
 api_router.include_router(company.router, prefix="/company", tags=["company"])
 api_router.include_router(jobs.router, prefix="/jobs", tags=["jobs"])
 api_router.include_router(resumes.router, prefix="/resumes", tags=["resumes"])

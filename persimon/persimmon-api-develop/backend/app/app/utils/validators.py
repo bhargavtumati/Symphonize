@@ -1,4 +1,7 @@
+import json
+import os
 import re
+from typing import List
 import validators
 import tldextract
 from app.models.master_data import MasterData
@@ -136,3 +139,17 @@ def validate_email_address(email_id:str, allowed_domains: list[str], field_name)
         return email_id
     else:
         raise ValueError(f"Please enter a valid {field_name}")
+
+
+#filter applicants
+def validate_Preference(value: str):
+    if value.lower() in {"good to have", "must have", "preferred to have"}:
+        return value
+    raise ValueError("The value for 'pref' must be one of the following: 'Good to have', 'Must have', or 'Preferred to have'.")
+
+def get_education_institutions_list() ->list[str]:
+    current_dir = os.path.dirname(__file__)
+    college_names_list_json_file = os.path.join(current_dir, '..', 'datasets', 'college_names.json')
+    with open(college_names_list_json_file, 'r') as file:
+        data: List[str] = json.load(file)  
+    return data

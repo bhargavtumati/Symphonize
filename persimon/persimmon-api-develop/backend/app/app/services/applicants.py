@@ -3,16 +3,13 @@ import asyncio
 import json
 import os
 import uuid
-import nltk
-nltk.download('stopwords')
-
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from app.api.v1.endpoints.models.applicant_model import FilterRequest
+from app.api.v1.endpoints.models.applicant_model import FilterRequest, Filters
 from app.helpers import ai_helper as aih
 from app.helpers import gcp_helper as gcph
 from app.helpers import json_helper as jsonh
@@ -25,8 +22,8 @@ from app.helpers.match_score_helper import get_match_score
 import traceback
 import logging
 
-PDF_OUTPUT_PATH = os.getenv('TEMP', '/tmp')  # Temporary directory for storing converted PDF files
-BUCKET_NAME = 'persimmon-ai'
+PDF_OUTPUT_PATH = "/tmp"  # Temporary directory for storing converted PDF files
+BUCKET_NAME = 'persimmon-data'
 
 logger = logging.getLogger(__name__)
 
@@ -68,35 +65,37 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
         generated_json = None      
 
         # Step 2: Convert DOCX to PDF if needed
-        if file.filename.endswith('.docx'):
-            output_pdf_name = f"{Path(original_file_name).stem}.pdf"
-            output_pdf_path = os.path.join(PDF_OUTPUT_PATH, output_pdf_name)
-            try:
-                processed_file_path = await pdfh.convert_docx_to_pdf(extracted_text, output_pdf_path)
+        # if file.filename.endswith('.docx'):
+        #     output_pdf_name = f"{Path(original_file_name).stem}.pdf"
+        #     output_pdf_path = os.path.join(PDF_OUTPUT_PATH, output_pdf_name)
+        #     try:
+        #         processed_file_path = await pdfh.convert_docx_to_pdf(extracted_text, output_pdf_path)
 
-                if not processed_file_path:
-                    raise ValueError(f"Failed to convert {original_file_name} to PDF")
-                temp_files_to_clean.append(processed_file_path)
-            except Exception as e:
-                file_success = False
-                error_message = f"Error converting {original_file_name} to PDF: {str(e)}"
-                error_list.append(error_message)
-                return file_success, error_list, flatten_resume
+        #         if not processed_file_path:
+        #             raise ValueError(f"Failed to convert {original_file_name} to PDF")
+        #         temp_files_to_clean.append(processed_file_path)
+        #     except Exception as e:
+        #         file_success = False
+        #         error_message = f"Error converting {original_file_name} to PDF: {str(e)}"
+        #         error_list.append(error_message)
+        #         return file_success, error_list, flatten_resume
 
         # Step 3: Prepare upload paths and async upload tasks
-        gcs_original_path = f"data/archive/resumes/pdf/{original_file_name}"
-        gcs_processed_path = f"data/processed/{output_pdf_name if processed_file_path else original_file_name}"
+        PERSIMMON_DATA=os.getenv("PERSIMMON_DATA", "/persimmon-data")
+        ENVIRONMENT = os.getenv("ENVIRONMENT","development")
+        gcs_original_path = f"{PERSIMMON_DATA}/{ENVIRONMENT}/resumes/raw/{original_file_name}"
+        # gcs_processed_path = f"data/processed/{output_pdf_name if processed_file_path else original_file_name}"
 
         tasks=[]
         # Define tasks for uploading
         tasks.append(gcph.upload_to_gcp(BUCKET_NAME, file.file, gcs_original_path)) 
 
-        if processed_file_path:
-            processed_file = open(processed_file_path, 'rb')
-            try:
-                tasks.append(gcph.upload_to_gcp(BUCKET_NAME, processed_file, gcs_processed_path))
-            except Exception as e :
-                print(f"Error preparing processed file upload: {str(e)}")
+        # if processed_file_path:
+        #     processed_file = open(processed_file_path, 'rb')
+        #     try:
+        #         tasks.append(gcph.upload_to_gcp(BUCKET_NAME, processed_file, gcs_processed_path))
+        #     except Exception as e :
+        #         print(f"Error preparing processed file upload: {str(e)}")
 
         # Upload files concurrently
         gcp_paths = {
@@ -145,7 +144,7 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                 flatten_resume = await jsonh.flatten_resume_data(generated_json)
                 flatten_resume['original_resume'] = gcp_paths["original_resume"]
                 flatten_resume['processed_resume'] = gcp_paths["processed_resume"]
-                
+
                 if flatten_resume:
                     try:
                         try:
@@ -154,7 +153,7 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                                 stage_uuid = stages_existing.stages[0]['uuid']
                         except: 
                             raise HTTPException(status_code=404, detail="Stages not found")
-                        
+
                         if full_name and len(flatten_resume['personal_information']['full_name']) == 0:
                             flatten_resume['personal_information']['full_name'] = full_name
                         if phone_number and len(flatten_resume['personal_information']['phone']) == 0:
@@ -163,15 +162,15 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                             flatten_resume['personal_information']['email'] = email_id
                         if linkedin_url and len(flatten_resume['social_media']['linkedin']) == 0:
                             flatten_resume['social_media']['linkedin'] = linkedin_url
-                        print(job_code)
+
                         db_job = Job.get_by_code(session=session, code=job_code)
                         match = get_match_score(db_job.description, extracted_text)
                         flatten_resume['match'] = match
-                        
+
                         applicant_uuid = str(uuid.uuid4())
                         applicant_data: Applicant = Applicant(details=flatten_resume, stage_uuid=stage_uuid, job_id=job_id, uuid=applicant_uuid)
                         solr_flag = False
-                        
+
                         try:
                             flatten_resume_solr = await jsonh.flatten_resume_data_solr(generated_json)
                             flatten_resume_solr['applicant_uuid'] = applicant_uuid
@@ -198,7 +197,7 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                         except Exception as e:
                             traceback.print_exc()
                             print('error',str(e))
-                        
+
                     except Exception as e:
                         if "Stages not found" in str(e):
                             raise HTTPException(status_code=404, detail="Stages not found")
@@ -242,7 +241,7 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
 
 
 def construct_query(filters: FilterRequest) -> str:
-    filters = filters.filters
+    filters: Filters = filters.filters
 
     # Compute industry type weights
     individual_industry_weights = []
@@ -257,7 +256,7 @@ def construct_query(filters: FilterRequest) -> str:
             if industry.name and industry.pref and industry.min and industry.max is not None:
                 print("this is if block ")
                 weight = PREFERENCE_WEIGHTS.get(industry.pref.lower(), 0) * (industry.max + industry.min)
-                individual_industry_weights.append(f"industry_type : {industry.name}^{weight}")
+                individual_industry_weights.append(f'industry_type : "{industry.name}"^{weight}')
                 overall_industry_weight += weight
             else:
                 print("this is else block ")
@@ -288,7 +287,7 @@ def construct_query(filters: FilterRequest) -> str:
             if skill.name and skill.pref and skill.value is not None:
                 weight = PREFERENCE_WEIGHTS.get(skill.pref.lower(), 0) * skill.value
                 print("the skill weight is ", weight)
-                individual_skills_weights.append(f"skills : {skill.name}^{weight}")
+                individual_skills_weights.append(f'skills : "{skill.name}"^{weight}')
                 overall_skills_weight += weight
 
     skills_query = " OR ".join(individual_skills_weights)
@@ -313,15 +312,15 @@ def construct_query(filters: FilterRequest) -> str:
             if pedigree.specifications:
                 if pedigree.specifications and pedigree.name.strip().lower() == 'education':
                     for spec in pedigree.specifications:
-                        if spec.spec == "include" and spec.qualification and spec.institution_name:
+                        if spec.spec.lower() == "include" and spec.qualification and spec.institution_name:
                             inclusion_parts.append(f"(education:\"{spec.institution_name}\")")
-                        elif spec.spec == "exclude" and spec.qualification and spec.institution_name:
+                        elif spec.spec.lower() == "exclude" and spec.qualification and spec.institution_name:
                             exclusion_parts.append(f"-education:\"{spec.institution_name}\"")
                 elif pedigree.specifications and pedigree.name.strip().lower() == 'company':
                     for spec in pedigree.specifications:
-                        if spec.spec == "include" and spec.qualification and spec.institution_name:
+                        if spec.spec.lower() == "include" and spec.qualification and spec.institution_name:
                             inclusion_parts.append(f"(company:\"{spec.institution_name}\")")
-                        elif spec.spec == "exclude" and spec.qualification and spec.institution_name:
+                        elif spec.spec.lower() == "exclude" and spec.qualification and spec.institution_name:
                             exclusion_parts.append(f"-company:\"{spec.institution_name}\"")
 
 
@@ -333,10 +332,11 @@ def construct_query(filters: FilterRequest) -> str:
     if filters.availability and filters.availability.name and filters.availability.value:
         availability_query = f"availability:[0 TO {filters.availability.value}]"
 
+
     # Workmode
     workmode_query = ""
     if filters.workmode and filters.workmode.value:
-        workmode_query = f"workmode:{filters.workmode.value}"
+        workmode_query = f'workmode:"{filters.workmode.value}"'
 
     print("the workmode query is ", workmode_query)
 
@@ -351,7 +351,7 @@ def construct_query(filters: FilterRequest) -> str:
                 print("the max value is ",soft_skill.max_value)
                 weight = PREFERENCE_WEIGHTS.get(soft_skill.pref.lower(), 0) * SOFTSKILL_WEIGHTS.get(soft_skill.max_value, 0)
                 print("the the weight is ", type(weight),weight)
-                individual_soft_skills_weights.append(f"soft_skills : {soft_skill.name}^{weight}")
+                individual_soft_skills_weights.append(f'soft_skills : "{soft_skill.name}"^{weight}')
                 overall_soft_skills_weight += weight
 
     soft_skills_query = " OR ".join(individual_soft_skills_weights)
@@ -363,17 +363,17 @@ def construct_query(filters: FilterRequest) -> str:
     if filters.location:
         location_parts = []
         if filters.location.first_priority:
-            location_parts.append(f"locations_list:{filters.location.first_priority}^2")
+            location_parts.append(f'locations_list:"{filters.location.first_priority}"^2')
             # Second priority location
         if filters.location.second_priority:
-            location_parts.append(f"locations_list:{filters.location.second_priority}^1") 
+            location_parts.append(f'locations_list:"{filters.location.second_priority}"^1') 
         
         location_query = " OR ".join(location_parts)
 
     # Transition Behaviour
     transition_behaviour_query_parts = []
     overall_transition_behaviour_weight = 0
-    if filters.transition_behaviour:
+    if filters.transition_behaviour and filters.transition_behaviour[0].name:
         for behaviour in filters.transition_behaviour:
             weight = PREFERENCE_WEIGHTS.get(behaviour.preference.lower(), 0) * behaviour.value
             range_query = f"transition_behaviour:[0 TO {behaviour.value}]^{weight}"
@@ -389,10 +389,10 @@ def construct_query(filters: FilterRequest) -> str:
         for advanced_filter in filters.advanced_filters:
             field_name = advanced_filter.name
             weight = PREFERENCE_WEIGHTS.get(advanced_filter.preference.lower(), 0) * 10
-            if field_name == "company_size":
-                advanced_filter_queries.append(f"company_size:{advanced_filter.value}^{weight}")
-            elif field_name == "team_size":
-                advanced_filter_queries.append(f"team_size:{advanced_filter.value}^{weight}")
+            if field_name.lower() == "company size":
+                advanced_filter_queries.append(f'company_size:"{advanced_filter.value}"^{weight}')
+            elif field_name.lower() == "team size":
+                advanced_filter_queries.append(f'team_size:"{advanced_filter.value}"^{weight}')
 
     advanced_filter_query = " OR ".join(advanced_filter_queries)
 

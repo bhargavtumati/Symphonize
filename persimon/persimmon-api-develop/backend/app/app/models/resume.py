@@ -8,6 +8,7 @@ from app.models.base import Base
 
 class Resume(Base):
     __tablename__ = "resume"
+    __table_args__ = {'schema': 'public'}
     id: Mapped[int] = mapped_column(primary_key=True)
     detail: Mapped[list[dict]] = mapped_column(JSONB)
     features: Mapped[list[dict]] = mapped_column(JSONB)

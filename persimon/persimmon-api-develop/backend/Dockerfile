@@ -24,7 +24,7 @@ COPY .env /
 
 # Copy poetry.lock* in case it doesn't exist in the repo
 COPY app/pyproject.toml app/poetry.lock* /code/
-RUN poetry lock --no-update
+RUN poetry lock
 
 # Allow installing dev dependencies to run tests
 ARG INSTALL_DEV=false
