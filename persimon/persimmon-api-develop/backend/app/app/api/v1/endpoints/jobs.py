@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from app.schemas.response_schema import create_response
 from app.api.v1.endpoints.models.job_model import JobModel, JobPartialUpdate, JobDescription, JobResponse
 from app.helpers.firebase_helper import verify_firebase_token
@@ -10,7 +10,7 @@ from app.db.session import get_db
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.helpers.regex_helper import get_domain_from_email
-import tldextract,json
+import tldextract,json, httpx
 from app.models.recruiter import Recruiter
 from app.models.stages import Stages
 from app.helpers.company_helper import get_or_create_company, handle_company_association
@@ -24,31 +24,41 @@ router = APIRouter()
 meta: dict[str, str] = {"api_reference": "https://github.com/symphonize/persimmon-api"}
 
 
-def xml_to_dict(element):
-    def _element_to_dict(element):
-        if not len(element):  # Check if element has no children
-            return element.text
-        return {child.tag: _element_to_dict(child) for child in element}
-    
-    # Handle the case for multiple "job" elements
-    if element.tag == "jobs":
-        return [xml_to_dict(child) for child in element]
-    return {element.tag: _element_to_dict(element)}
+@router.post("/post-job")
+async def post_job(job: dict):
+    target_websites = [
+        "https://api.jobsite1.com/post-job",
+        "https://api.jobsite2.com/post-job",
+        "https://api.jobsite3.com/post-job"
+    ]
 
-@router.get('/{domain}')
+    results = []
+    for url in target_websites:
+        try:
+            response = await httpx.post(url, json=job)
+            response.raise_for_status()
+            results.append({"site": url, "status": "success", "data": response.json()})
+        except httpx.HTTPStatusError as e:
+            results.append({"site": url, "status": "failure", "error": str(e)})
+
+    failed_posts = [result for result in results if result["status"] == "failure"]
+    if failed_posts:
+        raise HTTPException(status_code=500, detail={"message": "Failed to post job on some websites.", "results": results})
+
+    return {"message": "Job posted successfully on all target websites.", "results": results}
+
+
+@router.get('/{jobboard}/xml', summary="Get all jobs as XML feed", response_class=Response)
 def get_all_jobs_as_xml(
-    domain: str, 
-    search_term: Optional[str] = None,
+    jobboard: str,
     session: Session = Depends(get_db)
 ):
     try:
-        jobs = Job.search_jobs_by_domain(session=session, domain=domain, search_term=search_term)
-        
+        jobs = session.query(Job).filter(Job.publish_on_job_boards.contains([jobboard]))
         # Create the XML root element
         root = ET.Element("jobs")
         
         # Generate XML from the job data
-
         for job in jobs:
             job_element = ET.SubElement(root, "job")
             ET.SubElement(job_element, "id").text = str(job.id)
@@ -58,12 +68,12 @@ def get_all_jobs_as_xml(
             ET.SubElement(job_element, "status").text = job.status.name
             ET.SubElement(job_element, "workplace_type").text = job.workplace_type.name
             ET.SubElement(job_element, "location").text = job.location
-            ET.SubElement(job_element, "team_size").text = job.team_size
+            ET.SubElement(job_element, "team_size").text = str(job.team_size)
             ET.SubElement(job_element, "min_salary").text = str(job.min_salary)
             ET.SubElement(job_element, "max_salary").text = str(job.max_salary)
             ET.SubElement(job_element, "min_experience").text = str(job.min_experience)
             ET.SubElement(job_element, "max_experience").text = str(job.max_experience)
-            ET.SubElement(job_element, "target_date").text = job.target_date.isoformat()
+            ET.SubElement(job_element, "target_date").text = str(job.target_date.isoformat())
             ET.SubElement(job_element, "description").text = job.description
             ET.SubElement(job_element, "enhanced_description").text = json.dumps(job.enhanced_description)
             ET.SubElement(job_element, "is_posted_for_client").text = str(job.is_posted_for_client)
@@ -73,21 +83,16 @@ def get_all_jobs_as_xml(
             ET.SubElement(job_element, "publish_on_job_boards").text = json.dumps(job.publish_on_job_boards)
 
             posted_on = job.meta.get('audit', {}).get('created_at', 'N/A')
-            ET.SubElement(job_element, "posted_on").text = posted_on
+            ET.SubElement(job_element, "posted_on").text = str(posted_on)
 
-        # Convert XML root element to dict
+        # Convert XML to string
+        xml_str = ET.tostring(root, encoding='unicode', method='xml')
         
-                
-        xml_dict = xml_to_dict(root)
-        
-        return {
-            "jobs": xml_dict,
-            "message": "Jobs retrieved successfully",
-            "status": 200
-        }
+        return Response(content=xml_str, media_type="application/xml")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get('/domain/{name}')
 def get_all_jobs_for_given_domain(

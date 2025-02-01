@@ -10,6 +10,7 @@ from app.api.v1.endpoints import (
     recruiter,
     stages,
     zrapplicants,
+    interview
 )
 
 api_router = APIRouter()
@@ -23,3 +24,4 @@ api_router.include_router(resumes.router, prefix="/resumes", tags=["resumes"])
 api_router.include_router(recruiter.router, prefix="/recruiter", tags=["recruiter"])
 api_router.include_router(stages.router, prefix="/stages", tags=["stages"])
 api_router.include_router(zrapplicants.router, prefix="/zrapplicants", tags=["zrapplicants"])
+api_router.include_router(interview.router, prefix="/interview", tags=["interview"])
