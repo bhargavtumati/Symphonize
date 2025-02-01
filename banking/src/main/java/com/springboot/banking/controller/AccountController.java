@@ -32,7 +32,7 @@ public class AccountController {
 	}
 	
 	// Add Account REST API
-	@PostMapping("/addAccount")
+	@PostMapping("/createAccount")
 	public ResponseEntity<AccountDto> addAccount(@RequestBody AccountDto accountDto){
 		
 		return new ResponseEntity<>(accountservice.createAccount(accountDto), HttpStatus.CREATED);

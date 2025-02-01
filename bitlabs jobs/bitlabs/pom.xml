@@ -63,7 +63,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- MySQL Dependency -->
+		<!-- Postgres Dependency -->
 		<dependency>
               <groupId>org.postgresql</groupId>
               <artifactId>postgresql</artifactId>

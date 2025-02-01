@@ -24,7 +24,7 @@ public class patientservice {
 		
 	}
 	
-	public boolean updatePatient(com.example.Patient.entity.patient patient) {
+	public boolean updatePatient(patient patient) {
 		patient p=patientrepo.findById(patient.getPatientid()).get();
 		p=patient;
 		patientrepo.save(p);
