@@ -38,13 +38,16 @@ from pydantic import BaseModel
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy import func
 from sqlalchemy import cast, String
+from pdf2image import convert_from_path
+from docx import Document
+from fastapi.responses import FileResponse
+
+
 
 security = HTTPBearer()
 
 router = APIRouter()
 load_dotenv()
-
-
 
 api_reference: dict[str, str] = {
     "api_reference": "https://github.com/symphonize/persimmon-api"
@@ -218,6 +221,8 @@ async def extract_text(
     token: dict = Depends(verify_firebase_token)
 ):
     try:
+
+        logger.info("Received extract_text request")
         api_start_time = datetime.now(timezone.utc)
 
         source = Path(request.source)
@@ -443,10 +448,11 @@ async def legacy_upload_resumes(
             }
             pubsub_response = await gcph.send_message_to_pubsub(pubsub_message,topic_name="document-to-text")  # Call the service function
             logger.info(f"Pub/Sub message sent: {pubsub_response}")
+
         except Exception as e:
             logger.error(f"Failed to send Pub/Sub message: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to send Pub/Sub message: {str(e)}")
-
+    
     # Return the response
     return JSONResponse({
         "uploaded_files": uploaded_files,
@@ -458,6 +464,7 @@ async def legacy_upload_resumes(
         "job_code": job_code,
         "pubsub_status": "Message sent successfully"
     })
+    
 
 @router.post("/upload")
 async def upload_resumes(
@@ -501,6 +508,9 @@ async def upload_resumes(
     tasks = []
     errors = []
     uploaded_files = []
+    extracted_images = []
+    image_urls = []
+
     for file in files:
         try:
             unique_id = uuid.uuid4()
@@ -508,6 +518,8 @@ async def upload_resumes(
             #gcs_path = f"s1/{original_file_name}"
             # gcs_path = f"{FOLDER}/{original_file_name}"
             destination = f"{PERSIMMON_DATA}/{ENVIRONMENT}/resumes/raw/{original_file_name}"
+            
+            os.makedirs(os.path.dirname(destination), exist_ok=True)
 
             # Convert UploadFile to SpooledTemporaryFile
             # temp_file = tempfile.SpooledTemporaryFile()
@@ -517,10 +529,20 @@ async def upload_resumes(
                 writer.write(content)
             print(f"successfully written to destination")
             uploaded_files.append(destination)
+
+            if file_extension == "pdf":
+                images = extract_images_from_pdf(destination)
+            elif file_extension == "docx":
+                images = extract_images_from_docx(destination)
+            
+            extracted_images.extend(images)
+            image_urls.extend([f"{base_url}/download-image/{os.path.basename(image)}" for image in images])
+            
+
         except Exception as e:
             print(f"exception while converting document to text: {str(e)}")
             errors.append(str(e))
-
+    
     end_time = time.time()
     duration = round(end_time - start_time, 2)
     logger.info(f"Upload completed in {duration} seconds.")
@@ -541,7 +563,8 @@ async def upload_resumes(
         details = {
             "original_resume":uploaded_file,
             "context":"document-added",
-            "file_upload":uploaded_file
+            "file_upload":uploaded_file,
+            "image_urls": image_urls,
             }
         api_end_time = datetime.now(timezone.utc)
         status = {
@@ -570,6 +593,7 @@ async def upload_resumes(
 
         #Send a message to Pub/Sub after successful uploads
         try:
+
             pubsub_message = {
                 "endpoint": f"{base_url}/api/v1/resumes/extract-text",
                 "token": original_token,
@@ -578,13 +602,18 @@ async def upload_resumes(
                     "uuid": applicant_uuid
                 }
             }
+
             # pubsub_response = await gcph.send_message_to_pubsub(pubsub_message,topic_name="document-to-text")  # Call the service function
+            if not os.getenv("TOPIC_NAME"):
+                        raise ValueError("TOPIC_NAME environment variable is not set.")
             pubsub_response = await gcph.send_message_to_pubsub(pubsub_message,topic_name=os.getenv("TOPIC_NAME")) # Call the service function
             logger.info(f"Pub/Sub message sent: {pubsub_response}")
+        
+           
         except Exception as e:
-            logger.error(f"Failed to send Pub/Sub message: {str(e)}")
+            logger.error(f"Failed to send Pub/Sub message : {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to send Pub/Sub message: {str(e)}")
-
+        
     # Return the response
     return {
         "uploaded_files": uploaded_files,
@@ -594,9 +623,38 @@ async def upload_resumes(
         "failed_uploads": len(errors),
         "upload_duration_seconds": duration,
         "job_code": job_code,
+        "extracted_images": extracted_images,
         "pubsub_status": "Message sent successfully"
     }
 
+def extract_images_from_pdf(pdf_path: str):
+    images = []
+    pages = convert_from_path(pdf_path)
+    for page_number, page in enumerate(pages):
+        image_path = f"{pdf_path}_page_{page_number + 1}.png"
+        page.save(image_path, 'PNG')
+        images.append(image_path)
+    return images
+
+def extract_images_from_docx(docx_path: str):
+    images = []
+    doc = Document(docx_path)
+    for rel in doc.part.rels.values():
+        if "image" in rel.target_ref:
+            image = rel.target_part.blob
+            image_path = f"{docx_path}_{uuid.uuid4()}.png"
+            with open(image_path, "wb") as img_file:
+                img_file.write(image)
+            images.append(image_path)
+    return images
+
+@router.get("/download-image/{image_name}")
+async def download_image(image_name: str):
+    image_path = f"/persimmon-data/development/resumes/raw/{image_name}"
+    if os.path.exists(image_path):
+        return FileResponse(image_path, media_type='application/octet-stream', filename=image_name)
+    else:
+        raise HTTPException(status_code=404, detail="Image not found")
 
 class FlattenForDatabase(BaseModel):
     source: str

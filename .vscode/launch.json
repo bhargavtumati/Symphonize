@@ -29,7 +29,50 @@
             "mainClass": "com.springboot.banking.BankingApplication",
             "projectName": "banking",
             "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=63147 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=banking"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-BitlabsApplication<bitlabs>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.jobs.bitlabs.BitlabsApplication",
+            "projectName": "bitlabs",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-LoginpageApplication<loginpage>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.springboot.loginpage.LoginpageApplication",
+            "projectName": "loginpage",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=64023 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dspring.jmx.enabled=true -Djava.rmi.server.hostname=localhost -Dspring.application.admin.enabled=true -Dspring.boot.project.name=loginpage"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-SimplewebappApplication<Simplewebapp>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.symphonize.Simplewebapp.SimplewebappApplication",
+            "projectName": "Simplewebapp",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-SpringbootfirstappApplication<springbootfirstapp>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.springboot.app.SpringbootfirstappApplication",
+            "projectName": "springbootfirstapp",
+            "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
+    
     ]
 }

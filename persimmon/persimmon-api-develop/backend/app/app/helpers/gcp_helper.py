@@ -118,6 +118,7 @@ async def send_message_to_pubsub(message_data: dict,topic_name:str) -> dict:
         Exception: If any error occurs during publishing.
     """
     # Initialize the Pub/Sub Publisher Client
+
     credentials = service_account.Credentials.from_service_account_info(SA_KEY)
     publisher = pubsub_v1.PublisherClient(credentials=credentials)
 
@@ -139,6 +140,7 @@ async def send_message_to_pubsub(message_data: dict,topic_name:str) -> dict:
 
         # Wait for the publish to complete and return the response
         message_id = future.result()
+
         return {"topic": topic_path, "message_id": message_id, "data": data, "status": "Message sent successfully"}
     except Exception as e:
         raise Exception(f"Failed to send message: {e}")

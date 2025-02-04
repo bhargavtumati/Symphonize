@@ -72,6 +72,8 @@ google-cloud-pubsub = "^2.27.1"
 scikit-learn = "1.5.1"
 tensorflow-intel = "2.18.0"
 pytz = "^2025.1"
+pdf2image = "^1.17.0"
+docx = "^0.2.4"
 
 
 [tool.ruff.per-file-ignores]
