@@ -1,10 +1,9 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import Optional, Dict
 from datetime import datetime
-import pytz
+import pytz 
 import re
-from app.utils.validators import is_non_empty, has_proper_characters, validate_length, validate_linkedin_company_url, validate_url, validate_industry_type
-
+from app.utils.validators import has_proper_characters, is_non_empty, validate_length
 
 class InterviewDetails(BaseModel):
     recruiter_id: str = Field(..., title="Recruiter ID")
@@ -47,10 +46,26 @@ class InterviewDetails(BaseModel):
             raise ValueError("Invalid email address")
         return email
 
+
     @field_validator("description")
     def validate_description(cls, description):
         is_non_empty(value=description, field_name="Description")
         has_proper_characters(value=description, field_name="Description")
         return validate_length(value=description, min_len=0, max_len=250, field_name="Description")
 
-
+# Example usage:
+interview = InterviewDetails(
+    recruiter_id="12345",
+    applicant_id="67890",
+    interview_type="Technical",
+    platform="Microsoft Teams",
+    date="2025-03-10",
+    start_time="14:00",
+    end_time="15:00",
+    timezone="Asia/Kolkata",
+    interview_title="Software Engineer Interview",
+    interviewer_email="interviewer@example.com",
+    applicant_email="applicant@example.com",
+    description="Technical interview focusing on software engineering skills.",
+    additional_details={"note": "Please be prepared with your portfolio."}
+)

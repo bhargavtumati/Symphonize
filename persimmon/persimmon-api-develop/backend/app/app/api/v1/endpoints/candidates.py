@@ -11,6 +11,7 @@ api_reference: dict[str, str] = {
     "api_reference": "https://github.com/symphonize/persimmon-api"
 }
 
+
 @router.get("/")
 def get_candidates() -> GetResponseBase:
     return create_response(message=f"Get all candidates", data={}, meta=api_reference)

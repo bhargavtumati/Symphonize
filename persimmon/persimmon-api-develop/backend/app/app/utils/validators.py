@@ -2,6 +2,8 @@ import json
 import os
 import re
 from typing import List
+from fastapi import HTTPException
+from pytz import all_timezones
 import validators
 import tldextract
 from app.models.master_data import MasterData
@@ -115,8 +117,15 @@ def validate_decimal_point(value: float) -> float:
     return value
 
 def validate_name_with_fullstop(value: str, field_name: str) -> str:
-    if not re.match(r'^(?!.*\s{2})[a-zA-Z\s.]+$', value):
-        raise ValueError(f"{field_name} should only contain alphabets, single space and fullstop(.)")
+    if len(value) > 20:
+        raise ValueError(f"{field_name} cannot be more than 20 characters")
+    if value.startswith(" ") or value.endswith(" ") or "  " in value:
+        raise ValueError(f"Please check for improper spaces")
+    if not value.replace(" ", "").isalpha():
+        raise ValueError(f"{field_name} should only contain alphabets")
+    pattern = r"^[A-Za-z]+ [A-Za-z]+$"
+    if not bool(re.match(pattern, value)):
+        raise ValueError(f"Please enter your {field_name}, in 'First name Last name' format.")
     return value
 
 def validate_mobile_number(number: int, field_name: str):
@@ -153,3 +162,14 @@ def get_education_institutions_list() ->list[str]:
     with open(college_names_list_json_file, 'r') as file:
         data: List[str] = json.load(file)  
     return data
+
+def validate_list_len(colors,length,field_name):
+    if len(colors) > length:
+        raise ValueError(f'Maximum {length} {field_name} are allowed in this list')
+    return colors
+
+def validate_timezone(tz: str) -> str:
+    """Checks if the given timezone is valid."""
+    if tz.title() not in all_timezones:
+        raise HTTPException(status_code=400, detail=f"Invalid timezone: {tz}")
+    return tz 

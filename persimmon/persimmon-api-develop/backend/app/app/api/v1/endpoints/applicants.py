@@ -5,26 +5,29 @@ import traceback
 import uuid
 from typing import Dict, List, Optional
 from uuid import UUID
+from app.models.company import Company
 from fastapi.responses import JSONResponse
-import httpx
+import httpx,traceback
 import requests
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 from app.api.v1.endpoints.models.applicant_model import (
-    ApplicantPartialUpdate, ApplicantRequest, FilterRequest, PayloadModel,Message, ApplicantModel)
+    ApplicantPartialUpdate, ApplicantRequest, FilterRequest, PayloadModel,Message, ApplicantModel, MeetingModel)
 from app.db.session import get_db
-from app.helpers import db_helper as dbh, gcp_helper as gcph, solr_helper as solrh, date_helper as dateh
+from app.helpers import db_helper as dbh, gcp_helper as gcph, solr_helper as solrh, date_helper as dateh, zoom_helper as zoomh, regex_helper as regexh, email_helper as emailh
 from app.helpers.firebase_helper import verify_firebase_token
 from app.helpers.otlpless_helper import verify_otpless_token
 from app.helpers.math_helper import get_pagination
-from app.models.applicant import Applicant
+from app.models.applicant import Applicant, InterviewType
 from app.models.job import Job
 from app.models.stages import Stages
-import math
+from app.models.integration import Integration
+import math,traceback
 from app.services import applicants as ap
 from urllib.parse import quote
+from datetime import datetime, timezone, timedelta
 
 load_dotenv()
 
@@ -36,12 +39,9 @@ router = APIRouter()
 
 meta: dict[str, str] = {"api_reference": "https://github.com/symphonize/persimmon-api"}
 
-
-
 router = APIRouter()
 SOLR_BASE_URL=os.getenv("SOLR_BASE_URL")
 PERSIMMON_DATA_BUCKET=os.getenv("PERSIMMON_DATA_BUCKET")
-
 
 @router.post("/upload-resume")
 async def upload_resumes(
@@ -115,37 +115,12 @@ async def partial_update(
             if stage_uuid not in stage_uuids:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid stage uuid")
 
-            params = {
-                "q": f"applicant_uuid:({' OR '.join(applicant_uuids)})", 
-                "rows": len(applicant_uuids),
-                "wt": "json"
-            }
-
-            async with httpx.AsyncClient() as client:
-                solr_response = await client.get(f"{SOLR_BASE_URL}/resumes/select", params=params)
-                solr_response.raise_for_status()  
-                documents = solr_response.json().get("response", {}).get("docs", [])
-                updates = []
-                for document in documents:
-                    if document["applicant_uuid"] in applicant_uuids:
-                        updates.append({
-                            "id": document["id"],  
-                            "stage_uuid": {"set": stage_uuid}  
-                        })
-
-                if not updates:
-                    raise HTTPException(status_code=404,detail="No matching documents found for update in solr")
-                update_url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
-                try:
-                    update_response = await client.post(update_url, json=updates)
-                except httpx.RequestError as e:
-                    print(f"Request error occurred: {e}")
-                # TODO: Investigate 500 error coming from solr after atomic update happened successfully
+            await solrh.update_solr_documents_partially(uuids=applicant_uuids,set_uuid=stage_uuid,search_category="applicant_uuid")
                 
             for applicant_uuid in applicant_uuids:
                 existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=str(applicant_uuid))
                 if not existing_applicant:
-                    raise HTTPException(status_code=404, detail=f'Applicant with id as {applicant_id} was not found')
+                    raise HTTPException(status_code=404, detail=f'Applicant with an uuid {str(applicant_uuid)} was not found')
 
                 existing_applicant.stage_uuid = stage_uuid
                 existing_applicant.meta.update(dbh.update_meta(existing_applicant.meta, updated_by))
@@ -157,12 +132,15 @@ async def partial_update(
         }
 
     except HTTPException as e:
+        traceback.print_exc()
         raise e
         
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
     except httpx.RequestError as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error connecting to Solr: {str(e)}")
 
 @router.post("/filter")
@@ -264,8 +242,10 @@ async def get_applicant(
             }
         }
     except HTTPException as e:
+        traceback.print_exc()
         raise e
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -291,9 +271,11 @@ def get_resume(
         return gcph.retrieve_from_gcp(bucket_name=PERSIMMON_DATA_BUCKET, file_path=file_path, download_filename=download_filename, action=action)
     
     except HTTPException as e:
+        traceback.print_exc()
         raise e
 
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/career-page")
@@ -310,6 +292,10 @@ async def create_applicant_in_career_page(
 ):
     allowed_extensions = {"pdf", "docx"}  
     file_extension = file.filename.split('.')[-1].lower()
+
+    job = Job.get_by_job_id(session=session, job_id=job_id)
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job not found")
 
     if file_extension not in allowed_extensions:
         raise HTTPException(
@@ -344,6 +330,7 @@ async def create_applicant_in_career_page(
     return JSONResponse(
         content = {
             "status": "success" if not error_message else "failed",
+            "message": "Job Applied successfully" if not error_message else "Failed to Apply Job",
             "success_file": file_success,
             "errors": error_message,
             "extracted_text": flatten_resume
@@ -443,3 +430,79 @@ async def upload_to_solr(
             "status":204,
             "message": f"Error uploading the document: {response.text}"
             }
+    
+
+@router.post('/{uuid}/create-meeting')
+def create_meeting(
+    uuid: str,
+    end_time: str,
+    interview_type: InterviewType,
+    meeting_details: MeetingModel,
+    user_id: Optional[str] = None,
+    platform_name:Optional[str]=None,
+    session: Session = Depends(get_db),
+    token: dict = Depends(verify_firebase_token)
+):
+    try:
+        email = token['email']
+        create_response = {
+            "status": status.HTTP_201_CREATED,
+            "message": "Interview scheduled successfully",
+        }
+
+        if interview_type == InterviewType.ONLINE and platform_name == "zoom":
+            domain = regexh.get_domain_from_email(email=email)
+            if not domain:
+                raise HTTPException(status_code=404,detail="Domain is invalid")
+
+            company_details = Company.get_by_domain(session=session,domain=domain)
+
+            integration_details: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name=platform_name)
+            credentials = integration_details.credentials
+
+            response = zoomh.validate_access_token(credentials=credentials,integration=integration_details,email=email,session=session)
+            print('response',response)
+
+            duration = dateh.calculate_duration_in_minutes(start_time=meeting_details.start_time,end_time=end_time)
+            meeting_details.duration = duration
+            response = zoomh.create_meeting(data=meeting_details.model_dump_json(),user_id=user_id,token=response.get('access_token'))
+            create_response["data"] = response
+
+            body = f"""
+            <p>Hi There!</p>
+            <p>Here is the meeting invite link {response['join_url']}</p>
+            <br/>
+            <p>Thank you for choosing Persimmon.</p>
+            <p>-The Persimmmon Team</p>
+            """
+
+        elif interview_type == InterviewType.FACE_TO_FACE:
+            body = f"""
+            <p>Hi There!</p>
+            <p>Here are the location details for your upcoming face-to-face interview:</p>
+            <p>{meeting_details.agenda}</p>
+            <br/>
+            <p>Thank you for choosing Persimmon.</p>
+            <p>-The Persimmmon Team</p>
+            """
+
+        elif interview_type == InterviewType.PHONE_CALL:
+            body = f"""
+            <p>Hi There!</p>
+            <p>Here are the contact details for your upcoming telephonic round interview:</p>
+            <p>{meeting_details.agenda}</p>
+            <br/>
+            <p>Thank you for choosing Persimmon.</p>
+            <p>-The Persimmmon Team</p>
+            """
+
+        applicant = Applicant.get_by_uuid(session=session, uuid=uuid)
+        to_addresses = [meeting.email for meeting in meeting_details.settings.meeting_invitees]
+        to_addresses += [email, applicant.details.get('personal_information').get('email')]
+        from_address = os.getenv("FROM_ADDRESS")
+        emailh.send_email(subject="Scheduled an Interview",body=body,to_email=to_addresses,from_email=from_address,reply_to_email=email)
+
+        return create_response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

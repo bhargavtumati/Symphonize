@@ -1,11 +1,20 @@
 from app.models.base import Base
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy import String, func, desc, ForeignKey, and_
+from sqlalchemy import String, func, desc, ForeignKey, and_, or_
 from sqlalchemy.orm import Mapped, mapped_column, Session
 from app.helpers.db_helper import get_metadata
 from sqlalchemy.ext.mutable import MutableDict
 from typing import List
+import enum
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+class InterviewType(enum.Enum):
+    ONLINE = 'ONLINE'
+    FACE_TO_FACE = 'FACE_TO_FACE'
+    PHONE_CALL = 'PHONE_CALL'
 
 class Applicant(Base):
     __tablename__ = "applicant"
@@ -29,6 +38,14 @@ class Applicant(Base):
     @classmethod
     def get_by_id(cls, session: Session, id: int):
         return session.query(cls).filter(cls.id == id).first()
+    
+    @classmethod
+    def get_by_emailid(cls,session:Session,emailid:str):
+        return session.query(cls).filter(func.jsonb_extract_path_text(cls.details, 'personal_information', 'email') == emailid).first()
+    
+    @classmethod
+    def get_by_emailid_and_job_id(cls,session:Session, emailid:str, job_id: int):
+        return session.query(cls).filter(func.jsonb_extract_path_text(cls.details, 'personal_information', 'email') == emailid, cls.job_id == job_id).first()
 
     @classmethod
     def get_by_uuid(cls, session: Session, uuid: str):
@@ -48,7 +65,7 @@ class Applicant(Base):
 
     @classmethod
     def get_count(cls, session: Session, job_id : int, stage_uuid:str) -> int:
-        return session.query(cls).filter(and_(cls.job_id == job_id, cls.stage_uuid == stage_uuid, func.jsonb_extract_path_text(Applicant.status, 'overall_status') == 'success')).count()
+        return session.query(cls).filter(and_(cls.job_id == job_id, cls.stage_uuid == stage_uuid, or_(cls.status.is_(None),func.jsonb_extract_path_text(cls.status, 'overall_status') == 'success'))).count()
         
     @classmethod
     def get_all(cls, session: Session, limit: int, offset: int, job_id: int, stage_uuid:str, name:str = None):
@@ -68,17 +85,27 @@ class Applicant(Base):
         )
 
     def create(self, session: Session,created_by:str):
-        self.meta = get_metadata()
-        self.meta['audit']['created_by']['email'] = created_by
-        session.add(self)
-        session.commit()
-        session.refresh(self)
+        try:
+            self.meta = get_metadata()
+            self.meta['audit']['created_by']['email'] = created_by
+            session.add(self)
+            session.commit()
+            session.refresh(self)
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Transaction failed, rolled back: {e}", exc_info=True) 
+            raise
         return self
     
       
     def update(self, session: Session):
-        session.add(self)
-        session.commit()
-        session.refresh(self)
+        try:
+            session.add(self)
+            session.commit()
+            session.refresh(self)
+        except Exception as e:
+            session.rollback()
+            logger.error(f"Transaction failed, rolled back: {e}", exc_info=True) 
+            raise 
         return self
 

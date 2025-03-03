@@ -66,8 +66,8 @@ class Job(Base):
         return f"Job(id={self.id!r}, ...)"
 
     @classmethod
-    def filter_query(cls, query, created_by_email: str, client_name: str, code: str = None, title: str = None, location: str = None, company:Company = None,target_date: str = None, posted_on : str = None):
-        if client_name and len(client_name) and (not company):
+    def filter_query(cls, query, created_by_email: str, client_name: str, code: str = None, title: str = None, location: str = None, companies:list[Company] = None,target_date: str = None, posted_on : str = None, time_zone: str = None):
+        if client_name and len(client_name) and (not companies):
             return {
                 'query': query,
                 'allow_retrieve': False
@@ -79,38 +79,36 @@ class Job(Base):
             query = query.filter(cls.title.ilike(f"%{title}%"))
         if location:
             query = query.filter(cls.location.ilike(f"%{location}%"))
-        if company:
-            query = query.filter(cls.company_id == company.id)
+        if companies:
+            query = query.filter(cls.company_id.in_([company.id for company in companies]))
         if posted_on:
             query = date_helper.date_filter_query_helper(query = query, search_date = posted_on, 
                         date_field = func.to_timestamp(cls.meta['audit']['created_at'].astext.cast(Float)))
         if target_date:
-            query = date_helper.date_filter_query_helper(query = query, search_date = target_date, date_field = Job.target_date)
+            query = date_helper.date_filter_query_helper(query = query, search_date = target_date, date_field = Job.target_date, timezone=time_zone)
                 
         return {
                 'query': query,
                 'allow_retrieve': True
             }
 
-
-    
     @classmethod
-    def get_count(cls, session: Session, code: str, title: str, location: str, company: Company, client_name:str, created_by_email: str,target_date: str, posted_on : str) -> int:
+    def get_count(cls, session: Session, code: str, title: str, location: str, companies: list[Company], client_name:str, created_by_email: str,target_date: str, posted_on : str, time_zone:str) -> int:
         query = session.query(cls)
-        query = cls.filter_query(query=query, client_name=client_name, code=code, title=title, location=location, company=company, created_by_email=created_by_email,target_date=target_date, posted_on=posted_on)
+        query = cls.filter_query(query=query, client_name=client_name, code=code, title=title, location=location, companies=companies, created_by_email=created_by_email,target_date=target_date, posted_on=posted_on, time_zone=time_zone)
         if not query['allow_retrieve']:
             return 0
         return query['query'].count()
 
     @classmethod
-    def get_all(cls, session: Session, limit: int, offset: int, code: str, title: str, location: str, company: Company, client_name: str, target_date: str, posted_on: str, created_by_email: str,sort_order:str,sort_column:str):
+    def get_all(cls, session: Session, limit: int, offset: int, code: str, title: str, location: str, companies: list[Company], client_name: str, target_date: str, posted_on: str, time_zone: str, created_by_email: str,sort_order:str,sort_column:str):
         CompanyAlias = aliased(Company)
         applicant_count_subquery = (
             session.query(
                 Applicant.job_id,
                 func.count(Applicant.id).label("applicant_count")
             )
-            .filter(func.jsonb_extract_path_text(Applicant.status, 'overall_status') == 'success')
+            .filter(or_(Applicant.status.is_(None), func.jsonb_extract_path_text(Applicant.status, 'overall_status') == 'success'))
             .group_by(Applicant.job_id)
             .subquery()
         )
@@ -158,7 +156,7 @@ class Job(Base):
             else:
                 query = query.order_by(desc(getattr(cls, sort_column)))
 
-        query = cls.filter_query(query=query, client_name=client_name, code=code, title=title, location=location, company=company,target_date=target_date, posted_on=posted_on, created_by_email=created_by_email)        
+        query = cls.filter_query(query=query, client_name=client_name, code=code, title=title, location=location, companies=companies,target_date=target_date, posted_on=posted_on, time_zone=time_zone, created_by_email=created_by_email)        
         if not query['allow_retrieve']:
             return [] 
         results = query['query'].offset(offset).limit(limit).all()
@@ -186,8 +184,11 @@ class Job(Base):
     def get_by_code(cls, session: Session, code: str):
         job = session.query(cls).filter(cls.code == code).first()
         return job
-    
-    
+    @classmethod
+    def get_by_job_id(cls, session: Session, job_id: str):
+        job = session.query(cls).filter(cls.id == job_id).first()
+        return job
+
     @classmethod
     def search_jobs_by_domain(cls, session: Session, domain: str, search_term: str = None):
         query = session.query(cls).filter(
@@ -249,7 +250,7 @@ class Job(Base):
     def get_all_applicants_count(cls,session:Session,job_id:int):
         result = (
         session.query(func.count(Applicant.id))
-        .filter(and_(Applicant.job_id == job_id, func.jsonb_extract_path_text(Applicant.status, 'overall_status') == 'success'))
+        .filter(and_(Applicant.job_id == job_id, or_(Applicant.status.is_(None),func.jsonb_extract_path_text(Applicant.status, 'overall_status') == 'success')))
         .scalar()
         )
         return result

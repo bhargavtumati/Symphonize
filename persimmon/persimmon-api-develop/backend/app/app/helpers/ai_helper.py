@@ -1,8 +1,10 @@
+from datetime import datetime
 import json
 import os
 import re
 from typing import Optional
 
+from app.helpers.work_exp_helper import process_resume_json
 import google.generativeai as genai
 from dotenv import load_dotenv
 from langchain.prompts import PromptTemplate
@@ -27,6 +29,103 @@ def remove_special_characters(data):
     print("the function after tehe processing ",data_result)
     return data_result
 
+
+def preprocess_resume_dates(text):
+    """Preprocess resume text to standardize date formats and handle present/current dates."""
+    import re
+    
+    # Present terms that should be replaced with current date
+    present_terms = [
+        "present", "Present", "current", "Current",
+        "till date", "Till date", "Till Date", "till Date",
+        "ongoing", "Ongoing"
+    ]
+    
+    # Month mappings
+    month_map = {
+        "Jan": "01", "January": "01",
+        "Feb": "02", "February": "02",
+        "Mar": "03", "March": "03",
+        "Apr": "04", "April": "04",
+        "May": "05",
+        "Jun": "06", "June": "06",
+        "Jul": "07", "July": "07",
+        "Aug": "08", "August": "08",
+        "Sep": "09", "September": "09",
+        "Oct": "10", "October": "10",
+        "Nov": "11", "November": "11",
+        "Dec": "12", "December": "12"
+    }
+    
+    # First standardize the present/current terms
+    current_date = datetime.now().strftime("%m/%Y")
+    for term in present_terms:
+        if term in text:
+            text = text.replace(term, current_date)
+    
+    # Function to convert date to standard format
+    def standardize_date(date_str):
+        date_str = date_str.strip()
+        
+        # Handle text month format (Dec 2022, December 2022)
+        for month in month_map:
+            if month in date_str:
+                year = re.search(r'\d{4}', date_str).group()
+                return f"{month_map[month]}/{year}"
+        
+        # Handle MM-YYYY or MM/YYYY
+        match = re.search(r'(\d{1,2})[-/](\d{4})', date_str)
+        if match:
+            month, year = match.groups()
+            return f"{int(month):02d}/{year}"
+        
+        # Handle YYYY-MM or YYYY/MM
+        match = re.search(r'(\d{4})[-/](\d{1,2})', date_str)
+        if match:
+            year, month = match.groups()
+            return f"{int(month):02d}/{year}"
+            
+        return date_str
+    
+    # Find date ranges and process them
+    def process_date_range(match):
+        full_range = match.group()
+        dates = [d.strip() for d in full_range.split('-')]
+        if len(dates) != 2:
+            return full_range
+            
+        start_date = standardize_date(dates[0])
+        end_date = standardize_date(dates[1])
+        
+        return f"{start_date} - {end_date}"
+    
+    # Process all date ranges in the text
+    date_pattern = r'\b(?:\d{1,2}[-/]\d{4}|\d{4}[-/]\d{1,2}|(?:' + '|'.join(month_map.keys()) + r')\s+\d{4})\s*-\s*(?:\d{1,2}[-/]\d{4}|\d{4}[-/]\d{1,2}|01/2025)\b'
+    text = re.sub(date_pattern, process_date_range, text)
+    
+    return text
+
+
+class APIKeyRotator:
+    def __init__(self, api_keys):
+        self.api_keys = api_keys
+        self.current_index = 0
+
+    def get_next_key(self):
+        key = self.api_keys[self.current_index]
+        self.current_index = (self.current_index + 1) % len(self.api_keys)
+        return key
+    
+key1 = os.getenv("KEY_1")
+key2 = os.getenv("KEY_2")
+key3 = os.getenv("KEY_3")
+key4 = os.getenv("KEY_4")
+
+api_key_rotator = APIKeyRotator([key1, key2, key3, key4])
+
+# Function to get the next key
+def get_key():
+    return api_key_rotator.get_next_key()
 
 
 EXTRACT_FEATURES_FROM_RESUME1 = """
@@ -75,6 +174,7 @@ Here is the resume:
 
 EXTRACT_FEATURES_FROM_RESUME2 = """You are given a resume text copied by a user. 
 Your task is to extract specific details from the resume and structure them into a JSON file. 
+**strictly avoid giving output in markdown format, only give in valid json format not in invalid json format which causes json decode error. The object should not start with ```json and end with ```**
 Respond only with valid JSON. Do not write an introduction or summary.
 Instead of null values, use empty strings. Do not give "None" in the response. If something is missing, infer a reasonable value based on the context provided in the resume.
 
@@ -156,19 +256,170 @@ Here is the resume:
 """
 
 
+EXTRACT_FEATURES_FROM_RESUME_DATE2 = """You are given a resume text copied by a user. 
+Your task is to extract specific details from the resume and structure them into a JSON file. 
+**strictly avoid giving output in markdown format, only give in valid json format not in invalid json format which causes json decode error. The object should not start with ```json and end with ```**
+Respond only with valid JSON. Do not write an introduction or summary.
+
+# MANDATORY PRE-PROCESSING STEP: Date Standardization
+Before processing ANY part of the resume, you MUST first standardize ALL dates using these rules:
+
+1. Date Conversion Rules:
+   Convert ALL dates to format "MM/YYYY" where:
+   - MM is a 2-digit month (01-12)
+   - YYYY is a 4-digit year
+   - The separator MUST be "/"
+
+   Input Format → Required Output:
+   - "2023-01" → "01/2023"
+   - "Jan 2023" → "01/2023"
+   - "January 2023" → "01/2023"
+   - "2023" → "01/2023"
+   - "2023-01 - present" → "01/2023 - 01/2025"
+   - "Jan 2023 - current" → "01/2023 - 01/2025"
+   - "2023-01 - 2024-12" → "01/2023 - 12/2024"
+
+2. Month Standardization Table:
+   - January/Jan → "01"
+   - February/Feb → "02"
+   - March/Mar → "03"
+   - April/Apr → "04"
+   - May → "05"
+   - June/Jun → "06"
+   - July/Jul → "07"
+   - August/Aug → "08"
+   - September/Sep → "09"
+   - October/Oct → "10"
+   - November/Nov → "11"
+   - December/Dec → "12"
+
+3. Current Date References:
+   Replace ANY of these terms with "01/2025":
+   - "present"
+   - "current"
+   - "till date"
+   - "ongoing"
+   - "till now"
+   - "to date"
+
+4. Date Range Format:
+   - Must be in format: "MM/YYYY - MM/YYYY"
+   - Example: "12/2022 - 01/2025"
+
+5. PROHIBITED Formats - NEVER use:
+   ❌ YYYY-MM format
+   ❌ Text month names
+   ❌ Single-digit months
+   ❌ The word "present" or "current"
+   ❌ Dates without months
+   ❌ Wrong separators (like "-" instead of "/")
+
+# Required JSON Structure
+
+The output must be a JSON object with these exact keys (structure shown with double curly braces to escape template variables):
+
+```json
+{{
+  "personal": {{
+    "name": "string",
+    "phone": "string",
+    "email": "string",
+    "address": "string",
+    "gender": "string",
+    "date_of_birth": "string",
+    "social": ["string"],
+    "about": "string"
+  }},
+  "skills": [
+    {{
+      "name": "string",
+      "type": "string",
+      "experience": "number",
+      "rating": "number 0-10"
+    }}
+  ],
+  "education": [
+    {{
+      "degree": "string",
+      "institution": "string",
+      "dates": "MM/YYYY - MM/YYYY"
+    }}
+  ],
+  "experience": [
+    {{
+      "title": "string",
+      "company": "string",
+      "dates": "MM/YYYY - MM/YYYY",
+      "location": "string",
+      "responsibilities": ["string"],
+      "experience_years": "number"
+    }}
+  ],
+  "overall_experience": "number",
+  "salary": "number",
+  "Industry_type": "string",
+  "availability": "number",
+  "workmode": "string",
+  "softskills": ["string"],
+  "Transition_behaviour": "number",
+  "Company_size": "string",
+  "Team_size": "number"
+}}
+```
+
+Ratings scale for skills:
+0: Minimal to none
+1: Minimal
+2: Minimal to below average in basics
+3: Average in basics
+4: Good in basics
+5: Excellent in basics with minimal understanding of advanced concepts
+6: Excellent in basics with basic knowledge of advanced concepts
+7: Excellent in basics with average knowledge of advanced concepts
+8: Excellent in basics with above-average knowledge of advanced concepts
+9: Excellent in basics with good knowledge of advanced concepts
+10: Excellent in both basics and advanced concepts
+
+# Experience Calculation Examples:
+For date range "01/2023 - 01/2025":
+- Start: January 2023
+- End: January 2025
+- experience_years = 2.0
+
+For date range "03/2022 - 01/2025":
+- Start: March 2022
+- End: January 2025
+- experience_years = 2.8
+
+Rules for missing information:
+1. Use empty string "" instead of null
+2. For missing dates, infer based on context
+3. For missing ratings, use reasonable estimates based on experience
+4. For missing locations, use empty string
+5. For missing team/company size, infer from context
+
+Here is the resume:
+{resume}
+"""
+
+
 async def extract_features_from_resume(
     text: str,
     type: str = "resume",
-    prompt_template: str = EXTRACT_FEATURES_FROM_RESUME2,
+    prompt_template: str = EXTRACT_FEATURES_FROM_RESUME_DATE2,
     enable_parser: bool = False,
     output_format: str = "json",
     max_retries: int = 4,
     api_key: Optional[str] = None,  # Optional parameter for flexibility
 ) -> str:
     text = remove_special_characters(text)
+    text = preprocess_resume_dates(text)
     # Initialize LLM with the provided API key
+    api_key = api_key or api_key_rotator.get_next_key()
+    #print("Using API key:", api_key)
+    
     llm = ChatGoogleGenerativeAI(
-        google_api_key = os.getenv("GEMINI_API_KEY"),  # Replace with your actual key
+        google_api_key = api_key,  # Replace with your actual key
         model=os.getenv("CHAT_GENAI"),
         temperature=0.7,
         top_p=0.85
@@ -185,9 +436,17 @@ async def extract_features_from_resume(
     for attempt in range(max_retries):
         try:
             response = chain.invoke(input_data)
+            print('lang chain response',response)
         except Exception as e:
             return e
+
         response_content = response.content
+        print('response_content', response_content)
+        pattern = r"\{.*\}"
+        match = re.search(pattern, response_content, re.DOTALL)
+        if match:
+            result = match.group()
+        response_content = result if result else response_content
         # try:
         #     response_content = response.content
         # except Exception as e :
@@ -196,6 +455,9 @@ async def extract_features_from_resume(
             # cleaned_data = remove_special_characters(response_content)
             # print("the  cleaned data :",cleaned_data)
             response_json = json.loads(response_content)
+            exp_result = process_resume_json(response_json)
+            response_json['overall_experience'] = exp_result['total_experience']
+            print('response_json',response_json)
             # response_json["text"] = text  # Adding original text if needed
             return json.dumps(response_json, indent=2)
         except json.JSONDecodeError:
@@ -204,7 +466,10 @@ async def extract_features_from_resume(
     # Final attempt outside of retries, or error handling if all attempts fail
     try:
         response_json = json.loads(response_content)
+        exp_result = process_resume_json(response_json)
+        response_json['overall_experience'] = exp_result['total_experience']
         response_json["text"] = text
+        print('response_json',response_json)
         return json.dumps(response_json, indent=2)
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse JSON: {e}")

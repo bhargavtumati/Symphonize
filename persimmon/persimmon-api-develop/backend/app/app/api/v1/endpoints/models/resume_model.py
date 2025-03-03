@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from typing import List
-
+from typing import List, Optional
 
 class ResumeParseRequest(BaseModel):
     payload: str  
@@ -9,3 +8,10 @@ class ResumeParseRequest(BaseModel):
 # Request model
 class FilePathPayload(BaseModel):
     file_paths: List[str]
+
+class EmailTemplate(BaseModel):
+    uuid: Optional[str] = None
+    name: str
+    subject : str
+    body: str
+    is_edited: bool = False

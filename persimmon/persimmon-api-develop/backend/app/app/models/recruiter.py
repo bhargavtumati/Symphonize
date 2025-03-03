@@ -23,6 +23,10 @@ class Recruiter(Base):
     @classmethod
     def get_by_email_id(cls, session:Session, email: str):
         return session.query(cls).filter(cls.email_id == email).first()
+    
+    @classmethod
+    def get_by_created_by_email(cls, session:Session, email: str):
+        return session.query(cls).filter(cls.meta['audit']['created_by']['email'].astext == email).first()
 
     @classmethod
     def exists_by_email_id(cls, session: Session, email: str) -> bool:

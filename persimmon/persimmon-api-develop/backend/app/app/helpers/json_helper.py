@@ -74,7 +74,7 @@ async def flatten_resume_data_solr(data):
         "locations_list": [experience.get("location") for experience in data.get("experience", [])],
         "transition_behaviour": data.get("Transition_behaviour",""),
         "company_size": data.get("Company_size",""),
-        "soft_skills": [soft_skill["name"] for soft_skill in data["softskills"]] if data["softskills"] else [],
+        "soft_skills": [soft_skill for soft_skill in data["softskills"]] if data["softskills"] else [],
         "team_size": data.get("Team_size"," ")  
     }
     return flattened_data

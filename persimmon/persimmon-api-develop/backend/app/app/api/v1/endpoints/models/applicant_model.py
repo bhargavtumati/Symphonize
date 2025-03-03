@@ -389,7 +389,6 @@ class ApplicantModel(BaseModel):
     @field_validator('full_name')
     def validate_full_name(cls, full_name):
         is_non_empty(full_name, "Full Name")
-        validate_length(full_name, 3, 25, "Full Name")
         validate_name_with_fullstop(full_name, "Full Name")
         return full_name
 
@@ -402,3 +401,22 @@ class ApplicantModel(BaseModel):
     def validate_email(cls, email_id):
         validate_email_address(email_id, allowed_domains_for_applicant_email, "Email Id")
         return email_id
+
+
+class MeetingInvite(BaseModel):
+    email: EmailStr
+
+class Settings(BaseModel):
+    meeting_authentication: Optional[bool] = None
+    meeting_invitees: List[MeetingInvite]
+    push_change_to_calendar: Optional[bool] = None
+    
+class MeetingModel(BaseModel):
+    agenda: str
+    duration: Optional[str] = None
+    schedule_for: Optional[str] = None
+    allow_multiple_devices: Optional[bool] = None
+    settings: Settings
+    start_time: str
+    timezone: Optional[str] = None
+    topic: str

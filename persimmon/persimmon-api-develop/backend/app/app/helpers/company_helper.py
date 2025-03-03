@@ -1,9 +1,11 @@
+import os
 from app.api.v1.endpoints.models.job_model import JobModel
 from sqlalchemy.orm import Session
 import tldextract
 from app.models.company import Company
+from app.models.template import Template
 from app.models.job import Job
-from app.helpers import db_helper as dbh, regex_helper as regexh, job_helper as jobh
+from app.helpers import db_helper as dbh, regex_helper as regexh, job_helper as jobh, email_helper as emailh
 
 def get_or_create_company(job: JobModel, session: Session, created_by: str):
     """
@@ -20,6 +22,9 @@ def get_or_create_company(job: JobModel, session: Session, created_by: str):
         company_data = Company(**job.company.model_dump())
         company_data.domain = domain
         company_record = company_data.create(session=session, created_by=created_by)
+        email_id = os.getenv("TEMPLATE_EMAIL_ID")
+        email_template = Template(company_id = company_record.id, template_data = emailh.get_email_templates(), email_id=email_id)
+        email_template.create(session=session, created_by=created_by)
     return company_record
 
 def update_or_create_company(

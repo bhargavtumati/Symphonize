@@ -31,7 +31,7 @@ class Company(Base):
     @classmethod
     def get_by_name(cls, session: Session, company_name: str):
         if company_name:
-            return session.query(cls).filter(cls.name.ilike(f"%{company_name}%")).first()
+            return session.query(cls).filter(cls.name.ilike(f"%{company_name}%")).all()
 
     @classmethod
     def get_by_domain(cls, session: Session, domain: str):

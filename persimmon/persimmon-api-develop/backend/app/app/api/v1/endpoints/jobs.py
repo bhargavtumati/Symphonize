@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.response_schema import create_response
 from app.api.v1.endpoints.models.job_model import JobModel, JobPartialUpdate, JobDescription, JobResponse
 from app.helpers.firebase_helper import verify_firebase_token
@@ -10,89 +10,17 @@ from app.db.session import get_db
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.helpers.regex_helper import get_domain_from_email
-import tldextract,json, httpx
+import tldextract
 from app.models.recruiter import Recruiter
 from app.models.stages import Stages
 from app.helpers.company_helper import get_or_create_company, handle_company_association
 from app.helpers.job_helper import generate_job_code, prepare_job_data, enhance_jd
 from app.helpers.stages_helper import prepare_default_stages, create_stages
-import xml.etree.ElementTree as ET
-
+from app.utils.validators import validate_timezone
 
 router = APIRouter()
 
 meta: dict[str, str] = {"api_reference": "https://github.com/symphonize/persimmon-api"}
-
-
-@router.post("/post-job")
-async def post_job(job: dict):
-    target_websites = [
-        "https://api.jobsite1.com/post-job",
-        "https://api.jobsite2.com/post-job",
-        "https://api.jobsite3.com/post-job"
-    ]
-
-    results = []
-    for url in target_websites:
-        try:
-            response = await httpx.post(url, json=job)
-            response.raise_for_status()
-            results.append({"site": url, "status": "success", "data": response.json()})
-        except httpx.HTTPStatusError as e:
-            results.append({"site": url, "status": "failure", "error": str(e)})
-
-    failed_posts = [result for result in results if result["status"] == "failure"]
-    if failed_posts:
-        raise HTTPException(status_code=500, detail={"message": "Failed to post job on some websites.", "results": results})
-
-    return {"message": "Job posted successfully on all target websites.", "results": results}
-
-
-@router.get('/{jobboard}/xml', summary="Get all jobs as XML feed", response_class=Response)
-def get_all_jobs_as_xml(
-    jobboard: str,
-    session: Session = Depends(get_db)
-):
-    try:
-        jobs = session.query(Job).filter(Job.publish_on_job_boards.contains([jobboard]))
-        # Create the XML root element
-        root = ET.Element("jobs")
-        
-        # Generate XML from the job data
-        for job in jobs:
-            job_element = ET.SubElement(root, "job")
-            ET.SubElement(job_element, "id").text = str(job.id)
-            ET.SubElement(job_element, "code").text = job.code
-            ET.SubElement(job_element, "title").text = job.title
-            ET.SubElement(job_element, "type").text = job.type.name
-            ET.SubElement(job_element, "status").text = job.status.name
-            ET.SubElement(job_element, "workplace_type").text = job.workplace_type.name
-            ET.SubElement(job_element, "location").text = job.location
-            ET.SubElement(job_element, "team_size").text = str(job.team_size)
-            ET.SubElement(job_element, "min_salary").text = str(job.min_salary)
-            ET.SubElement(job_element, "max_salary").text = str(job.max_salary)
-            ET.SubElement(job_element, "min_experience").text = str(job.min_experience)
-            ET.SubElement(job_element, "max_experience").text = str(job.max_experience)
-            ET.SubElement(job_element, "target_date").text = str(job.target_date.isoformat())
-            ET.SubElement(job_element, "description").text = job.description
-            ET.SubElement(job_element, "enhanced_description").text = json.dumps(job.enhanced_description)
-            ET.SubElement(job_element, "is_posted_for_client").text = str(job.is_posted_for_client)
-            ET.SubElement(job_element, "company_id").text = str(job.company_id)
-            ET.SubElement(job_element, "ai_clarifying_questions").text = json.dumps(job.ai_clarifying_questions)
-            ET.SubElement(job_element, "publish_on_career_page").text = str(job.publish_on_career_page)
-            ET.SubElement(job_element, "publish_on_job_boards").text = json.dumps(job.publish_on_job_boards)
-
-            posted_on = job.meta.get('audit', {}).get('created_at', 'N/A')
-            ET.SubElement(job_element, "posted_on").text = str(posted_on)
-
-        # Convert XML to string
-        xml_str = ET.tostring(root, encoding='unicode', method='xml')
-        
-        return Response(content=xml_str, media_type="application/xml")
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 
 @router.get('/domain/{name}')
 def get_all_jobs_for_given_domain(
@@ -204,11 +132,13 @@ def get_jobs(
     client_name: Optional[str] = None,
     target_date: Optional[str] = None,
     posted_on: Optional[str] = None,
+    time_zone: Optional[str] = None,
     token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db),
     sort:Optional[str]="desc,posted_on"
 ):
-
+    if time_zone:
+        validate_timezone(time_zone)
     try:
         sort_type=None
         sort_value=None
@@ -219,11 +149,11 @@ def get_jobs(
             sort_value=sort[1]
         jobs=[]
         page_size = 12
-        company = Company.get_by_name(session=session, company_name=client_name)
-        total_count = Job.get_count(session=session, code=code, title=title, location=location, company=company, created_by_email=created_by, client_name=client_name, target_date=target_date, posted_on=posted_on)
+        companies = Company.get_by_name(session=session, company_name=client_name)
+        total_count = Job.get_count(session=session, code=code, title=title, location=location, companies=companies, created_by_email=created_by, client_name=client_name, target_date=target_date, posted_on=posted_on, time_zone=time_zone)
         pagination = mathh.get_pagination(page=page,page_size=page_size,total_records=total_count)
         try:
-            jobs = Job.get_all(session=session, limit=page_size, offset=pagination['offset'], code=code, title=title, location=location, company=company, created_by_email=created_by, client_name=client_name, target_date=target_date, posted_on=posted_on, sort_order=sort_type, sort_column=sort_value)
+            jobs = Job.get_all(session=session, limit=page_size, offset=pagination['offset'], code=code, title=title, location=location, companies=companies, created_by_email=created_by, client_name=client_name, target_date=target_date, posted_on=posted_on, time_zone=time_zone, sort_order=sort_type, sort_column=sort_value)
         except Exception as e:
             print(f"Error occurred while fetching the jobs: {str(e)}")
         posted_jobs = []
@@ -309,6 +239,7 @@ def get_job_by_id(
         shortlisted_uuid = None
         selected_uuid = None
         rejected_uuid = None
+        other_stage_uuids=[]
 
         for stage in stages:
             if stage['name'] == 'Shortlisted':
@@ -317,10 +248,17 @@ def get_job_by_id(
                 selected_uuid = stage['uuid']
             elif stage['name'] == 'Rejected':
                 rejected_uuid = stage['uuid']
+            elif stage['name'] != 'new':
+                other_stage_uuids.append(stage['uuid'])
         
         shortlisted_count = Applicant.get_count(session=session, job_id=id, stage_uuid=shortlisted_uuid)
         selected_count = Applicant.get_count(session=session, job_id=id, stage_uuid=selected_uuid)
         rejected_count = Applicant.get_count(session=session, job_id=id, stage_uuid=rejected_uuid)
+        other_stages = []
+
+        for stage_uuid in other_stage_uuids:
+            applicant_count = Applicant.get_count(session=session, job_id=id, stage_uuid=stage_uuid)
+            other_stages.append({'stage_uuid': stage_uuid, 'applicant_count': applicant_count})
 
         applicant_count = Job.get_all_applicants_count(session=session, job_id=id)
 
@@ -331,7 +269,8 @@ def get_job_by_id(
                 "all_applicants": applicant_count,
                 "shortlisted": shortlisted_count,
                 "selected": selected_count,
-                "rejected": rejected_count
+                "rejected": rejected_count,
+                "other_stages": other_stages
             },
             "status": status.HTTP_200_OK,
             "message": "Retrieved job details successfully"

@@ -14,16 +14,17 @@ from app.helpers import ai_helper as aih
 from app.helpers import gcp_helper as gcph
 from app.helpers import json_helper as jsonh
 from app.helpers import pdf_helper as pdfh
-from app.helpers import solr_helper as solrh
+from app.helpers import solr_helper as solrh, image_helper as imageh
 from app.models.applicant import Applicant
 from app.models.stages import Stages
 from app.models.job import Job
 from app.helpers.match_score_helper import get_match_score
 import traceback
 import logging
+from io import BytesIO
+import re #regular expressions
 
 PDF_OUTPUT_PATH = "/tmp"  # Temporary directory for storing converted PDF files
-BUCKET_NAME = 'persimmon-data'
 
 logger = logging.getLogger(__name__)
 
@@ -50,18 +51,29 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
     original_pdf_name = None
 
     try:
+        base64_applicant_image = None
         unique_id = uuid.uuid4()
         original_file_name = f"{unique_id}_{file.filename}"
+        content = await file.read()
+        file.file.seek(0)
+
         # Step 1: Extract text from the resume
         extracted_text = await pdfh.extract_text_from_file(file)
 
         if not extracted_text:
             raise ValueError(f"Failed to extract text from {file.filename}")
+        
+        file_extension = file.filename.split('.')[-1].lower()
+        try:
+            if file_extension == "pdf":
+                base64_applicant_image = imageh.extract_first_image_from_pdf(BytesIO(content))
+            elif file_extension == "docx":
+                base64_applicant_image = imageh.extract_first_image_from_docx(BytesIO(content))
+        except HTTPException as e:
+            raise e
 
-        processed_file_path = None
+        # processed_file_path = None
         flatten_resume_solr = None
-        processed_upload = None 
-        original_upload = None 
         generated_json = None      
 
         # Step 2: Convert DOCX to PDF if needed
@@ -81,14 +93,14 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
         #         return file_success, error_list, flatten_resume
 
         # Step 3: Prepare upload paths and async upload tasks
-        PERSIMMON_DATA=os.getenv("PERSIMMON_DATA", "/persimmon-data")
+        PERSIMMON_DATA=os.getenv("PERSIMMON_DATA", "persimmon-data")
         ENVIRONMENT = os.getenv("ENVIRONMENT","development")
-        gcs_original_path = f"{PERSIMMON_DATA}/{ENVIRONMENT}/resumes/raw/{original_file_name}"
+        gcs_original_path = f"{ENVIRONMENT}/resumes/raw/{original_file_name}"
         # gcs_processed_path = f"data/processed/{output_pdf_name if processed_file_path else original_file_name}"
 
         tasks=[]
         # Define tasks for uploading
-        tasks.append(gcph.upload_to_gcp(BUCKET_NAME, file.file, gcs_original_path)) 
+        tasks.append(gcph.upload_to_gcp(PERSIMMON_DATA, file.file, gcs_original_path)) 
 
         # if processed_file_path:
         #     processed_file = open(processed_file_path, 'rb')
@@ -117,10 +129,10 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                 gcp_paths['original_resume'] = results[0] 
             print(f"the gcp original resume is {gcp_paths['original_resume']}")
             print(f"the results after upload are : {results}")
-            if processed_file_path:
-                processed_file.close()
-            if processed_file_path and len(results) > 1:
-                gcp_paths['processed_resume'] = results[1] if isinstance(results[1],str) else '' 
+            # if processed_file_path:
+            #     processed_file.close()
+            # if processed_file_path and len(results) > 1:
+            #     gcp_paths['processed_resume'] = results[1] if isinstance(results[1],str) else '' 
         except Exception as e:
             error_message += f"\nFailed to upload files to GCP: {str(e)}"
             error_list.append(error_message)
@@ -166,6 +178,7 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                         db_job = Job.get_by_code(session=session, code=job_code)
                         match = get_match_score(db_job.description, extracted_text)
                         flatten_resume['match'] = match
+                        flatten_resume['applicant_image'] = base64_applicant_image
 
                         applicant_uuid = str(uuid.uuid4())
                         applicant_data: Applicant = Applicant(details=flatten_resume, stage_uuid=stage_uuid, job_id=job_id, uuid=applicant_uuid)
@@ -311,15 +324,21 @@ def construct_query(filters: FilterRequest) -> str:
         for pedigree in filters.pedigree:
             if pedigree.specifications:
                 if pedigree.specifications and pedigree.name.strip().lower() == 'education':
+                    
                     for spec in pedigree.specifications:
+                        spec.institution_name = re.sub(r'\(.*?\)', '', spec.institution_name)
                         if spec.spec.lower() == "include" and spec.qualification and spec.institution_name:
                             inclusion_parts.append(f"(education:\"{spec.institution_name}\")")
                         elif spec.spec.lower() == "exclude" and spec.qualification and spec.institution_name:
                             exclusion_parts.append(f"-education:\"{spec.institution_name}\"")
                 elif pedigree.specifications and pedigree.name.strip().lower() == 'company':
+                    
                     for spec in pedigree.specifications:
+                        spec.institution_name = re.sub(r'\(.*?\)', '', spec.institution_name)
                         if spec.spec.lower() == "include" and spec.qualification and spec.institution_name:
                             inclusion_parts.append(f"(company:\"{spec.institution_name}\")")
+                            
+                            
                         elif spec.spec.lower() == "exclude" and spec.qualification and spec.institution_name:
                             exclusion_parts.append(f"-company:\"{spec.institution_name}\"")
 

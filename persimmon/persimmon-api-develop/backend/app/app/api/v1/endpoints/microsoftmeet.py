@@ -2,15 +2,16 @@ from fastapi import HTTPException, APIRouter
 import requests
 import json
 from datetime import datetime
+import pytz,os
 from pytz import timezone
-from app.api.v1.endpoints.models.interview_model import InterviewDetails
+from app.api.v1.endpoints.models.microsoftmeet_model  import InterviewDetails
 
 router = APIRouter()
 
 # Define your Azure AD credentials
-tenant_id = "enter your tenant id"
-client_id = "enter your client id"
-client_secret = "enter your client secret"
+tenant_id = os.getenv("MICMET_TENANT_ID")   # located at overview
+client_id = os.getenv("MICMET_CLIENT_ID")     # located at overview
+client_secret = os.getenv("MICET_CLIENT_SECRET")     #located at certificates and serets (value (one time viewable))
 
 """
 These credentials are necessary because they enable your app to interact with Microsoft Teams through the Microsoft Graph API. Here's a breakdown of why each credential is required:
@@ -24,10 +25,10 @@ async def schedule_interview(details: InterviewDetails):
     try:
         # Get Access Token...
         access_token = get_access_token()
-        print(access_token)
+        
         # Create Microsoft Teams meeting link...
         meeting_link = create_teams_meeting(details, access_token)
-        print(meeting_link)
+        
         # Send notifications...
         send_notification_emails(details, meeting_link)
         
@@ -35,6 +36,7 @@ async def schedule_interview(details: InterviewDetails):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to schedule interview: {str(e)}")
 
+@router.post("/get-token")
 def get_access_token():
     url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
@@ -45,12 +47,12 @@ def get_access_token():
         'grant_type': 'client_credentials'
     }
     response = requests.post(url, headers=headers, data=payload)
-    response.raise_for_status()
-    
-    return response.json().get("access_token")
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+    return {"access_token": response.json().get("access_token")}
 
 def create_teams_meeting(details, access_token):
-    url = f"https://graph.microsoft.com/v1.0/{details.interviewer_email}/onlineMeetings"
+    url = f"https://graph.microsoft.com/v1.0/users/{details.interviewer_email}/onlineMeetings"
     headers = {
         'Authorization': f'Bearer {access_token}',
         'Content-Type': 'application/json'

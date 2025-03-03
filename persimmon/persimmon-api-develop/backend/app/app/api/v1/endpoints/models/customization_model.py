@@ -4,21 +4,26 @@ from app.utils.validators import (
     is_non_empty,
     validate_length,
     has_proper_characters,
-    validate_letters_and_numbers
+    validate_letters_and_numbers,
+    validate_list_len
 )
 import base64
 import imghdr
 
 class CustomizationModel(BaseModel):
-    enable_cover_photo: bool = Field(default=True)
-    heading: str = Field(default="Join Us")
-    description: str = Field(default='''Explore opportunities that empower you to grow, innovate, and make an impact. 
+    career_page_url: Optional[str] = None
+    enable_cover_photo: Optional[bool] = Field(default=True)
+    heading: Optional[str] = Field(default="Join Us")
+    description: Optional[str] = Field(default='''Explore opportunities that empower you to grow, innovate, and make an impact. 
     Join a team where your talents are valued, your ideas are heard, and your career aspirations become a reality. Let’s build the future together!''')
-    enable_dark_mode: bool = Field(default=False)
+    enable_dark_mode: Optional[bool] = Field(default=False)
     color_selected: Optional[str] = None
-    primary_colors: List[str]
-    font_style: str
+    primary_colors: Optional[List[str]] = None
+    selected_header_color: Optional[str] = None
+    header_colors: Optional[List[str]] = None
+    font_style: Optional[str] = None
     image_data: Optional[str] = None
+    logo_data: Optional[str] = None
 
     @field_validator("heading")
     def validate_heading(cls, heading):
@@ -33,8 +38,8 @@ class CustomizationModel(BaseModel):
         has_proper_characters(value=description, field_name="Description")
         return validate_length(value=description, min_len=0, max_len=250, field_name="Description")
 
-    @field_validator("image_data")
-    def validate_image_size_and_type(cls, image_data):
+    @staticmethod
+    def decode_and_validate_image(image_data):
         if image_data:
             try:
                 decoded_image = base64.b64decode(image_data)
@@ -51,3 +56,19 @@ class CustomizationModel(BaseModel):
             except Exception as e:
                 raise ValueError(f"Invalid image data: {e}")
         return image_data
+
+    @field_validator("image_data")
+    def validate_image_data(cls, image_data):
+        return cls.decode_and_validate_image(image_data)
+
+    @field_validator("logo_data")
+    def validate_logo_data(cls, logo_data):
+         return cls.decode_and_validate_image(logo_data)
+
+    @field_validator("primary_colors")
+    def validate_primary_colors(cls, primary_colors):
+         return validate_list_len(primary_colors, 10, "colors")
+
+    @field_validator("header_colors")
+    def validate_header_colors(cls, header_colors):
+         return validate_list_len(header_colors, 10, "colors")

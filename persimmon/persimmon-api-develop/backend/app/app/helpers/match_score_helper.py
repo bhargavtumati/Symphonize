@@ -2,6 +2,7 @@ from app.helpers import classifier_helper as classifierh
 from app.core.config import settings
 
 def get_match_score(job_description: str, resume_text: str):
+    classifierh.run_once()
     message = job_description + " " + resume_text
     result, probs = classifierh.classify_message(message=message, model_version=settings.CLASSIFIER_VERSION, vectorizer_version=settings.VECTORIZER_VERSION)
 

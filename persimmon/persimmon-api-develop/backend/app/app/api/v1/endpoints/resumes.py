@@ -19,16 +19,19 @@ from fastapi.responses import JSONResponse
 from app.db.session import get_db
 from app.models.job import Job
 from app.models.applicant import Applicant
+from app.models.company import Company
+from app.models.recruiter import Recruiter
 from app.api.v1.endpoints.models.applicant_model import ResumeFlatten
-from app.api.v1.endpoints.models.resume_model import ResumeParseRequest,FilePathPayload
+from app.api.v1.endpoints.models.resume_model import EmailTemplate, ResumeParseRequest,FilePathPayload
 from app.core.config import settings
 from app.helpers import classifier_helper as classifierh
 from app.helpers import data_helper as datah
 from app.helpers import gcp_helper as gcph
 from app.helpers import json_helper as jsonh
+from app.helpers import email_helper as emailh
 from app.helpers import pdf_helper as pdfh
 from app.helpers import db_helper as dbh
-from app.helpers import solr_helper as solrh
+from app.helpers import solr_helper as solrh, image_helper as imageh
 from app.models.stages import Stages
 from app.schemas.response_schema import GetResponseBase, create_response
 from app.helpers.firebase_helper import verify_firebase_token,get_base_url
@@ -38,16 +41,20 @@ from pydantic import BaseModel
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy import func
 from sqlalchemy import cast, String
-from pdf2image import convert_from_path
-from docx import Document
-from fastapi.responses import FileResponse
-
-
+from typing import List, Dict, Optional
+from pydantic import EmailStr
+from app.models.template import Template
 
 security = HTTPBearer()
 
 router = APIRouter()
 load_dotenv()
+
+import logging
+
+# Configure logging
+logger = logging.getLogger(__name__)
+
 
 api_reference: dict[str, str] = {
     "api_reference": "https://github.com/symphonize/persimmon-api"
@@ -221,8 +228,6 @@ async def extract_text(
     token: dict = Depends(verify_firebase_token)
 ):
     try:
-
-        logger.info("Received extract_text request")
         api_start_time = datetime.now(timezone.utc)
 
         source = Path(request.source)
@@ -230,11 +235,20 @@ async def extract_text(
         original_token = credentials.credentials
         
         try:
+            existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
+
+            if not existing_applicant:
+                raise HTTPException(status_code=404, detail=f"Applicant was not found")
+            
+            #the prevention of duplicate api calls using the stage in data base
+            stage_exist = any(stage["stage"] == "document-to-text" for stage in existing_applicant.status["stages"])
+            if stage_exist:
+                return "The stage already got processed"
             parsed = parser.from_file(request.source)
             text = parsed.get('content', '')
             text = text if text else ''
             destination = source.parent.parent / "processed" / "text" / (source.stem + '.txt')
-            with open(destination, 'w') as writer:
+            with open(destination, 'w',encoding="utf-8") as writer:
                 writer.write(text)
         except Exception as e:
             logger.error(f"Error during file processing: {str(e)}")
@@ -247,7 +261,6 @@ async def extract_text(
                 "start": api_start_time.isoformat(),
                 "end": api_end_time.isoformat()
             }
-            existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
             existing_applicant.status['stages'].append(status)
             existing_applicant.meta.update(dbh.update_meta(existing_applicant.meta, updated_by))
             flag_modified(existing_applicant, 'status')
@@ -448,11 +461,10 @@ async def legacy_upload_resumes(
             }
             pubsub_response = await gcph.send_message_to_pubsub(pubsub_message,topic_name="document-to-text")  # Call the service function
             logger.info(f"Pub/Sub message sent: {pubsub_response}")
-
         except Exception as e:
             logger.error(f"Failed to send Pub/Sub message: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to send Pub/Sub message: {str(e)}")
-    
+
     # Return the response
     return JSONResponse({
         "uploaded_files": uploaded_files,
@@ -464,7 +476,6 @@ async def legacy_upload_resumes(
         "job_code": job_code,
         "pubsub_status": "Message sent successfully"
     })
-    
 
 @router.post("/upload")
 async def upload_resumes(
@@ -508,8 +519,7 @@ async def upload_resumes(
     tasks = []
     errors = []
     uploaded_files = []
-    extracted_images = []
-    image_urls = []
+    base64_images = []
 
     for file in files:
         try:
@@ -518,8 +528,6 @@ async def upload_resumes(
             #gcs_path = f"s1/{original_file_name}"
             # gcs_path = f"{FOLDER}/{original_file_name}"
             destination = f"{PERSIMMON_DATA}/{ENVIRONMENT}/resumes/raw/{original_file_name}"
-            
-            os.makedirs(os.path.dirname(destination), exist_ok=True)
 
             # Convert UploadFile to SpooledTemporaryFile
             # temp_file = tempfile.SpooledTemporaryFile()
@@ -529,26 +537,28 @@ async def upload_resumes(
                 writer.write(content)
             print(f"successfully written to destination")
             uploaded_files.append(destination)
-
-            if file_extension == "pdf":
-                images = extract_images_from_pdf(destination)
-            elif file_extension == "docx":
-                images = extract_images_from_docx(destination)
-            
-            extracted_images.extend(images)
-            image_urls.extend([f"{base_url}/download-image/{os.path.basename(image)}" for image in images])
-            
-
+            file_extension = file.filename.split('.')[-1].lower()
+            try:
+                if file_extension == "pdf":
+                    image_base64 = imageh.extract_first_image_from_pdf(BytesIO(content))
+                elif file_extension == "docx":
+                    image_base64 = imageh.extract_first_image_from_docx(BytesIO(content))
+            except HTTPException as e:
+                raise e
+            base64_images.append(image_base64)
         except Exception as e:
             print(f"exception while converting document to text: {str(e)}")
             errors.append(str(e))
-    
+
     end_time = time.time()
     duration = round(end_time - start_time, 2)
     logger.info(f"Upload completed in {duration} seconds.")
 
-    for uploaded_file in uploaded_files:
-        job_id = Job.get_id_by_code(session=session,code=job_code)
+    for index,uploaded_file in enumerate(uploaded_files):
+        try:
+            job_id = Job.get_id_by_code(session=session,code=job_code)
+        except Exception as e:
+            return HTTPException(status_code=404,detail="Job not found")
         print("the job id is : ",job_id)
         if len(uploaded_files) > 0: 
             applicant_uuid = str(uuid.uuid4())
@@ -564,7 +574,7 @@ async def upload_resumes(
             "original_resume":uploaded_file,
             "context":"document-added",
             "file_upload":uploaded_file,
-            "image_urls": image_urls,
+            "applicant_image": base64_images[index]
             }
         api_end_time = datetime.now(timezone.utc)
         status = {
@@ -593,7 +603,6 @@ async def upload_resumes(
 
         #Send a message to Pub/Sub after successful uploads
         try:
-
             pubsub_message = {
                 "endpoint": f"{base_url}/api/v1/resumes/extract-text",
                 "token": original_token,
@@ -602,18 +611,13 @@ async def upload_resumes(
                     "uuid": applicant_uuid
                 }
             }
-
             # pubsub_response = await gcph.send_message_to_pubsub(pubsub_message,topic_name="document-to-text")  # Call the service function
-            if not os.getenv("TOPIC_NAME"):
-                        raise ValueError("TOPIC_NAME environment variable is not set.")
             pubsub_response = await gcph.send_message_to_pubsub(pubsub_message,topic_name=os.getenv("TOPIC_NAME")) # Call the service function
             logger.info(f"Pub/Sub message sent: {pubsub_response}")
-        
-           
         except Exception as e:
-            logger.error(f"Failed to send Pub/Sub message : {str(e)}")
+            logger.error(f"Failed to send Pub/Sub message: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to send Pub/Sub message: {str(e)}")
-        
+
     # Return the response
     return {
         "uploaded_files": uploaded_files,
@@ -623,38 +627,9 @@ async def upload_resumes(
         "failed_uploads": len(errors),
         "upload_duration_seconds": duration,
         "job_code": job_code,
-        "extracted_images": extracted_images,
         "pubsub_status": "Message sent successfully"
     }
 
-def extract_images_from_pdf(pdf_path: str):
-    images = []
-    pages = convert_from_path(pdf_path)
-    for page_number, page in enumerate(pages):
-        image_path = f"{pdf_path}_page_{page_number + 1}.png"
-        page.save(image_path, 'PNG')
-        images.append(image_path)
-    return images
-
-def extract_images_from_docx(docx_path: str):
-    images = []
-    doc = Document(docx_path)
-    for rel in doc.part.rels.values():
-        if "image" in rel.target_ref:
-            image = rel.target_part.blob
-            image_path = f"{docx_path}_{uuid.uuid4()}.png"
-            with open(image_path, "wb") as img_file:
-                img_file.write(image)
-            images.append(image_path)
-    return images
-
-@router.get("/download-image/{image_name}")
-async def download_image(image_name: str):
-    image_path = f"/persimmon-data/development/resumes/raw/{image_name}"
-    if os.path.exists(image_path):
-        return FileResponse(image_path, media_type='application/octet-stream', filename=image_name)
-    else:
-        raise HTTPException(status_code=404, detail="Image not found")
 
 class FlattenForDatabase(BaseModel):
     source: str
@@ -856,17 +831,31 @@ async def flatten(
     existing_applicant = None
 
     try:
+        existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
+        #to stop the applicant creation when duplicate api calls happens . 
+        #if applicant is already created, then return the message
+        if not existing_applicant:
+            raise HTTPException(status_code=404,detail=f"Applicant was not found")
+        
+        stage_exist = any(stage["stage"] == "flatten" for stage in existing_applicant.status["stages"])
+        if stage_exist:
+            return "The stage already got processed"
+        
+        applicant_exist = await solrh.is_applicant_exist(request.uuid)
+        if applicant_exist:
+            return "applicant already exist"
+
         source = Path(request.source)
         destination = source.parent.parent / "flat" / (source.stem + ".json")
-        with open(request.source, "r") as reader:
+        with open(request.source, "r",encoding="utf-8") as reader:
             data_to_be_processed = reader.read()
-        json_to_be_processed = json.loads(data_to_be_processed)
-        existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
+        json_to_be_processed = json.loads(data_to_be_processed) 
         job_code = Job.get_code_with_id(session=session, id=existing_applicant.job_id)
         if not existing_applicant:
-            raise HTTPException(status_code=404, detail=f'Applicant with id as {gspath} was not found')
+            raise HTTPException(status_code=404, detail=f'Applicant with id as was not found')
 
         logger.info(f"========= flattening for solr: json_to_be_processed: {json_to_be_processed}")
+            
        # Flatten and process the data for Solr
         flattened_data_solr = await jsonh.flatten_resume_data_solr(json_to_be_processed)
         flattened_data_solr = datah.convert_nulls_to_empty_strings(flattened_data_solr)
@@ -887,7 +876,7 @@ async def flatten(
 
         # Upload flattened data to GCP
         json_string = json.dumps(flattened_data_solr, indent=4)
-        with open(destination, "w") as writer:
+        with open(destination, "w",encoding="utf-8") as writer:
             writer.write(json_string)
         logger.info(f"========= written to destination {str(destination)}")
         # Update the applicant's status in the database
@@ -1093,3 +1082,4 @@ async def process_file_paths(
         raise HTTPException(status_code=500, detail=str(e))
     except HTTPException as e:
         raise e
+    
