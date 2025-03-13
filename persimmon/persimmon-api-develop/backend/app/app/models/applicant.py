@@ -25,6 +25,7 @@ class Applicant(Base):
     uuid: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     stage_uuid : Mapped[str] = mapped_column(String,nullable=False)
     job_id: Mapped[int] = mapped_column(ForeignKey("public.job.id"))
+    feedback : Mapped[list[dict]] = mapped_column(JSONB,nullable=True) 
     meta: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSONB),nullable=False)
 
     # TODO: Implement stringify
@@ -62,6 +63,27 @@ class Applicant(Base):
     @classmethod
     def get_all_by_original_path(cls, session: Session, file_paths: List[str]):
         return session.query(cls).filter(Applicant.details["original_resume"].astext.in_(file_paths)).all()
+    
+    @classmethod
+    def get_by_mobile_number(cls, session: Session, mobile_number: str,job_id: int):
+        #print("mobile number is ",mobile_number,job_id)
+        return (
+            session.query(cls)
+            .filter(cls.job_id == job_id)  # First filter by job_id
+            .filter(cls.details["personal_information"]["phone"].astext == mobile_number ).first()
+        )
+    @classmethod
+    def get_by_email_id(cls, session: Session, email_id: str,job_id: int):
+        #print("emial_id  ",email_id,job_id)
+        return (
+            session.query(cls)
+            .filter(cls.job_id == job_id)  # First filter by job_id
+            .filter(cls.details["personal_information"]["email"].astext == email_id ).first()
+        )
+    
+    @classmethod 
+    def get_by_file_upload(cls,session: Session, file_upload: str):
+        return session.query(cls).filter(cls.details["original_resume"].astext == file_upload).first()
 
     @classmethod
     def get_count(cls, session: Session, job_id : int, stage_uuid:str) -> int:

@@ -2,6 +2,7 @@
 import asyncio
 import json
 import os
+import re
 import uuid
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -22,7 +23,6 @@ from app.helpers.match_score_helper import get_match_score
 import traceback
 import logging
 from io import BytesIO
-import re #regular expressions
 
 PDF_OUTPUT_PATH = "/tmp"  # Temporary directory for storing converted PDF files
 
@@ -66,9 +66,9 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
         file_extension = file.filename.split('.')[-1].lower()
         try:
             if file_extension == "pdf":
-                base64_applicant_image = imageh.extract_first_image_from_pdf(BytesIO(content))
+                base64_applicant_image = imageh.extract_first_face_from_pdf(BytesIO(content))
             elif file_extension == "docx":
-                base64_applicant_image = imageh.extract_first_image_from_docx(BytesIO(content))
+                base64_applicant_image = imageh.extract_first_face_from_docx(BytesIO(content))
         except HTTPException as e:
             raise e
 
@@ -324,23 +324,19 @@ def construct_query(filters: FilterRequest) -> str:
         for pedigree in filters.pedigree:
             if pedigree.specifications:
                 if pedigree.specifications and pedigree.name.strip().lower() == 'education':
-                    
                     for spec in pedigree.specifications:
                         spec.institution_name = re.sub(r'\(.*?\)', '', spec.institution_name)
                         if spec.spec.lower() == "include" and spec.qualification and spec.institution_name:
-                            inclusion_parts.append(f"(education:\"{spec.institution_name}\")")
+                            inclusion_parts.append(f"(education:{spec.institution_name}*)")
                         elif spec.spec.lower() == "exclude" and spec.qualification and spec.institution_name:
-                            exclusion_parts.append(f"-education:\"{spec.institution_name}\"")
+                            exclusion_parts.append(f"-education:{spec.institution_name}*")
                 elif pedigree.specifications and pedigree.name.strip().lower() == 'company':
-                    
                     for spec in pedigree.specifications:
                         spec.institution_name = re.sub(r'\(.*?\)', '', spec.institution_name)
                         if spec.spec.lower() == "include" and spec.qualification and spec.institution_name:
-                            inclusion_parts.append(f"(company:\"{spec.institution_name}\")")
-                            
-                            
+                            inclusion_parts.append(f"(company:{spec.institution_name}*)")
                         elif spec.spec.lower() == "exclude" and spec.qualification and spec.institution_name:
-                            exclusion_parts.append(f"-company:\"{spec.institution_name}\"")
+                            exclusion_parts.append(f"-company:{spec.institution_name}*")
 
 
     inclusion_query = " OR ".join(inclusion_parts) if inclusion_parts else ""

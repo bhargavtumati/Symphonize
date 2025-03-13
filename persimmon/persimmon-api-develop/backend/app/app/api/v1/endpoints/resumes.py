@@ -6,6 +6,7 @@ import time
 import uuid
 import json
 import requests
+import re
 from io import BytesIO
 from typing import List, Optional
 from tempfile import SpooledTemporaryFile
@@ -235,24 +236,17 @@ async def extract_text(
         original_token = credentials.credentials
         
         try:
-            existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
-
-            if not existing_applicant:
-                raise HTTPException(status_code=404, detail=f"Applicant was not found")
-            
-            #the prevention of duplicate api calls using the stage in data base
-            stage_exist = any(stage["stage"] == "document-to-text" for stage in existing_applicant.status["stages"])
-            if stage_exist:
-                return "The stage already got processed"
             parsed = parser.from_file(request.source)
             text = parsed.get('content', '')
             text = text if text else ''
+            
             destination = source.parent.parent / "processed" / "text" / (source.stem + '.txt')
             with open(destination, 'w',encoding="utf-8") as writer:
                 writer.write(text)
         except Exception as e:
             logger.error(f"Error during file processing: {str(e)}")
         api_end_time = datetime.now(timezone.utc)
+
         if destination:            
             status = {
                 "stage":"document-to-text",
@@ -261,6 +255,9 @@ async def extract_text(
                 "start": api_start_time.isoformat(),
                 "end": api_end_time.isoformat()
             }
+            existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
+            if not existing_applicant:
+                raise HTTPException(status_code=404, detail=f"Applicant was not found")
             existing_applicant.status['stages'].append(status)
             existing_applicant.meta.update(dbh.update_meta(existing_applicant.meta, updated_by))
             flag_modified(existing_applicant, 'status')
@@ -313,6 +310,11 @@ async def extract_text(
                 raise HTTPException(
                     status_code=460, detail=f"error updating the applicant details {str(e)}"
                 )
+            try:
+                logger.info(f"========calling delete_records_by_applicant_uuid for applicant_uuid : {request.uuid}")
+                await solrh.delete_records_by_applicant_uuid(request.uuid)
+            except Exception as e:
+                logger.error(f"Exception In Exception block while deleting record from solr for applicant_uuid : {request.uuid}, Error Mesaage: {str(e)}")
             
         if text:
             return {
@@ -503,6 +505,9 @@ async def upload_resumes(
     ENVIRONMENT=os.getenv("ENVIRONMENT", "development")
     allowed_extensions = {"pdf", "docx"} 
     created_applicant = None 
+    mobile_number_existance = None
+    email_number_existance = None
+
     for file in files:
         file_extension = file.filename.split('.')[-1].lower()
         if file_extension not in allowed_extensions:
@@ -521,34 +526,76 @@ async def upload_resumes(
     uploaded_files = []
     base64_images = []
 
+
     for file in files:
         try:
             unique_id = uuid.uuid4()
             original_file_name = f"{unique_id}_{file.filename}"
-            #gcs_path = f"s1/{original_file_name}"
-            # gcs_path = f"{FOLDER}/{original_file_name}"
+
             destination = f"{PERSIMMON_DATA}/{ENVIRONMENT}/resumes/raw/{original_file_name}"
 
-            # Convert UploadFile to SpooledTemporaryFile
-            # temp_file = tempfile.SpooledTemporaryFile()
             content = await file.read()  # Read the file content
             print(f"Attempting to write to {destination}")
             with open(destination, 'wb') as writer:
                 writer.write(content)
+
+            parsed = parser.from_file(destination)
+            text = parsed.get('content', '')
+            text = text if text else ''
+            
+            source = Path(destination)
+            text_destination = source.parent.parent / "processed" / "text" / (source.stem + '.txt')
+            
+            with open(text_destination, 'w',encoding="utf-8") as writer:
+                writer.write(text)
+            
+            mobile_pattern = re.compile(r"(?:\+\d{1,3}[-.\s]?)?\d{10}")
+
+            email_pattern = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
+
+            mobile_matches = mobile_pattern.findall(text)
+
+            email_matches = email_pattern.findall(text)
+
+            job_id = Job.get_by_code(session=session, code=job_code).id
+
+            if mobile_matches:
+                mobile_number_existance = Applicant.get_by_mobile_number(
+                                            session=session, mobile_number=mobile_matches[0],
+                                            job_id=job_id
+                                            )
+
+            if email_matches:
+                email_number_existance = Applicant.get_by_email_id( 
+                                            session=session, email_id=email_matches[0],
+                                            job_id=job_id
+                                        )
+            
+            if  email_number_existance or mobile_number_existance:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"applicant already exists {destination}"
+                )
+
             print(f"successfully written to destination")
             uploaded_files.append(destination)
             file_extension = file.filename.split('.')[-1].lower()
             try:
                 if file_extension == "pdf":
-                    image_base64 = imageh.extract_first_image_from_pdf(BytesIO(content))
+                    image_base64 = imageh.extract_first_face_from_pdf(BytesIO(content))
                 elif file_extension == "docx":
-                    image_base64 = imageh.extract_first_image_from_docx(BytesIO(content))
+                    image_base64 = imageh.extract_first_face_from_docx(BytesIO(content))
             except HTTPException as e:
                 raise e
             base64_images.append(image_base64)
         except Exception as e:
             print(f"exception while converting document to text: {str(e)}")
             errors.append(str(e))
+
+    if len(base64_images) < len(uploaded_files):
+        diff = len(uploaded_files) - len(base64_images)
+        diff = [None] * diff
+        base64_images.extend(diff)
 
     end_time = time.time()
     duration = round(end_time - start_time, 2)
@@ -573,7 +620,7 @@ async def upload_resumes(
         details = {
             "original_resume":uploaded_file,
             "context":"document-added",
-            "file_upload":uploaded_file,
+            "file_upload": str(text_destination),
             "applicant_image": base64_images[index]
             }
         api_end_time = datetime.now(timezone.utc)
@@ -604,10 +651,10 @@ async def upload_resumes(
         #Send a message to Pub/Sub after successful uploads
         try:
             pubsub_message = {
-                "endpoint": f"{base_url}/api/v1/resumes/extract-text",
+                "endpoint": f"{base_url}/api/v1/ai/text-to-json",
                 "token": original_token,
                 "payload": {
-                    "source": uploaded_file,
+                    "source": str(text_destination),
                     "uuid": applicant_uuid
                 }
             }
@@ -617,7 +664,6 @@ async def upload_resumes(
         except Exception as e:
             logger.error(f"Failed to send Pub/Sub message: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to send Pub/Sub message: {str(e)}")
-
     # Return the response
     return {
         "uploaded_files": uploaded_files,
@@ -831,31 +877,18 @@ async def flatten(
     existing_applicant = None
 
     try:
-        existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
-        #to stop the applicant creation when duplicate api calls happens . 
-        #if applicant is already created, then return the message
-        if not existing_applicant:
-            raise HTTPException(status_code=404,detail=f"Applicant was not found")
-        
-        stage_exist = any(stage["stage"] == "flatten" for stage in existing_applicant.status["stages"])
-        if stage_exist:
-            return "The stage already got processed"
-        
-        applicant_exist = await solrh.is_applicant_exist(request.uuid)
-        if applicant_exist:
-            return "applicant already exist"
-
         source = Path(request.source)
         destination = source.parent.parent / "flat" / (source.stem + ".json")
         with open(request.source, "r",encoding="utf-8") as reader:
             data_to_be_processed = reader.read()
         json_to_be_processed = json.loads(data_to_be_processed) 
-        job_code = Job.get_code_with_id(session=session, id=existing_applicant.job_id)
+        
+        existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
         if not existing_applicant:
-            raise HTTPException(status_code=404, detail=f'Applicant with id as was not found')
+            raise HTTPException(status_code=404,detail=f"Applicant was not found")
+        job_code = Job.get_code_with_id(session=session, id=existing_applicant.job_id)
 
         logger.info(f"========= flattening for solr: json_to_be_processed: {json_to_be_processed}")
-            
        # Flatten and process the data for Solr
         flattened_data_solr = await jsonh.flatten_resume_data_solr(json_to_be_processed)
         flattened_data_solr = datah.convert_nulls_to_empty_strings(flattened_data_solr)
@@ -870,6 +903,7 @@ async def flatten(
         logger.info(f"========= before writing to destination {str(destination)}")
         # Upload data to Solr
         response = await solrh.upload_to_solr(flattened_data_solr)
+        logger.info(f"========= solr upload done for applicant_uuid: {request.uuid}")
         logger.info(f"========= solrh.upload_to_solr(flattened_data_solr): response: {response}")
         if response["status_code"] != 200:
             raise Exception(f"status: {response['status_code']} message: {response['message']}")
@@ -890,6 +924,7 @@ async def flatten(
         existing_details = existing_applicant.details
         details = flattened_data
         details["original_resume"] = existing_details["original_resume"]
+        details["applicant_image"] = existing_details["applicant_image"]
         details["file_upload"] = str(destination)
         existing_applicant.details = details
         existing_applicant.status['stages'].append(status)
@@ -897,6 +932,7 @@ async def flatten(
         existing_applicant.meta.update(dbh.update_meta(existing_applicant.meta, updated_by))
         flag_modified(existing_applicant, 'status')
         existing_applicant.update(session=session)
+
         logger.info(f"========= updated the status")
 
         return {
@@ -924,9 +960,22 @@ async def flatten(
             existing_applicant.meta.update(dbh.update_meta(existing_applicant.meta, updated_by))
             flag_modified(existing_applicant, 'status')
             existing_applicant.update(session=session)
+        
+        try:
+            logger.info(f"========calling delete_records_by_applicant_uuid for applicant_uuid : {request.uuid}")
+            await solrh.delete_records_by_applicant_uuid(request.uuid)
+        except Exception as e:
+            logger.error(f"Exception In Exception block while deleting record from solr for applicant_uuid : {request.uuid}, Error Mesaage: {str(e)}")
 
         logger.error(f"flatten: str{e}")
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        try:
+            logger.info(f"========calling delete_duplicate_records for applicant_uuid : {request.uuid}")
+            time.sleep(4)
+            await solrh.delete_duplicate_records(request.uuid)
+        except Exception as e:
+            logger.error(f"Exception In Finally block while deleting duplicate records from solr for applicant_uuid : {request.uuid}, Error Mesaage: {str(e)}")
 
 @router.post("/legacy-flatten-for-solr")
 async def leagacy_flattern_resume_data_from_solr(

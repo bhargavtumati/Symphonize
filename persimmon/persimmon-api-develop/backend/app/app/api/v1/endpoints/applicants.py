@@ -7,14 +7,16 @@ from typing import Dict, List, Optional
 from uuid import UUID
 from app.models.company import Company
 from fastapi.responses import JSONResponse
-import httpx,traceback
+import httpx
 import requests
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from pydantic import ValidationError
+from pydantic import ValidationError, EmailStr
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 from app.api.v1.endpoints.models.applicant_model import (
-    ApplicantPartialUpdate, ApplicantRequest, FilterRequest, PayloadModel,Message, ApplicantModel, MeetingModel)
+    ApplicantPartialUpdate, ApplicantRequest, FilterRequest, PayloadModel,Message, ApplicantModel, MeetingModel,
+    FeedbackPayload)
 from app.db.session import get_db
 from app.helpers import db_helper as dbh, gcp_helper as gcph, solr_helper as solrh, date_helper as dateh, zoom_helper as zoomh, regex_helper as regexh, email_helper as emailh
 from app.helpers.firebase_helper import verify_firebase_token
@@ -24,7 +26,7 @@ from app.models.applicant import Applicant, InterviewType
 from app.models.job import Job
 from app.models.stages import Stages
 from app.models.integration import Integration
-import math,traceback
+import math
 from app.services import applicants as ap
 from urllib.parse import quote
 from datetime import datetime, timezone, timedelta
@@ -39,9 +41,12 @@ router = APIRouter()
 
 meta: dict[str, str] = {"api_reference": "https://github.com/symphonize/persimmon-api"}
 
+
+
 router = APIRouter()
 SOLR_BASE_URL=os.getenv("SOLR_BASE_URL")
 PERSIMMON_DATA_BUCKET=os.getenv("PERSIMMON_DATA_BUCKET")
+
 
 @router.post("/upload-resume")
 async def upload_resumes(
@@ -132,15 +137,12 @@ async def partial_update(
         }
 
     except HTTPException as e:
-        traceback.print_exc()
         raise e
         
     except Exception as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
     except httpx.RequestError as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error connecting to Solr: {str(e)}")
 
 @router.post("/filter")
@@ -238,14 +240,13 @@ async def get_applicant(
                 "details": applicant_exists.details,
                 "stage_uuid": applicant_exists.stage_uuid,
                 "job_id": applicant_exists.job_id,
+                "feedback": applicant_exists.feedback,
                 "uuid": applicant_exists.uuid
             }
         }
     except HTTPException as e:
-        traceback.print_exc()
         raise e
     except Exception as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -271,11 +272,9 @@ def get_resume(
         return gcph.retrieve_from_gcp(bucket_name=PERSIMMON_DATA_BUCKET, file_path=file_path, download_filename=download_filename, action=action)
     
     except HTTPException as e:
-        traceback.print_exc()
         raise e
 
     except Exception as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/career-page")
@@ -434,8 +433,9 @@ async def upload_to_solr(
 
 @router.post('/{uuid}/create-meeting')
 def create_meeting(
-    uuid: str,
-    end_time: str,
+    uuid: UUID,
+    end_time: datetime,
+    from_address: EmailStr,
     interview_type: InterviewType,
     meeting_details: MeetingModel,
     user_id: Optional[str] = None,
@@ -496,13 +496,59 @@ def create_meeting(
             <p>-The Persimmmon Team</p>
             """
 
-        applicant = Applicant.get_by_uuid(session=session, uuid=uuid)
+        applicant = Applicant.get_by_uuid(session=session, uuid=str(uuid))
         to_addresses = [meeting.email for meeting in meeting_details.settings.meeting_invitees]
         to_addresses += [email, applicant.details.get('personal_information').get('email')]
-        from_address = os.getenv("FROM_ADDRESS")
         emailh.send_email(subject="Scheduled an Interview",body=body,to_email=to_addresses,from_email=from_address,reply_to_email=email)
 
         return create_response
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@router.post("/{applicant_uuid}/feedback")
+async def add_feedback(
+    applicant_uuid: UUID,
+    feedback: FeedbackPayload,
+    session: Session = Depends(get_db),
+    token: dict = Depends(verify_firebase_token)
+):
+    """
+    Add feedback for an applicant.
+
+    Args:
+        applicant_uuid (str): The applicant UUID for which feedback needs to be added.
+        feedback (FeedbackPayload): The feedback details to be added.
+
+    Returns:
+        JSON response indicating success or failure.
+    Raises:
+        HTTPException: If the applicant is not found or invalid feedback format.
+    """
+    try:
+        applicant_existed: Applicant = Applicant.get_by_uuid(session=session, uuid=str(applicant_uuid))
+
+        if not applicant_existed:
+            raise HTTPException(status_code=404, detail="Applicant not found")
+
+        feedback_dict = feedback.model_dump().get("feedback", [])
+        if not isinstance(feedback_dict, list):
+            raise HTTPException(status_code=400, detail="Feedback must be a list")
+
+        if applicant_existed.feedback:
+            applicant_existed.feedback.append(feedback_dict[0])
+            flag_modified(applicant_existed, "feedback")  # Ensure JSONB field is updated
+        else:
+            applicant_existed.feedback = feedback_dict
+
+        applicant_existed.update(session=session)
+
+        return {"status": "success", "message": "Feedback updated successfully"}
+
+    except HTTPException:
+        raise  
+    except Exception as e:
+        session.rollback()  
+        raise HTTPException(status_code=500, detail=f"Unexpected Error: {str(e)}")

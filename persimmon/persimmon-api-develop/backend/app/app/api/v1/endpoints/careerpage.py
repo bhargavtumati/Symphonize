@@ -8,7 +8,7 @@ from app.helpers import db_helper as dbh
 from app.helpers.firebase_helper import verify_firebase_token
 from app.api.v1.endpoints.models.customization_model import CustomizationModel
 from app.models.company import Company
-import base64,traceback
+import base64
 import json
 
 router = APIRouter()
@@ -36,10 +36,8 @@ def get_customization_settings(
             "status": status.HTTP_200_OK
         }
     except HTTPException as e:
-        traceback.print_exc()
         raise e
     except Exception as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/customization/domain/{name}")
@@ -53,9 +51,9 @@ async def create_or_update_customization(
     ),
     enable_dark_mode: Optional[bool] = Form(False),
     color_selected: Optional[str] = Form(None),
-    primary_colors: Optional[str] = Form(None),
+    primary_colors: Optional[str] = Form("[\"#F97316\", \"#0EA5E9\", \"#22C55E\", \"#EF4444\", \"#A855F7\"]"),
     selected_header_color: Optional[str] = Form(None),
-    header_colors: Optional[str] = Form(None),
+    header_colors: Optional[str] = Form("[\"#F97316\", \"#0EA5E9\", \"#22C55E\", \"#EF4444\", \"#A855F7\"]"),
     font_style: Optional[str] = Form(None),
     image: Optional[UploadFile] = File(None),
     icon: Optional[UploadFile] = File(None),
@@ -177,10 +175,8 @@ async def create_or_update_customization(
             customization_data = customization.create(session=session, created_by=email)
 
     except Exception as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
     except HTTPException as e:
-        traceback.print_exc()
         raise e
 
     return {
@@ -215,8 +211,6 @@ def get_customization_settings(
             "data": customization_settings.settings
         }
     except HTTPException as e:
-        traceback.print_exc()
         raise e
     except Exception as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from app.helpers.regex_helper import get_domain_from_email
 import tldextract
+import traceback
 from app.models.recruiter import Recruiter
 from app.models.stages import Stages
 from app.helpers.company_helper import get_or_create_company, handle_company_association
@@ -119,8 +120,10 @@ def create_job(
         )
 
     except HTTPException as e:
+        traceback.print_exc()
         raise e
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get('')

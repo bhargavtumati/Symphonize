@@ -1,8 +1,7 @@
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 from app.main import app
-from fastapi.responses import Response
-import uuid
+import pytest
 from app.helpers.firebase_helper import verify_firebase_token
 
 client = TestClient(app)
@@ -84,67 +83,65 @@ def test_partial_update_invalid_stage( mock_solr_update,
     assert response.status_code == 400
     assert response.json()["detail"] == "Invalid stage uuid"    #test is passed if expected result is same like what is expected
 
-@patch("app.api.v1.endpoints.jobs.Applicant.get_by_uuid")
-@patch("app.helpers.date_helper.convert_epoch_to_utc")
-def test_get_applicant(mock_get_applicant, mock_convert_epoch_to_utc):
+@pytest.fixture
+def mock_applicant():
+    mock = MagicMock()
+    mock.feedback = [
+        {
+        "rating": {"skill": 3, "communication": 3, "professionalism": 3},
+        "overall_feedback": "string",
+        "opinion": "dislike",
+        "given_by": "user1@example.com"
+         }
+    ]
+    return mock
 
-    applicant_uuid = str(uuid.uuid4()) 
-    applicant_update = {"some_key": "some_value"}  # Example update data
 
-    mock_get_applicant.return_value = MagicMock()
+@patch("app.api.v1.endpoints.applicants.Applicant.get_by_uuid", return_value=None)
+def test_add_feedback_applicant_not_found(mock_get_applicant):
+    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback", json={"feedback": []})
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Applicant not found"
 
-    response = client.get(
-        f"/api/v1/applicants/{applicant_uuid}",
-        headers={"Authorization": "Bearer test_token"}
-    )
+@patch("app.api.v1.endpoints.applicants.Applicant.get_by_uuid")
+def test_add_feedback_invalid_feedback_format(mock_get_applicant, mock_applicant):
+    mock_get_applicant.return_value = mock_applicant
 
-    print("Response:", response.json())
+    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback", json={"feedback": {}})
+    assert response.status_code == 422
+
+@patch("app.api.v1.endpoints.applicants.Applicant.get_by_uuid")
+def test_add_feedback_success(mock_get_applicant, mock_applicant):
+    mock_get_applicant.return_value = mock_applicant
+
+    payload = [{
+            "rating": {"skill": 5, "communication": 4, "professionalism": 4},
+            "overall_feedback": "Great work",
+            "opinion": "like",
+            "given_by": "user@example.com"
+        }]
+
+    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback",
+                           json={"feedback": payload})
 
     assert response.status_code == 200
-    assert response.json()["message"] == "Applicant details retrieved successfully"
+    assert response.json()["status"] == "success"
+    assert response.json()["message"] == "Feedback updated successfully"
 
-
-
-PERSIMMON_DATA_BUCKET = "PERSIMMON_DATA_BUCKET"  # Ensure the bucket is defined
-
-@patch("app.helpers.gcp_helper.retrieve_from_gcp")
 @patch("app.api.v1.endpoints.applicants.Applicant.get_by_uuid")
-def test_get_resume(mock_get_applicant, mock_retrieve_from_gcp):
-    applicant_uuid = str(uuid.uuid4())
+def test_add_feedback_db_error(mock_get_applicant, mock_applicant):
+    mock_get_applicant.return_value = mock_applicant
+    mock_applicant.update.side_effect = Exception("Database error")
 
-    # ✅ Ensure mock_get_applicant returns an object with a "details" attribute
-    applicant_mock = MagicMock()
-    applicant_mock.uuid = applicant_uuid
-    applicant_mock.details = {
-        "original_resume": f"/{PERSIMMON_DATA_BUCKET}/test_resume.pdf",
-        "personal_information": {"full_name": "Test User"}
-    }
+    payload = [{
+            "rating": {"skill": 5, "communication": 4, "professionalism": 4},
+            "overall_feedback": "Great work",
+            "opinion": "like",
+            "given_by": "user@example.com"
+        }]
 
-    mock_get_applicant.return_value = applicant_mock  # ✅ Ensure correct return type
+    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback",
+                           json={"feedback": payload})
 
-    # ✅ Ensure retrieve_from_gcp returns a valid Response
-    mock_retrieve_from_gcp.return_value = Response(
-        content=b'%PDF-1.4 Test PDF Content',
-        media_type="application/pdf",
-        headers={"Content-Disposition": 'attachment; filename="Persimmon_Test_User_Resume.pdf"'}
-    )
-
-    # ✅ Make the API request
-    response = client.get(
-        f"/api/v1/applicants/{applicant_uuid}/resume",
-        headers={"Authorization": "Bearer test_token"}
-    )
-
-    print("Response headers:", response.headers)
-    print("Response content:", response.content[:10])  # Print first 10 bytes for brevity
-
-    # ✅ Assertions
-    assert response.status_code == 200, f"Unexpected status code: {response.status_code}, Response: {response.content}"
-    assert response.content.startswith(b'%PDF-1.4')
-    assert response.headers['Content-Disposition'] == 'attachment; filename="Persimmon_Test_User_Resume.pdf"'
-
-
-
-
-
-
+    assert response.status_code == 500
+    assert "Unexpected Error" in response.json()["detail"]

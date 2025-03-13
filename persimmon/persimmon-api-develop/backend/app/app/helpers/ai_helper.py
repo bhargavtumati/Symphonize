@@ -294,7 +294,7 @@ Before processing ANY part of the resume, you MUST first standardize ALL dates u
    - December/Dec → "12"
 
 3. Current Date References:
-   Replace ANY of these terms with "01/2025":
+   Replace ANY of these terms with "{current_date}":
    - "present"
    - "current"
    - "till date"
@@ -398,9 +398,14 @@ Rules for missing information:
 4. For missing locations, use empty string
 5. For missing team/company size, infer from context
 
+Note:
+    - do not consider the projects under the experience, consider only interships and work experience under experience key
+
 Here is the resume:
 {resume}
 """
+
+# if the text does not contain any range for internship and given as 3 or 6 or 9 months of internship then consider that 3 or 6 or 9 months only and assign as some range of dates to match that internship.
 
 
 async def extract_features_from_resume(
@@ -426,10 +431,10 @@ async def extract_features_from_resume(
     )
     prompt = PromptTemplate(
         template=prompt_template,
-        input_variables={"text"},  # Consistent dictionary syntax
+        input_variables={"text", "current_date"},  # Consistent dictionary syntax
     ) 
    
-    input_data = {"resume": text}
+    input_data = {"resume": text, "current_date": datetime.now().strftime("%m/%Y")}
     chain = prompt | llm
 
     # Retry loop for handling transient JSON parsing issues

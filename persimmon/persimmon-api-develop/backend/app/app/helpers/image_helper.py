@@ -1,10 +1,12 @@
 import fitz
 import base64
+import cv2
+import numpy as np
 from docx import Document
 from io import BytesIO
 from fastapi import HTTPException
 
-def extract_first_image_from_pdf(image_bytes: BytesIO):
+def extract_first_face_from_pdf(image_bytes: BytesIO):
     try:
         pdf_document = fitz.open(stream=image_bytes, filetype="pdf")
         
@@ -12,25 +14,53 @@ def extract_first_image_from_pdf(image_bytes: BytesIO):
             page = pdf_document.load_page(0)  
             image_list = page.get_images(full=True)
 
-            if image_list:  
-                xref = image_list[0][0] 
-                base_image = pdf_document.extract_image(xref)
-                image_bytes = base_image["image"]
-                return base64.b64encode(image_bytes).decode("utf-8") 
+            if image_list:
+                face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+                
+                for img in image_list:
+                    xref = img[0] 
+                    base_image = pdf_document.extract_image(xref)
+                    image_data = base_image["image"]
+                    
+                    # Convert image to OpenCV format
+                    np_img = np.frombuffer(image_data, dtype=np.uint8)
+                    img_cv = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+
+                    # Convert to grayscale for face detection
+                    gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+
+                    # Detect faces
+                    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+                    if len(faces) > 0:
+                        return base64.b64encode(image_data).decode("utf-8")
 
         return None 
     except Exception as e:
-        raise HTTPException(status_code=400, detail="Error extracting image from PDF")
+        raise HTTPException(status_code=400, detail=f"Error extracting face image from PDF: {str(e)}")
 
-def extract_first_image_from_docx(docx_path: BytesIO):
+def extract_first_face_from_docx(docx_path: BytesIO):
     try:
         doc = Document(docx_path)
-        
+        face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+
         for rel in doc.part.rels.values():
-            if "image" in rel.target_ref: 
+            if "image" in rel.target_ref:
                 image = rel.target_part.blob  
-                return base64.b64encode(image).decode("utf-8") 
+
+                # Convert image to OpenCV format
+                np_img = np.frombuffer(image, dtype=np.uint8)
+                img_cv = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+
+                # Convert to grayscale for face detection
+                gray = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
+                
+                # Detect faces
+                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+                if len(faces) > 0: 
+                    return base64.b64encode(image).decode("utf-8")
 
         return None  
     except Exception as e:
-        print(e)
+        raise HTTPException(status_code=400, detail=f"Error extracting face image from docx: {str(e)}")

@@ -6,6 +6,7 @@ from app.models.job import JobStatusTypeEnum, JobTypeEnum, WorkplaceTypeEnum
 from datetime import datetime
 from app.api.v1.endpoints.models.common_models import QuestionAnswerDict 
 
+
 JOB_TITLE_FIELD = "Job title"
 JOB_DESCRIPTION_FIELD = "Job description"
 MINIMUM_EXPERIENCE_FIELD = "Minimum experience"
@@ -22,11 +23,11 @@ class JobModel(BaseModel):
     team_size: str
     min_salary: float
     max_salary: float
-    min_experience: int
-    max_experience: int
+    min_experience: float
+    max_experience: float
     target_date: datetime
     description: str
-    enhanced_description: Optional[dict] = None
+    enhanced_description: dict
     is_posted_for_client: bool
     company: CompanyModel
     ai_clarifying_questions: Optional[List[QuestionAnswerDict]] = Field(default_factory=list)
@@ -88,6 +89,10 @@ class JobModel(BaseModel):
         max_experience = values.max_experience
         min_salary = values.min_salary
         max_salary = values.max_salary
+
+        for field_name, value in [("min_experience", min_experience), ("max_experience", max_experience)]:
+            if "." in str(value) and len(str(value).split(".")[-1]) > 1:
+                raise ValueError(f"{field_name} must have only one digit after the decimal")
     
         if min_experience >= max_experience:
             raise ValueError("Minimum experience cannot be greater than or equal to maximum experience")
@@ -106,8 +111,8 @@ class JobPartialUpdate(BaseModel):
     team_size: Optional[str] = None
     min_salary: Optional[float] = None
     max_salary: Optional[float] = None
-    min_experience: Optional[int] = None
-    max_experience: Optional[int] = None
+    min_experience: Optional[float] = None
+    max_experience: Optional[float] = None
     target_date: Optional[datetime] = None
     description: Optional[str] = None
     is_posted_for_client: Optional[bool] = None

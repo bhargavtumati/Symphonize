@@ -6,6 +6,10 @@ from app.utils.validators import (
     is_non_empty, validate_email_address, validate_length, validate_linkedin_url, 
     validate_mobile_number, validate_name_with_fullstop, validate_Preference,
     validate_numeric_range, validate_industry_type, validate_job_location, get_education_institutions_list)
+from datetime import datetime
+from zoneinfo import available_timezones
+
+from enum import Enum
 
 class SocialMedia(BaseModel):
     github: Optional[str] = ""
@@ -224,8 +228,8 @@ class Availability(BaseModel):
         
     @field_validator('value')
     def validate_value(cls, value):
-        if value not in [0, 15, 30, 45, 60, 75, 90, 99]:
-            raise ValueError("value must be one of: 0, 15, 30, 45, 60, 75, 90 or 99")
+        if not (0 <= value <= 99):
+            raise ValueError("value must be within the range 0 to 99")
         return value
 
 
@@ -278,7 +282,7 @@ class TransitionBehaviour(BaseModel):
     
     @field_validator('value')
     def validate_value(cls, value):
-        validate_numeric_range(value, 0, 5, "value")
+        validate_numeric_range(value, 0, 50, "value")
         return value
 
 
@@ -417,6 +421,50 @@ class MeetingModel(BaseModel):
     schedule_for: Optional[str] = None
     allow_multiple_devices: Optional[bool] = None
     settings: Settings
-    start_time: str
+    start_time: datetime
     timezone: Optional[str] = None
     topic: str
+
+    @field_validator("timezone")
+    def validate_timezone(cls, value):
+        if value not in available_timezones():
+            raise ValueError(f"Invalid timezone: {value}")
+        return value
+
+
+# Enum for opinion choices
+class OpinionEnum(str, Enum):
+    LIKE = "LIKE"
+    DISLIKE = "DISLIKE"
+
+# Rating model with constraints using Field()
+class Rating(BaseModel):
+    skill: int = Field(..., ge=1, le=5)  # Rating between 0 and 10
+    communication: int = Field(..., ge=1, le=5)
+    professionalism: int = Field(..., ge=1, le=5)
+
+# Feedback item model
+class FeedbackItem(BaseModel):
+    rating: Rating
+    overall_feedback: str
+    opinion: Optional[OpinionEnum]
+    given_by: EmailStr  # Ensures it's a valid email
+
+# Main payload model
+class FeedbackPayload(BaseModel):
+    feedback: List[FeedbackItem]
+
+class ShareRequest(BaseModel):
+    job_code: str
+    job_title: str
+    sender: EmailStr
+    email_type: str
+    recipient_email: EmailStr  
+    applicant_uuids: List[str] 
+    hide_salary: bool  
+
+    @field_validator('email_type')
+    def validate_email_type(cls, email_type):
+        if email_type not in ['default', 'brevo', 'sendgrid']:
+            raise ValueError("Invalid email_type. Allowed values are 'default', 'brevo' and 'sendgrid'")
+        return email_type    

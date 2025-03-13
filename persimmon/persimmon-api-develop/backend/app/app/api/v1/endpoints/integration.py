@@ -178,13 +178,15 @@ async def create_email_integration(
     session: Session = Depends(get_db)
 ):   
     try:
+        name = name.lower().strip()
+        if name not in ['brevo', 'sendgrid']:
+            raise HTTPException(status_code=400, detail=f"Invalid email service name '{name}'. Allowed values are 'brevo' and 'sendgrid'")
+
         email = token['email']
         domain = regexh.get_domain_from_email(email=email)
 
         if not domain:
             raise HTTPException(status_code=404,detail="Domain is invalid")
-        
-        name = name.lower().strip()
         
         if name == 'brevo':
             await emailh.get_brevo_senders(api_key = request.api_key)
@@ -440,3 +442,132 @@ async def send_test_email(
         raise he
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error sending email : {str(e)}")
+    
+
+@router.get('/email/{name}/verify-status')
+def verify_integration_status(
+    name: str,
+    token: dict = Depends(verify_firebase_token),
+    session: Session = Depends(get_db)
+):
+    try:
+        name = name.lower().strip()
+        email = token['email']
+        domain = regexh.get_domain_from_email(email=email)
+        if not domain:
+            raise HTTPException(status_code=404,detail="Domain is invalid")
+
+        company_details = Company.get_by_domain(session=session,domain=domain)
+        if not company_details:
+            raise HTTPException(status_code=404,detail="Company details not found")
+
+        integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='email')
+        print("integration : ", integration)
+        if integration:
+            credentials = integration.credentials
+            for cred in credentials.get('credentials'):
+                if cred.get('service_type') == name:
+                    return True
+                
+        return False
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+    
+
+@router.get('/email/{name}/api_key')
+def get_api_key(
+    name: str,
+    token: dict = Depends(verify_firebase_token),
+    session: Session = Depends(get_db)
+):
+    try:
+        name = name.lower().strip()
+        email = token['email']
+        domain = regexh.get_domain_from_email(email=email)
+        if not domain:
+            raise HTTPException(status_code=404,detail="Domain is invalid")
+
+        company_details = Company.get_by_domain(session=session,domain=domain)
+        if not company_details:
+            raise HTTPException(status_code=404,detail="Company details not found")
+
+        integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='email')
+        if not integration:
+            raise HTTPException(status_code=404,detail="Email Integration details not found")
+        
+        credentials = integration.credentials
+        api_key = ""
+        for cred in credentials.get('credentials'):
+            if cred.get('service_type') == name:
+                api_key = cred['api_key'] 
+            
+        if not api_key:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{name} service not found")
+                
+        return {
+            "message": f"{name} api key fetched successfully",
+            "status" : 200,
+            "api_key": api_key
+        }
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+
+@router.get('/email/verify-from-address')
+async def verify_from_address_status(
+    token: dict = Depends(verify_firebase_token),
+    session: Session = Depends(get_db)
+):
+    try:
+        email = token['email']
+        domain = regexh.get_domain_from_email(email=email)
+        if not domain:
+            raise HTTPException(status_code=404,detail="Domain is invalid")
+
+        company_details = Company.get_by_domain(session=session,domain=domain)
+        if not company_details:
+            raise HTTPException(status_code=404,detail="Company details not found")
+
+        integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='email')
+        if not integration:
+            return {
+                "status": status.HTTP_200_OK,
+                "message": "Email Integration details not found",
+                "data": False
+            }
+        
+        credentials = integration.credentials
+        for cred in credentials.get('credentials'):
+            if cred.get('service_type') == 'sendgrid':
+                api_key = cred['api_key']
+                senders = await emailh.get_sendgrid_senders(api_key = api_key)
+                if email in senders:
+                    return {
+                        "status": status.HTTP_200_OK,
+                        "message": "Your email found within the sendgrid integrated email service",
+                        "data": True
+                    }
+                
+            if cred.get('service_type') == 'brevo':
+                api_key = cred['api_key']
+                senders = await emailh.get_brevo_senders(api_key = api_key)
+                if email in senders:
+                    return {
+                        "status": status.HTTP_200_OK,
+                        "message": "Your email found within the brevo integrated email service",
+                        "data": True
+                    }
+
+        return {
+            "status": status.HTTP_200_OK,
+            "message": "Your email not found within any integrated email service, please contact your administrator",
+            "data": False
+        }
+
+    except HTTPException as e:
+        raise e

@@ -13,7 +13,7 @@ from app.api.v1.endpoints import (
     email,
     zrapplicants,
     templates,
-    microsoftmeet
+    share_applicants
 )
 
 api_router = APIRouter()
@@ -30,4 +30,4 @@ api_router.include_router(stages.router, prefix="/stages", tags=["stages"])
 api_router.include_router(email.router, prefix="/email", tags=["email"])
 api_router.include_router(zrapplicants.router, prefix="/zrapplicants", tags=["zrapplicants"])
 api_router.include_router(templates.router, prefix="/template", tags=["template"])
-api_router.include_router(microsoftmeet.router, prefix="/microsoftmeet", tags=["microsoftmeet"])
+api_router.include_router(share_applicants.router, prefix="/share", tags=["share applicants"])

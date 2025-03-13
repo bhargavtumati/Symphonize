@@ -1,9 +1,13 @@
+import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from fastapi.testclient import TestClient
 from app.main import app
 from app.helpers.firebase_helper import verify_firebase_token
 from app.api.v1.endpoints.models.stages_model import StagesPartialUpdate
 from app.models.stages import Stages
+from app.models.job import Job, JobStatusTypeEnum, JobTypeEnum, WorkplaceTypeEnum
+from app.helpers import db_helper as dbh  # Ensure this import is correct based on your project structure
+import json
 import uuid
 
 client = TestClient(app)
@@ -106,7 +110,7 @@ def test_update_stages_job_not_found(mock_get_by_id):
     mock_stages_partial_update = (StagesPartialUpdate(stages=[
         {"uuid": "fbc5589e-9931-4d60-87ec-0c38bfd9c4e1", "name": "Shortlisted"},
         {"uuid": "7f32cc9e-e5fb-4cfb-9ae7-32e8d13648d1", "name": "Selected"},
-        {"uuid": "52795e02-13e4-4452-9322-715001c58ff7", "name": "Rejected"}
+        {"uuid": "52795e02-13e4-4452-9322-715001c58ff7", "name": "Rejected"} 
     ]))
 
     response = client.patch(
@@ -114,5 +118,6 @@ def test_update_stages_job_not_found(mock_get_by_id):
         json=convert_uuids_to_strings(mock_stages_partial_update.model_dump()),
         headers={"Authorization": "Bearer test_token"}
     )
+
     assert response.status_code == 404
     assert response.json()["detail"] == "Job not found"

@@ -65,11 +65,8 @@ def convert_epoch_to_utc(epoch_timestamp):
     return utc_time.isoformat()
 
 def calculate_duration_in_minutes(start_time, end_time):
-    # Parse the strings into datetime objects
-    start = datetime.fromisoformat(start_time)
-    end = datetime.fromisoformat(end_time)
-    if end <= start:
+    if end_time <= start_time:
         raise HTTPException(status_code=400,detail="Start date/time cannot be greater than or equal to end date/time")
     # Calculate the difference in minutes
-    duration = (end - start).total_seconds() / 60  # Convert seconds to minutes
+    duration = (end_time - start_time).total_seconds() / 60  # Convert seconds to minutes
     return int(duration)

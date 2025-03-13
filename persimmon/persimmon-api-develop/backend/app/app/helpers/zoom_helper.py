@@ -80,7 +80,7 @@ def get_user_by_id(token,user_id):
         }
         response = requests.get(url, headers=headers)
         response_json = response.json()
-        if response.status_code == 404:
+        if response.status_code == 404 or response.status_code == 400:
             raise HTTPException(status_code=response.status_code, detail=response_json.get('message'))
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response_json.get('reason'))

@@ -1,12 +1,13 @@
 import json
 import os
-import re
+import re, io
 from typing import List
 from fastapi import HTTPException
 from pytz import all_timezones
 import validators
 import tldextract
 from app.models.master_data import MasterData
+from PIL import Image
 
 def is_non_empty(value: str, field_name: str) -> str:
     if not value.strip():
@@ -60,6 +61,27 @@ def validate_linkedin_url(value: str) -> str:
 def validate_linkedin_company_url(value: str) -> str:
     if not (value.startswith("https://www.linkedin.com/company/") or value.startswith("https://linkedin.com/company/")):
         raise ValueError("Please enter a valid LinkedIn Company URL")
+    return value
+
+def validate_instagram_url(value: str) -> str:
+    is_non_empty(value, "Instagram URL")
+    pattern = r'^(https://www.instagram.com/)[A-Za-z0-9-_.]{1,30}+/?$'
+    if not re.match(pattern, value):
+        raise ValueError("Please enter valid Instagram URL")
+    return value
+
+def validate_facebook_url(value: str) -> str:
+    is_non_empty(value, "Facebook URL")
+    pattern = r'^(https://www.facebook.com/)[A-Za-z0-9-_.]{5,50}+/?$'
+    if not re.match(pattern, value):
+        raise ValueError("Please enter valid Facebook URL")
+    return value
+
+def validate_x_url(value: str) -> str:
+    is_non_empty(value, "X URL")
+    pattern = r'^(https://x.com/)[A-Za-z0-9-_]{4,15}+/?$'
+    if not re.match(pattern, value):
+        raise ValueError("Please enter valid X URL")
     return value
 
 
@@ -173,3 +195,17 @@ def validate_timezone(tz: str) -> str:
     if tz.title() not in all_timezones:
         raise HTTPException(status_code=400, detail=f"Invalid timezone: {tz}")
     return tz 
+
+@staticmethod
+def decode_and_validate_image(image):
+        file_bytes = image.file.read()
+        image.file.seek(0)  # Reset file pointer for future use
+
+        # Validate if it's an image
+        try:
+            image = Image.open(io.BytesIO(file_bytes))
+            if image.format not in ("JPEG", "PNG"):
+                  raise ValueError("Only JPEG and PNG files are allowed.")
+            image.verify()  # Verify the integrity of the image
+        except Exception:
+              raise ValueError("Invalid image file")

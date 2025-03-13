@@ -42,4 +42,3 @@ class RecruiterModel(BaseModel):
     @field_validator('email_id')
     def validate_email(cls, email_id):
         return validate_professional_email(email_id)
-    

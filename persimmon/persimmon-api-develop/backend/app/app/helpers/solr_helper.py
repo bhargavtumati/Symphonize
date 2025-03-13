@@ -11,7 +11,7 @@ SOLR_URL = f'{SOLR_BASE_URL}/resumes/update/json/docs?overwrite=true'
 SOLR_URL_Query = f'{SOLR_BASE_URL}/resumes/select'
 
 
-async def upload_to_solr( flattened_resume: dict) -> dict:
+async def upload_to_solr(flattened_resume: dict) -> dict:
     """
     Upload a flattened resume to Solr.
     
@@ -22,14 +22,14 @@ async def upload_to_solr( flattened_resume: dict) -> dict:
     # Convert the flattened_resume to JSON format
     json_data = json.dumps(flattened_resume)
     solr_url = SOLR_URL
+    f"========= uploading function to solr for applicant_uuid: {flattened_resume['applicant_uuid']}"
     try:
         # Send the JSON data to Solr
-        response = requests.post(
-            solr_url,
-            headers={"Content-Type": "application/json"},
-            data=json_data,
-            verify=False
-        )
+        async with httpx.AsyncClient(verify=False) as client:
+            response = await client.post(solr_url,
+                headers={"Content-Type": "application/json"},
+                data=json_data
+            )
         
         # Check if the request was successful
         if response.status_code == 200:
@@ -108,26 +108,97 @@ async def update_solr_documents_partially(uuids: list[str],set_uuid:uuid,search_
                     "stage_uuid": {"set": set_uuid}  
                 })
 
-        if not updates:
-            raise HTTPException(status_code=404,detail="No matching documents found to update in solr")
-        update_url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
-        try:
-            print('calling post')
-            update_response = await client.post(update_url, json=updates)
-            print('updated_response',update_response)
-        except httpx.RequestError as e:
-            print(f"Request error occurred: {e}")
-            raise HTTPException(status_code=update_response.status_code,detail=update_response.text)
-        # TODO: Investigate 500 error coming from solr after atomic update happened successfully
+        if len(updates) > 0:
+            update_url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
+            try:
+                print('calling post')
+                update_response = await client.post(update_url, json=updates)
+                print('updated_response',update_response)
+            except httpx.RequestError as e:
+                print(f"Request error occurred: {e}")
+                raise HTTPException(status_code=update_response.status_code,detail=update_response.text)
+            # TODO: Investigate 500 error coming from solr after atomic update happened successfully
+
 
 async def is_applicant_exist(applicant_uuid: str):
-    url = f"{SOLR_BASE_URL}/resumes/select"
+    headers = {"Content-Type": "application/json"}
     params = {
         "q": f"applicant_uuid:\"{applicant_uuid}\"",                
-        "rows": 10,             
+        "rows": 20,             
         "fl": "id,applicant_uuid", 
     }
-    response = requests.get(url, params=params, verify=False)
+    async with httpx.AsyncClient(verify=False) as client:
+        response = await client.get(SOLR_URL_Query, params=params, headers=headers)
+
+    if response.status_code != 200:
+        raise HTTPException(status_code=response.status_code, detail=response.text)
+
     data = response.json()
     res = data['response']['numFound']
     return res
+
+
+async def delete_records_by_applicant_uuid(applicant_uuid: str):
+    """Delete records from Solr based on applicant_uuid."""
+    if not applicant_uuid:
+        return
+
+    delete_query = {"delete": {"query": f'applicant_uuid:"{applicant_uuid}"'}}
+
+    async with httpx.AsyncClient(verify=False) as client:
+        url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
+        response = await client.post(url, json=delete_query)
+        return response.json()
+
+
+async def get_solr_applicant_by_applicant_uuid(applicant_uuid):
+    async with httpx.AsyncClient(verify=False) as client:
+        try:
+            response = await client.get(f"{SOLR_BASE_URL}/resumes/select", params={
+                "q": f"applicant_uuid:\"{applicant_uuid}\"",
+                "rows": 50,
+                "fl": "id,applicant_uuid",
+            })
+
+            if response.status_code != 200:
+                print(f"Solr request failed: {response.status_code} {response.text}")
+                return []  # Return empty list to prevent crashes
+
+            return response.json().get("response", {}).get("docs", [])
+        except Exception as e:
+            print(f"Error fetching data from Solr: {e}")
+            return []
+
+
+async def delete_solr_records(doc_ids):
+    """Delete multiple records from Solr by ID."""
+    if not doc_ids:
+        return
+
+    async with httpx.AsyncClient(verify=False) as client:
+        delete_query = {"delete": [{"id": doc_id} for doc_id in doc_ids]}
+        url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
+        response = await client.post(url, json=delete_query)
+        return response.json()
+
+
+async def delete_duplicate_records(applicant_uuid):
+    """Fetch records, find duplicates, and delete all except the first occurrence."""
+    records = await get_solr_applicant_by_applicant_uuid(applicant_uuid)
+    print(records)
+
+    if not records:
+        print(f"No records found with applicant_uuid : {applicant_uuid}")
+        return
+    duplicates_to_delete = []
+    if len(records)>1:
+        for record in records:
+            duplicates_to_delete.append(record.get("id"))
+        duplicates_to_delete.pop(0)
+            
+    if duplicates_to_delete:
+        print(f"Deleting {(duplicates_to_delete)} duplicate records...")
+        await delete_solr_records(duplicates_to_delete)
+        print("Duplicates removed successfully.")
+    else:
+        print("No duplicates found.")

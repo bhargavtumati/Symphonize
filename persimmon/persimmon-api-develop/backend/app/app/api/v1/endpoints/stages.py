@@ -8,7 +8,7 @@ from app.api.v1.endpoints.models.stages_model import StagesPartialUpdate
 from app.helpers import db_helper as dbh, solr_helper as solrh, stages_helper as stagesh
 from app.models.applicant import Applicant
 import httpx
-import os, traceback
+import os
 
 router = APIRouter()
 SOLR_BASE_URL=os.getenv("SOLR_BASE_URL")
@@ -58,15 +58,13 @@ async def update_stages(
             
         stages_dict = stages.model_dump()
         existing_stages: Stages = Stages.get_by_id(session=session, job_id=job_id)
-        
-        
         if not existing_stages:
             raise HTTPException(status_code=404, detail="Stages not found")
 
         restricted_stages_names = ['Shortlisted', 'Rejected', 'Selected']
         restricted_stages = [stage for stage in existing_stages.stages if stage['name'] in restricted_stages_names]
         stagesh.check_immutable_objects(stages_dict['stages'], restricted_stages)
- 
+
         if len(stages_dict['stages']) > 18:
             raise HTTPException(status_code=400, detail="Maximum 20 stages are allowed")
         
@@ -106,13 +104,10 @@ async def update_stages(
         }
 
     except HTTPException as e:
-        traceback.print_exc()
         raise e
         
     except Exception as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
     except httpx.RequestError as e:
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Error connecting to Solr: {str(e)}")

@@ -49,14 +49,15 @@ def send_email_user(
     token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
 ):
-    if from_email != os.getenv("FROM_ADDRESS"):
-        raise ValueError("The from address is not authorized")
-    reply_to_email = "xyz@symphonize.com"
+    if to_email == [''] or len(to_email) == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one recipient email is required")
+    reply_to_email = "no-reply@symphonize.ai"
     to_email = to_email[0].split(",")
     email_results = []
     failed_emails = []
-    
     try:
+        if from_email != os.getenv("FROM_ADDRESS"):
+            raise ValueError("The from address is not authorized")
         # Validate input parameters
         if not to_email:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one recipient email is required")
@@ -92,7 +93,7 @@ def send_email_user(
                     continue
 
                 email_body, email_subject = emailh.render_email_variables(session=session, to_email=email, body=body, subject=subject, company=company_details, job=job, recuriter=recruiter)
-                result = email_helper.send_email(subject=email_subject, body=email_body, to_email=email, from_email=from_email, reply_to_email=reply_to_email, attachment=files)
+                result = email_helper.send_email(subject=email_subject, body=email_body, to_email=email, from_email=from_email, reply_to_email=reply_to_email, attachments=files)
 
                 if result:
                     email_results.append({"email": email, "status": "success"})
@@ -115,19 +116,14 @@ def send_email_user(
 
         return response
 
-    except HTTPException as he:
-        raise he
+    except ValueError as he:
+        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(he))
     except Exception as e:
         logger.critical(f"Unexpected error in send_email_user: {str(e)}", exc_info=True)
-        session.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error occurred"
         )
-    finally:
-        if files:
-            for file in files:
-                file.close()
 
 
 
@@ -154,7 +150,7 @@ async def send_test_email(
                 logger.warning(f"Invalid email format: {to_email}")
                 failed_emails.append({"email": to_email, "error": "Invalid email format"})
             
-            result = email_helper.send_email(subject=subject, body=body, to_email=to_email, from_email=from_email, reply_to_email=reply_to_email, attachment=files)
+            result = email_helper.send_email(subject=subject, body=body, to_email=to_email, from_email=from_email, reply_to_email=reply_to_email, attachments=files)
             if result: 
                 email_results.append({"email": to_email, "status": "success"})
 

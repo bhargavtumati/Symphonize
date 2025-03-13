@@ -5,6 +5,7 @@ from app.models.applicant import Applicant
 from pydantic import BaseModel
 from app.api.v1.endpoints.models.resume_model import ResumeParseRequest
 from app.helpers.firebase_helper import verify_firebase_token, get_base_url
+from app.helpers import solr_helper as solrh
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from tempfile import SpooledTemporaryFile
@@ -27,64 +28,43 @@ log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=log_level)
 logger = logging.getLogger("ResumeParsing")
 
+
 class JDRequest(BaseModel):
     input: Optional[str] = None
     prompt: str
+
 
 @router.post("/generate-job-description")
 async def generate_job_description(
     jd: JDRequest, token: dict = Depends(verify_firebase_token)
 ):
     try:
-        if not jd.input:
-           full_input = (     
-                (jd.input or "")
-                + "\n"
-                + jd.prompt
-                + "\n"
-                + "Please generate a job description that includes all the skills and expertise mentioned above, ensuring the total number of characters are strictly above 3500, including spaces, special characters also."
-            )
-           
-        ai_response = aih.get_gemini_ai_response(input=full_input)
-
-        return {
-        "job_description": ai_response,
-        "status": status.HTTP_200_OK,
-        "message": "Job description generated successfully"
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
-@router.post("/enhance-job-description")
-async def enhance_job_description(
-    jd: JDRequest, token: dict = Depends(verify_firebase_token)
-):
-    try:
         full_input = (
-            (jd.input)
+            (jd.input or "")
             + "\n"
             + jd.prompt
             + "\n"
-            + "Please do required changes without changing the entire job description, ensuring the total number of characters are strictly above 3500, including spaces, special characters also."
+            + "Please generate a job description that includes all the skills and expertise mentioned above, ensuring the total number of characters are strictly above 3500, including spaces, special characters also."
         )
 
         ai_response = aih.get_gemini_ai_response(input=full_input)
 
         return {
-        "job_description": ai_response,
-        "status": status.HTTP_200_OK,
-        "message": "Job description enhanced successfully"
-        }
-        
+            "job_description": ai_response,
+            "status": status.HTTP_200_OK,
+            "message": "Job description generated successfully"
+            }
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+
 # @router.post("/extract-features-from-resumes")
 # async def gemini_response(
 class TextToJsonRequest(BaseModel):
     source: str
     uuid: str
+
 
 from pathlib import Path
 
@@ -98,16 +78,6 @@ async def text_to_json(
 ):
     logger.info("invoked text-to-json")
     try:
-        existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
-
-        if not existing_applicant:
-            raise HTTPException(status_code=404,detail=f"Applicant was not found",)
-        
-        #the prevention of duplicate api calls using the stage in data base
-        stage_exist = any(stage["stage"] == "text-to-json" for stage in existing_applicant.status["stages"])
-        if stage_exist:
-            return "The stage already got processed"
-        
         api_start_time = datetime.now(timezone.utc)
         text = ""
         generated_json = ""
@@ -170,6 +140,9 @@ async def text_to_json(
                 "end": api_end_time.isoformat(),
             }
 
+            existing_applicant: Applicant = Applicant.get_by_uuid(session=session, uuid=request.uuid)
+            if not existing_applicant:
+                raise HTTPException(status_code=404,detail=f"Applicant was not found",)
             existing_applicant.status["stages"].append(status)
             existing_applicant.meta.update(
                 dbh.update_meta(existing_applicant.meta, updated_by)
@@ -223,7 +196,7 @@ async def text_to_json(
                 "generated_json": None,
             }
     except Exception as e:
-        logger.error(f"text-to-json exception: str(e)")
+        logger.error(f"text-to-json exception: {str(e)}")
         try:
             existing_applicant = Applicant.get_by_uuid(
                 session=session, uuid=request.uuid
@@ -242,9 +215,11 @@ async def text_to_json(
                 )
                 flag_modified(existing_applicant, "status")
                 existing_applicant.update(session=session)
+                logger.info(f"========calling delete_records_by_applicant_uuid for applicant_uuid : {request.uuid}")
+                await solrh.delete_records_by_applicant_uuid(request.uuid)
+                logger.error(f"Exception In Exception block while deleting record from solr for applicant_uuid : {request.uuid}, Error Mesaage: {str(e)}")
         except Exception as ex:
             logger.error(f"Failed to update applicant status: {str(ex)}")
-
         # Raise the original exception
         raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
 

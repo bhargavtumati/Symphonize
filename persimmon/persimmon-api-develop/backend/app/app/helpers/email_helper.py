@@ -4,7 +4,7 @@ import json
 import os
 import httpx
 import traceback
-from typing import List
+from typing import List,Optional
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
@@ -31,17 +31,8 @@ from app.models.recruiter import Recruiter
 from app.models.applicant import Applicant
 
 
-# SMTP configuration
-# def get_smtp_credentials():
-#     """Get SMTP credentials from environment variables"""
-#     return {
-#         "server": "smtp-relay.brevo.com",
-#         "port": 587,
-#         "user": os.getenv("SMTP_USER"),
-#         "password": os.getenv("SMTP_PASSWORD")
-#     }
 
-def send_email(subject: str, body: str, to_email: EmailStr, from_email: EmailStr, reply_to_email: EmailStr, attachment: UploadFile = None):
+def send_email(subject: str, body: str, to_email: EmailStr, from_email: EmailStr, reply_to_email: EmailStr, attachments: Optional[List[UploadFile]]=None):
     """
     Send an email using the Sendinblue SMTP service.
 
@@ -80,20 +71,21 @@ def send_email(subject: str, body: str, to_email: EmailStr, from_email: EmailStr
     msg.attach(MIMEText(body,'html'))  # Use 'html' to send HTML content
 
     # Attach a file if provided
-    if attachment:
+    if attachments:
         #print("the attachment is ",attachment)
         try:
-            attachment[0].file.seek(0)
-            file_content = attachment[0].file.read()
-            #print(f"file content is {file_content}")
-            part = MIMEBase('application', 'octet-stream')
-            part.set_payload(file_content)
-            encoders.encode_base64(part)
-            part.add_header(
-                'Content-Disposition',
-                f'attachment; filename="{attachment[0].filename}"'
-            )
-            msg.attach(part)
+            for attachment in attachments:
+                attachment.file.seek(0)
+                file_content = attachment.file.read()
+                #print(f"file content is {file_content}")
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload(file_content)
+                encoders.encode_base64(part)
+                part.add_header(
+                    'Content-Disposition',
+                    f'attachment; filename="{attachment.filename}"'
+                )
+                msg.attach(part)
         except Exception as e:
             print(f"Error attaching file: {e}")
 

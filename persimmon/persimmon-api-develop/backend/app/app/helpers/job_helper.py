@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.job import Job
 from app.api.v1.endpoints.models.job_model import JobModel
+from app.helpers import jd_helper as jdh
 
 def generate_job_code(session: Session, company_code: str):
     """
@@ -15,6 +16,9 @@ def prepare_job_data(job: JobModel, job_exists: Job, updated_by: str) -> dict:
     """
     Prepares the data to update a job record.
     """
+    enhanced_description = jdh.extract_features_from_jd(text=job.description, ai_clarifying_questions=job.ai_clarifying_questions)
+    print('the enhanced job desciption is : ', enhanced_description)
+    enhanced_description = enhance_jd(jd=enhanced_description,job=job)
     return {
         "id": job_exists.id,
         "code": job_exists.code,
@@ -30,9 +34,9 @@ def prepare_job_data(job: JobModel, job_exists: Job, updated_by: str) -> dict:
         "max_experience": job.max_experience,
         "target_date": job.target_date,
         "description": job.description,
-        "enhanced_description": job.enhanced_description,
+        "enhanced_description": enhanced_description,
         "is_posted_for_client": job.is_posted_for_client,
-        "ai_clarifying_questions": [q.dict() for q in job.ai_clarifying_questions],
+        "ai_clarifying_questions": [q.model_dump() for q in job.ai_clarifying_questions],
         "publish_on_career_page": job.publish_on_career_page,
         "publish_on_job_boards": job.publish_on_job_boards,
         "meta": job_exists.meta,
