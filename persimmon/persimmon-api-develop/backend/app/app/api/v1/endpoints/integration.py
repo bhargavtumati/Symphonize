@@ -14,10 +14,12 @@ from app.models.job import Job
 from app.models.company import Company
 from app.models.integration import Integration
 from app.models.recruiter import Recruiter
+from app.models.template import Template
 from app.helpers import db_helper as dbh, regex_helper as regexh, zoom_helper as zoomh
 from app.helpers.firebase_helper import verify_firebase_token
 from app.helpers import email_helper as emailh
 from app.api.v1.endpoints.models.integration_model import IntegrationModel, APIKeyModel
+
 
 router = APIRouter()
 
@@ -340,9 +342,9 @@ async def send_email_user(
             try:
                 email_body, email_subject = emailh.render_email_variables(session=session, to_email=email, body=body, subject=subject, company=company_details, job=job, recuriter=recruiter)
                 if name == 'brevo':
-                    response = await emailh.brevo_send_mail(api_key=api_key, from_email=from_email, to_email=email, subject=email_subject, body=email_body, files=files)
+                    response = await emailh.brevo_send_mail(api_key=api_key, from_email=from_email, to_email=[email], subject=email_subject, body=email_body, files=files)
                 elif name == 'sendgrid':
-                    response = await emailh.sendgrid_send_mail(api_key=api_key, from_email=from_email, to_email=email, subject=email_subject, body=email_body, files=files)
+                    response = await emailh.sendgrid_send_mail(api_key=api_key, from_email=from_email, to_email=[email], subject=email_subject, body=email_body, files=files)
 
                 email_results.append({"email": email, "status": "success"})
 
@@ -413,9 +415,9 @@ async def send_test_email(
         
         try:
             if name == 'brevo':
-                response = await emailh.brevo_send_mail(api_key=api_key, from_email=from_email, to_email=to_email, subject=subject, body=body, files=files)
+                response = await emailh.brevo_send_mail(api_key=api_key, from_email=from_email, to_email=[to_email], subject=subject, body=body, files=files)
             elif name == 'sendgrid':
-                response = await emailh.sendgrid_send_mail(api_key=api_key, from_email=from_email, to_email=to_email, subject=subject, body=body, files=files)
+                response = await emailh.sendgrid_send_mail(api_key=api_key, from_email=from_email, to_email=[to_email], subject=subject, body=body, files=files)
 
             if response: 
                 email_results.append({"email": to_email, "status": "success"}) #"response":response['response']
@@ -533,11 +535,16 @@ async def verify_from_address_status(
         if not company_details:
             raise HTTPException(status_code=404,detail="Company details not found")
 
+        template_details = Template.get_by_company_id(session=session, id=company_details.id)
+        if not template_details:
+            raise HTTPException(status_code=404,detail="Template details not found")
+
         integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='email')
         if not integration:
             return {
                 "status": status.HTTP_200_OK,
                 "message": "Email Integration details not found",
+                "email_send_count": template_details.email_data.get('send_count'),
                 "data": False
             }
         

@@ -96,10 +96,26 @@ def mock_applicant():
     ]
     return mock
 
+def get_valid_feedback():
+    return {
+        "feedback": [
+            {
+            "rating": {
+                "skill": 3,
+                "communication": 5,
+                "professionalism": 4
+            },
+            "overall_feedback": "verry good knowledge on python and having excellent knowledge on spring boot and microservices",
+            "opinion": "DISLIKE",
+            "given_by": "developer@tekworks.in"
+            }
+        ]
+    }
 
 @patch("app.api.v1.endpoints.applicants.Applicant.get_by_uuid", return_value=None)
 def test_add_feedback_applicant_not_found(mock_get_applicant):
-    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback", json={"feedback": []})
+    payload = get_valid_feedback()
+    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback", json=payload)
     assert response.status_code == 404
     assert response.json()["detail"] == "Applicant not found"
 
@@ -113,17 +129,8 @@ def test_add_feedback_invalid_feedback_format(mock_get_applicant, mock_applicant
 @patch("app.api.v1.endpoints.applicants.Applicant.get_by_uuid")
 def test_add_feedback_success(mock_get_applicant, mock_applicant):
     mock_get_applicant.return_value = mock_applicant
-
-    payload = [{
-            "rating": {"skill": 5, "communication": 4, "professionalism": 4},
-            "overall_feedback": "Great work",
-            "opinion": "like",
-            "given_by": "user@example.com"
-        }]
-
-    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback",
-                           json={"feedback": payload})
-
+    payload = get_valid_feedback()
+    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback", json=payload)
     assert response.status_code == 200
     assert response.json()["status"] == "success"
     assert response.json()["message"] == "Feedback updated successfully"
@@ -132,16 +139,7 @@ def test_add_feedback_success(mock_get_applicant, mock_applicant):
 def test_add_feedback_db_error(mock_get_applicant, mock_applicant):
     mock_get_applicant.return_value = mock_applicant
     mock_applicant.update.side_effect = Exception("Database error")
-
-    payload = [{
-            "rating": {"skill": 5, "communication": 4, "professionalism": 4},
-            "overall_feedback": "Great work",
-            "opinion": "like",
-            "given_by": "user@example.com"
-        }]
-
-    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback",
-                           json={"feedback": payload})
-
+    payload = get_valid_feedback()
+    response = client.post("/api/v1/applicants/fbc5589e-9931-4d60-87ec-0c38bfd9c4e1/feedback", json=payload)
     assert response.status_code == 500
     assert "Unexpected Error" in response.json()["detail"]

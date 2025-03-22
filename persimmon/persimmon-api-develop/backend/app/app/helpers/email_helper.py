@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 from jinja2 import Template
 
 import sendgrid
-from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
+from sendgrid.helpers.mail import Mail, Email, To, Cc, ReplyTo, Attachment, FileContent, FileName, FileType, Disposition
 
 from app.api.v1.endpoints.models.resume_model import EmailTemplate
 from app.models.company import Company
@@ -32,7 +32,7 @@ from app.models.applicant import Applicant
 
 
 
-def send_email(subject: str, body: str, to_email: EmailStr, from_email: EmailStr, reply_to_email: EmailStr, attachments: Optional[List[UploadFile]]=None):
+def send_email(subject: str, body: str, to_email: EmailStr, from_email: EmailStr, reply_to_email: EmailStr, attachments: Optional[List[UploadFile]]=None, cc_addresses: Optional[List[EmailStr]]=None):
     """
     Send an email using the Sendinblue SMTP service.
 
@@ -65,6 +65,11 @@ def send_email(subject: str, body: str, to_email: EmailStr, from_email: EmailStr
         msg['To'] = ', '.join(to_email)
     else:
         msg['To'] = to_email
+
+    if cc_addresses:
+        msg["Cc"] = ", ".join(cc_addresses)
+    else:
+        cc_addresses = ""
         
     msg['Subject'] = subject
     msg['Reply-To'] = reply_to_email
@@ -94,9 +99,10 @@ def send_email(subject: str, body: str, to_email: EmailStr, from_email: EmailStr
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
             server.starttls()  # Start TLS for security
             server.login(SMTP_USER, SMTP_PASSWORD)  # Log in using your SMTP credentials
-            server.sendmail(from_email, to_email, msg.as_string())  # Send the email
-            print(f"Email sent successfully to {to_email}!")
-            return f"Email sent successfully to {to_email}!"
+            all_recipients = to_email + cc_addresses
+            server.sendmail(from_email, all_recipients, msg.as_string())  # Send the email
+            print(f"Email sent successfully to {to_email} with CC: {cc_addresses}!")
+            return f"Email sent successfully to {to_email} with CC: {cc_addresses}!" if cc_addresses else f"Email sent successfully to {to_email}!"
     except Exception as e:
         print(traceback.format_exc())
         print(f"Error: {e}")
@@ -257,7 +263,7 @@ async def get_sendgrid_senders(api_key: str):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error: {str(e)}")
 
 
-async def brevo_send_mail(api_key: str, from_email: str, to_email: str, subject: str, body: str, files: List[UploadFile] = None):
+async def brevo_send_mail(api_key: str, from_email: EmailStr, to_email: List[EmailStr], subject: str, body: str, files: Optional[List[UploadFile]] = None, reply_to_email: Optional[EmailStr] = None, cc_addresses: Optional[List[EmailStr]] = None):
     """Send email via Brevo with form data and multiple file attachments."""
 
     configuration = sib_api_v3_sdk.Configuration()
@@ -267,9 +273,11 @@ async def brevo_send_mail(api_key: str, from_email: str, to_email: str, subject:
 
     email_data = sib_api_v3_sdk.SendSmtpEmail(
         sender={"email": from_email},
-        to=[{"email": to_email}],
+        to=[{"email": email} for email in to_email],
         subject=subject,
-        html_content=body
+        html_content=body,
+        cc=[{"email":cc} for cc in cc_addresses] if cc_addresses else None,
+        reply_to={"email":reply_to_email} if reply_to_email else None
     )
 
     if files:
@@ -303,15 +311,21 @@ async def brevo_send_mail(api_key: str, from_email: str, to_email: str, subject:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error: {str(e)}")
 
 
-async def sendgrid_send_mail(api_key: str, from_email: str, to_email: str, subject: str, body: str, files: List[UploadFile] = None):
+async def sendgrid_send_mail(api_key: str, from_email: EmailStr, to_email: List[EmailStr], subject: str, body: str, files: List[UploadFile] = None, reply_to_email: Optional[EmailStr] = None, cc_addresses: Optional[List[EmailStr]] = None):
     """Send an email via SendGrid with optional file attachments."""
 
     message = Mail(
-        from_email=from_email,
-        to_emails=to_email,
+        from_email=Email(from_email),
+        to_emails=[To(email) for email in to_email],
         subject=subject,
         html_content=body
     )
+
+    if cc_addresses:
+        message.cc = [Cc(cc) for cc in cc_addresses]
+    
+    if reply_to_email:
+        message.reply_to = ReplyTo(reply_to_email)
 
     if files:
         attachments = []

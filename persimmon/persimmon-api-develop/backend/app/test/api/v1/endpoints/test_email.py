@@ -27,11 +27,10 @@ def mock_upload_file():
 def email_params():
     return {
         "subject": "Test Subject",
-        "body": "<p>Hello {{name}}</p>",
+        "body": "<p>Hello Developer</p>",
         "to_email": "test@example.com",
         "from_email": "sender@example.com",
         "reply_to_email": "reply@example.com",
-        "template_data": {"name": "John Doe"}
     }
 
 # app/helpers/email_helper.py
@@ -62,19 +61,10 @@ def test_send_email_success(mock_smtp, mock_upload_file, email_params):
     # Setup mock SMTP response
     mock_smtp.sendmail.return_value = {}
 
-    # Mock credentials method
-    with patch('app.helpers.email_helper.get_smtp_credentials') as mock_creds:
-        mock_creds.return_value = {
-            "server": "smtp-relay.brevo.com",
-            "port": 587,
-            "user": "test_user",
-            "password": "test_pass"
-        }
-        
-        result = email_helper.send_email(
-            **email_params,
-            attachment=mock_upload_file
-        )
+    result = email_helper.send_email(
+        **email_params,
+        attachments=mock_upload_file
+    )
 
     # Verify SMTP interactions
     mock_smtp.starttls.assert_called_once()
@@ -97,16 +87,6 @@ def test_send_email_failure(mock_smtp, email_params):
     assert exc_info.value.status_code == 500
     assert "Failed to send email" in str(exc_info.value.detail)
 
-def test_send_email_template_rendering(mock_smtp, email_params):
-    email_helper.send_email(**email_params)
-    
-    # Get the sent message
-    args, _ = mock_smtp.sendmail.call_args
-    sent_message = args[2]
-    
-    # Verify template rendering
-    assert "Hello John Doe" in sent_message
-    assert "text/html" in sent_message
 
 def test_send_email_authentication_failure(mock_smtp, email_params):
     # Force authentication failure

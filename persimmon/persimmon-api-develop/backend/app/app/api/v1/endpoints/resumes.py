@@ -495,7 +495,7 @@ async def upload_resumes(
     #capture the start time 
     api_start_time = datetime.now(timezone.utc)
 
-    unique_id = uuid.uuid4()
+    unique_id = None
     original_token = credentials.credentials
     #print("the original token is : ",original_token)
     created_by = token['email']
@@ -525,7 +525,24 @@ async def upload_resumes(
     errors = []
     uploaded_files = []
     base64_images = []
+    job_id = None
+    stage_uuid = None
 
+    try:
+        job = Job.get_by_code(session=session, code=job_code)
+        if job:
+            job_id = job.id
+
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    ## get the new stage uuid for this job
+    try:
+        stages_existing: Stages = Stages.get_by_id(session=session, job_id=job_id)
+        if  stages_existing and len(stages_existing.stages) > 0:
+            stage_uuid = stages_existing.stages[0]['uuid']
+    except Exception as e: 
+        raise HTTPException(status_code=404, detail=f"Stages not found {str(e)}")
 
     for file in files:
         try:
@@ -543,11 +560,6 @@ async def upload_resumes(
             text = parsed.get('content', '')
             text = text if text else ''
             
-            source = Path(destination)
-            text_destination = source.parent.parent / "processed" / "text" / (source.stem + '.txt')
-            
-            with open(text_destination, 'w',encoding="utf-8") as writer:
-                writer.write(text)
             
             mobile_pattern = re.compile(r"(?:\+\d{1,3}[-.\s]?)?\d{10}")
 
@@ -556,8 +568,6 @@ async def upload_resumes(
             mobile_matches = mobile_pattern.findall(text)
 
             email_matches = email_pattern.findall(text)
-
-            job_id = Job.get_by_code(session=session, code=job_code).id
 
             if mobile_matches:
                 mobile_number_existance = Applicant.get_by_mobile_number(
@@ -586,7 +596,7 @@ async def upload_resumes(
                 elif file_extension == "docx":
                     image_base64 = imageh.extract_first_face_from_docx(BytesIO(content))
             except HTTPException as e:
-                raise e
+                logger.error(f"Failed to extract face image from document: {str(e)}")
             base64_images.append(image_base64)
         except Exception as e:
             print(f"exception while converting document to text: {str(e)}")
@@ -602,26 +612,11 @@ async def upload_resumes(
     logger.info(f"Upload completed in {duration} seconds.")
 
     for index,uploaded_file in enumerate(uploaded_files):
-        try:
-            job_id = Job.get_id_by_code(session=session,code=job_code)
-        except Exception as e:
-            return HTTPException(status_code=404,detail="Job not found")
-        print("the job id is : ",job_id)
-        if len(uploaded_files) > 0: 
-            applicant_uuid = str(uuid.uuid4())
-            stage_uuid=""
-            try:
-                stages_existing: Stages = Stages.get_by_id(session=session, job_id=job_id)
-                print(f"the stages_existing are {stages_existing.stages}")
-                if len(stages_existing.stages) > 0:
-                    stage_uuid = stages_existing.stages[0]['uuid']
-            except Exception as e: 
-                raise HTTPException(status_code=404, detail=f"Stages not found {str(e)}")
         details = {
             "original_resume":uploaded_file,
             "context":"document-added",
-            "file_upload": str(text_destination),
-            "applicant_image": base64_images[index]
+            "file_upload":uploaded_file,
+            "applicant_image":base64_images[index]
             }
         api_end_time = datetime.now(timezone.utc)
         status = {
@@ -651,10 +646,10 @@ async def upload_resumes(
         #Send a message to Pub/Sub after successful uploads
         try:
             pubsub_message = {
-                "endpoint": f"{base_url}/api/v1/ai/text-to-json",
+                "endpoint": f"{base_url}/api/v1/resumes/extract-text",
                 "token": original_token,
                 "payload": {
-                    "source": str(text_destination),
+                    "source": uploaded_file,
                     "uuid": applicant_uuid
                 }
             }
@@ -664,6 +659,7 @@ async def upload_resumes(
         except Exception as e:
             logger.error(f"Failed to send Pub/Sub message: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Failed to send Pub/Sub message: {str(e)}")
+
     # Return the response
     return {
         "uploaded_files": uploaded_files,
@@ -944,6 +940,7 @@ async def flatten(
 
     except Exception as e:
         logger.error("========= handling catch all")
+        print(f"the exception as e {str(e)}")
         # Handle errors and update status as "failed"
         api_end_time = datetime.now(timezone.utc)
         status = {
@@ -966,9 +963,7 @@ async def flatten(
             await solrh.delete_records_by_applicant_uuid(request.uuid)
         except Exception as e:
             logger.error(f"Exception In Exception block while deleting record from solr for applicant_uuid : {request.uuid}, Error Mesaage: {str(e)}")
-
-        logger.error(f"flatten: str{e}")
-        raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(status_code=500, detail=str(e))
     finally:
         try:
             logger.info(f"========calling delete_duplicate_records for applicant_uuid : {request.uuid}")

@@ -64,3 +64,25 @@ def extract_first_face_from_docx(docx_path: BytesIO):
         return None  
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error extracting face image from docx: {str(e)}")
+    
+
+def binary_to_base64(binary_data: bytes) -> str:
+    """
+    Converts raw binary data to Base64 encoded string.
+
+    Args:
+        binary_data: The raw binary data (bytes).
+
+    Returns:
+        The Base64 encoded string.
+    """
+    base64_encoded = base64.b64encode(binary_data).decode('utf-8')
+    return base64_encoded
+
+
+def get_initials(name):
+    parts = name.split()  # Split by spaces
+   
+    first_initial = parts[0][0].upper()  # First letter of first name
+    last_initial = parts[-1][0].upper()  # First letter of last name
+    return first_initial + last_initial

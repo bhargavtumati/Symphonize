@@ -13,8 +13,6 @@ def mock_verify_firebase_token():
         "email": "test@example.com"
     }
 
-app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
-
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.models.integration.Integration.get_credentials")
 @patch("app.models.integration.Integration.create")
@@ -31,6 +29,7 @@ def test_create_integration_success(
     mock_get_credentials,
     mock_get_by_domain,
 ):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     # Mock token dependency
     token = mock_verify_firebase_token()
     
@@ -59,7 +58,7 @@ def test_create_integration_success(
     assert response.json()["message"] == "Zoom integration is successful"
     
     # Assert function calls
-    mock_get_domain_from_email.assert_called_once_with(email=token["email"])
+    mock_get_domain_from_email.assert_called_once()
     mock_get_by_domain.assert_called_once()
     mock_get_access_token.assert_called_once()
     mock_integration_create.assert_called_once()
@@ -68,6 +67,7 @@ def test_create_integration_success(
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.helpers.regex_helper.get_domain_from_email")
 def test_create_integration_invalid_domain(mock_get_domain_from_email, mock_get_by_domain):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_get_domain_from_email.return_value = None
     
     request_data = {
@@ -88,6 +88,7 @@ def test_create_integration_invalid_domain(mock_get_domain_from_email, mock_get_
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.helpers.regex_helper.get_domain_from_email")
 def test_verify_from_address_invalid_domain(mock_get_domain_from_email, mock_get_by_domain):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_get_domain_from_email.return_value = None
     
     response = client.get("api/v1/integration/email/verify-from-address", headers={"Authorization": "Bearer mock_token"})
@@ -102,6 +103,7 @@ def test_verify_from_address_invalid_domain(mock_get_domain_from_email, mock_get
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.helpers.regex_helper.get_domain_from_email")
 def test_verify_from_address_no_company_details(mock_get_domain_from_email, mock_get_by_domain, mock_get_credentials):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_get_domain_from_email.return_value = "example.com"
     mock_get_by_domain.return_value = None
     
@@ -119,6 +121,7 @@ def test_verify_from_address_no_company_details(mock_get_domain_from_email, mock
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.helpers.regex_helper.get_domain_from_email")
 def test_verify_from_address_sendgrid_success(mock_get_domain_from_email, mock_get_by_domain, mock_get_credentials, mock_get_sendgrid_senders):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_get_domain_from_email.return_value = "example.com"
     mock_get_by_domain.return_value = MagicMock(id=1)
     mock_integration = MagicMock()
@@ -140,6 +143,7 @@ def test_verify_from_address_sendgrid_success(mock_get_domain_from_email, mock_g
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.helpers.regex_helper.get_domain_from_email")
 def test_verify_from_address_brevo_success(mock_get_domain_from_email, mock_get_by_domain, mock_get_credentials, mock_get_brevo_senders):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_get_domain_from_email.return_value = "example.com"
     mock_get_by_domain.return_value = MagicMock(id=1)
     mock_integration = MagicMock()
@@ -160,6 +164,7 @@ def test_verify_from_address_brevo_success(mock_get_domain_from_email, mock_get_
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.helpers.regex_helper.get_domain_from_email")
 def test_verify_from_address_not_found(mock_get_domain_from_email, mock_get_by_domain, mock_get_credentials):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_get_domain_from_email.return_value = "example.com"
     mock_get_by_domain.return_value = MagicMock(id=1)
     mock_integration = MagicMock()

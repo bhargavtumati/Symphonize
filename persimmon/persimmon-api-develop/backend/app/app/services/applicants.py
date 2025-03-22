@@ -22,6 +22,7 @@ from app.models.job import Job
 from app.helpers.match_score_helper import get_match_score
 import traceback
 import logging
+import math
 from io import BytesIO
 
 PDF_OUTPUT_PATH = "/tmp"  # Temporary directory for storing converted PDF files
@@ -268,7 +269,7 @@ def construct_query(filters: FilterRequest) -> str:
         for industry in filters.industry_type :
             if industry.name and industry.pref and industry.min and industry.max is not None:
                 print("this is if block ")
-                weight = PREFERENCE_WEIGHTS.get(industry.pref.lower(), 0) * (industry.max + industry.min)
+                weight = PREFERENCE_WEIGHTS.get(industry.pref.lower(), 0) * math.ceil(industry.max + industry.min)
                 individual_industry_weights.append(f'industry_type : "{industry.name}"^{weight}')
                 overall_industry_weight += weight
             else:
@@ -364,7 +365,7 @@ def construct_query(filters: FilterRequest) -> str:
             print("the soft_skill is ", soft_skill.pref)
             if soft_skill.name and soft_skill.pref and soft_skill.min_value and soft_skill.max_value:
                 print("the max value is ",soft_skill.max_value)
-                weight = PREFERENCE_WEIGHTS.get(soft_skill.pref.lower(), 0) * SOFTSKILL_WEIGHTS.get(soft_skill.max_value, 0)
+                weight = PREFERENCE_WEIGHTS.get(soft_skill.pref.lower(), 0) * int(soft_skill.max_value)
                 print("the the weight is ", type(weight),weight)
                 individual_soft_skills_weights.append(f'soft_skills : "{soft_skill.name}"^{weight}')
                 overall_soft_skills_weight += weight
@@ -391,7 +392,10 @@ def construct_query(filters: FilterRequest) -> str:
     if filters.transition_behaviour and filters.transition_behaviour[0].name:
         for behaviour in filters.transition_behaviour:
             weight = PREFERENCE_WEIGHTS.get(behaviour.preference.lower(), 0) * behaviour.value
-            range_query = f"transition_behaviour:[0 TO {behaviour.value}]^{weight}"
+            if behaviour.value > 5:
+                range_query = f"transition_behaviour:[6 TO 50]^{weight}"
+            else:
+                range_query = f"transition_behaviour:[0 TO {behaviour.value}]^{weight}"
             transition_behaviour_query_parts.append(range_query)
             overall_transition_behaviour_weight += weight
         

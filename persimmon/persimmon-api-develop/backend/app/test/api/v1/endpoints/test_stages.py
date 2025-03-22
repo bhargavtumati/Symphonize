@@ -18,7 +18,6 @@ def mock_verify_firebase_token():
         "email": "surendra.goluguri@symphonize.com"
     }
 
-app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
 
 def convert_uuids_to_strings(data):
     if isinstance(data, dict):
@@ -37,6 +36,7 @@ def convert_uuids_to_strings(data):
 
 @patch("app.models.stages.Stages.get_by_id")
 def test_get_stages(mock_get_stages):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_stages_instance = MagicMock()
     mock_stages_instance.stages = [
         {"uuid": "cd81dcf2-3d6a-492l-96k4-87782271079q", "name": "Interviewing"},
@@ -50,6 +50,7 @@ def test_get_stages(mock_get_stages):
     response = client.get(f"/api/v1/stages?job_id={job_id}")
     
     assert response.status_code == 200
+    print("response", response.json())
     assert response.json() == {
         "stages": [
             {"uuid": "zm82dcf2-3h6a-492l-96k4-87782271079q", "name": "Deployed"},
@@ -69,6 +70,7 @@ def test_update_stages_success(
     mock_update_meta, mock_get_by_stage_uuid, mock_update_solr, 
     mock_check_immutable_objects, mock_get_job, mock_get_stages
 ):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     # Mock Job Data
     mock_job = MagicMock()
     mock_get_job.return_value = mock_job
@@ -106,6 +108,7 @@ def test_update_stages_success(
 
 @patch("app.models.job.Job.get_by_id", return_value=None)
 def test_update_stages_job_not_found(mock_get_by_id):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     # Correcting the data structure to match the expected schema
     mock_stages_partial_update = (StagesPartialUpdate(stages=[
         {"uuid": "fbc5589e-9931-4d60-87ec-0c38bfd9c4e1", "name": "Shortlisted"},

@@ -23,8 +23,14 @@ def get_or_create_company(job: JobModel, session: Session, created_by: str):
         company_data.domain = domain
         company_record = company_data.create(session=session, created_by=created_by)
         email_id = os.getenv("TEMPLATE_EMAIL_ID")
-        email_template = Template(company_id = company_record.id, template_data = emailh.get_email_templates(), email_id=email_id)
-        email_template.create(session=session, created_by=created_by)
+        email_data = {
+            "id": email_id,
+            "send_count": 0
+        }
+        template = Template.get_by_company_id(session=session, id=company_record.id)
+        if not template:
+            email_template = Template(company_id = company_record.id, template_data = emailh.get_email_templates(), email_data = email_data)
+            email_template.create(session=session, created_by=created_by)
     return company_record
 
 def update_or_create_company(
@@ -58,7 +64,16 @@ def update_or_create_company(
 
     new_company = Company(**job.company.model_dump())
     new_company.domain = domain
-    return new_company.create(session=session, created_by=updated_by).to_dict()
+    company_data: Company = new_company.create(session=session, created_by=updated_by).to_dict()
+    email_id = os.getenv("TEMPLATE_EMAIL_ID")
+    email_data = {
+        "id": email_id,
+        "send_count": 0
+    }
+    template = Template.get_by_company_id(session=session, id=company_data.id)
+    if not template:
+        email_template = Template(company_id = company_data.id, template_data = emailh.get_email_templates(), email_data = email_data)
+        email_template.create(session=session, created_by=updated_by)
 
 def handle_company_association(
     job: JobModel, job_exists: Job, session: Session, updated_by: str

@@ -1,6 +1,4 @@
-import pytest 
 from unittest.mock import Mock, MagicMock,patch
-from fastapi.testclient import TestClient
 from app.helpers import email_helper as emailh
 
 
@@ -8,7 +6,7 @@ from app.helpers import email_helper as emailh
 
 @patch("app.helpers.email_helper.send_email")
 def test_send_email(mock_send_email):
-    mock_send_email.result_value = {}
+    mock_send_email.return_value = "Email sent successfully to gvkartheek@gmail.com!"
      
     result = emailh.send_email(
         subject= "this is the subject",
@@ -18,4 +16,4 @@ def test_send_email(mock_send_email):
         reply_to_email= "xyz@gmail.com"
      )
 
-    assert result  == {}
+    assert result  == "Email sent successfully to gvkartheek@gmail.com!"

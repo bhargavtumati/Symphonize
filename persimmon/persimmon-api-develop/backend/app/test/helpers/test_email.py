@@ -23,12 +23,11 @@ class TestSendEmail(unittest.TestCase):
         # Call the send_email function
         result = send_email(
             subject="Test Email",
-            body="Hello {{name}}",
+            body="Hello John",
             to_email="test@example.com",
             from_email="sender@example.com",
             reply_to_email="reply@example.com",
-            template_data={"name": "John"},
-            attachment=attachment_mock,
+            attachments=attachment_mock,
         )
 
         # **Assertions & Debugging**

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator, model_validator
-from typing import Optional, List,Dict,Union
+from typing import Any, Optional, List,Dict,Union
 from sqlalchemy.dialects.postgresql import JSONB
 from uuid import UUID
 from app.utils.validators import (
@@ -8,8 +8,8 @@ from app.utils.validators import (
     validate_numeric_range, validate_industry_type, validate_job_location, get_education_institutions_list)
 from datetime import datetime
 from zoneinfo import available_timezones
-
 from enum import Enum
+
 
 class SocialMedia(BaseModel):
     github: Optional[str] = ""
@@ -22,11 +22,11 @@ class JobInformation(BaseModel):
     skills: Optional[List[str]] = []
     job_title: Optional[str] = ""
     department: Optional[str] = ""
-    current_ctc: Optional[str] = ""
-    expected_ctc: Optional[str] = ""
+    current_ctc: Optional[Union[float,str]] = None 
+    expected_ctc: Optional[Union[float,str]] = None
     job_location: Optional[str] = ""
     current_work_at: Optional[str] = ""
-    work_experience: Optional[str] = ""
+    work_experience: Optional[Any] = ""
 
 
 class PersonalInformation(BaseModel):
@@ -45,6 +45,15 @@ class ApplicantDetails(BaseModel):
     job_information: Optional[JobInformation] = JobInformation()
     processed_resume: Optional[str] = ""
     personal_information: Optional[PersonalInformation] = PersonalInformation()
+    
+class ApplicantDetailsPartialUpdate(BaseModel):
+    about: Optional[str] = ""
+    social_media: Optional[SocialMedia] = SocialMedia()
+    original_resume: Optional[str] = ""
+    job_information: Optional[JobInformation] = JobInformation()
+    processed_resume: Optional[str] = ""
+    personal_information: Optional[PersonalInformation] = PersonalInformation()
+    model_config = ConfigDict(extra='ignore')
 
 
 class ApplicantPartialUpdate(BaseModel):
@@ -56,8 +65,8 @@ class ApplicantPartialUpdate(BaseModel):
 class IndustryType(BaseModel):
     name: Optional[str]=None
     pref: Optional[str]=None
-    max: Optional[int]=None
-    min: Optional[int]=None
+    max: Optional[float]=None
+    min: Optional[float]=None
 
     @field_validator('name')
     def validate_name(cls, name):
@@ -417,8 +426,8 @@ class Settings(BaseModel):
     
 class MeetingModel(BaseModel):
     agenda: str
-    duration: Optional[str] = None
-    schedule_for: Optional[str] = None
+    duration: Optional[int] = None
+    schedule_for: Optional[EmailStr] = None
     allow_multiple_devices: Optional[bool] = None
     settings: Settings
     start_time: datetime
@@ -429,6 +438,16 @@ class MeetingModel(BaseModel):
     def validate_timezone(cls, value):
         if value not in available_timezones():
             raise ValueError(f"Invalid timezone: {value}")
+        return value
+
+    @field_validator("agenda")
+    def validate_agenda(cls, value):
+        is_non_empty(value, "Description")
+        return value
+
+    @field_validator("topic")
+    def validate_topic(cls, value):
+        is_non_empty(value, "Title")
         return value
 
 
@@ -443,28 +462,59 @@ class Rating(BaseModel):
     communication: int = Field(..., ge=1, le=5)
     professionalism: int = Field(..., ge=1, le=5)
 
+
+ALLOWED_CHARACTERS = set(". , ? ! : ; ' - \" () {} [] <> _ - & @ / \\")
+
+
 # Feedback item model
 class FeedbackItem(BaseModel):
     rating: Rating
     overall_feedback: str
-    opinion: Optional[OpinionEnum]
-    given_by: EmailStr  # Ensures it's a valid email
+    opinion: Optional[OpinionEnum] = None
+    given_by: EmailStr  
+
+    @field_validator('overall_feedback')
+    def validate_overall_feedback(cls, overall_feedback):
+        if not all(char.isalnum() or char.isspace() or char in ALLOWED_CHARACTERS for char in overall_feedback):
+            raise ValueError("overall_feedback must not contain special characters")
+        overall_feedback = overall_feedback.strip()
+        if len(overall_feedback)<50 or len(overall_feedback)>1000:
+            raise ValueError("overall_feedback must be between 50 and 1000 characters")
+        return overall_feedback
 
 # Main payload model
 class FeedbackPayload(BaseModel):
-    feedback: List[FeedbackItem]
+    feedback: List[FeedbackItem] #using the list item to allow multiple feedback in database jsonb column
+    
+    @field_validator('feedback')
+    def validate_feedback(cls, feedback):
+        if len(feedback) == 0:
+            raise ValueError("feedback must not be empty")
+        return feedback
 
 class ShareRequest(BaseModel):
     job_code: str
-    job_title: str
     sender: EmailStr
     email_type: str
-    recipient_email: EmailStr  
+    recipient_emails: List[EmailStr]
     applicant_uuids: List[str] 
-    hide_salary: bool  
+    hide_salary: bool  = False
+    redirect_url: str
 
     @field_validator('email_type')
     def validate_email_type(cls, email_type):
         if email_type not in ['default', 'brevo', 'sendgrid']:
             raise ValueError("Invalid email_type. Allowed values are 'default', 'brevo' and 'sendgrid'")
         return email_type    
+    
+    @field_validator('recipient_emails')
+    def validate_recipient_emails(cls, recipient_emails):
+        if len(recipient_emails) == 0:
+            raise ValueError("recipient_emails must me atleast one")
+        return recipient_emails
+
+    @field_validator('applicant_uuids')
+    def validate_applicant_uuids(cls, applicant_uuids):
+        if len(applicant_uuids) == 0:
+            raise ValueError("applicant_uuids must me atleast one")
+        return applicant_uuids

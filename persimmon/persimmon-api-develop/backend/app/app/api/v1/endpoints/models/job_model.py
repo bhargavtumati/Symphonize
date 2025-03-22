@@ -6,7 +6,6 @@ from app.models.job import JobStatusTypeEnum, JobTypeEnum, WorkplaceTypeEnum
 from datetime import datetime
 from app.api.v1.endpoints.models.common_models import QuestionAnswerDict 
 
-
 JOB_TITLE_FIELD = "Job title"
 JOB_DESCRIPTION_FIELD = "Job description"
 MINIMUM_EXPERIENCE_FIELD = "Minimum experience"
@@ -63,10 +62,12 @@ class JobModel(BaseModel):
 
     @field_validator('min_experience')
     def validate_min_experience(cls, min_experience):
+        validate_decimal_point(value=min_experience)
         return validate_numeric_range(value=min_experience, min_val=1, max_val=49, field_name=MINIMUM_EXPERIENCE_FIELD)
 
     @field_validator('max_experience')
     def validate_max_experience(cls, max_experience):
+        validate_decimal_point(value=max_experience)
         return validate_numeric_range(value=max_experience, min_val=2, max_val=50, field_name=MAXIMUM_EXPERIENCE_FIELD)
 
     @field_validator('min_salary')
@@ -89,10 +90,6 @@ class JobModel(BaseModel):
         max_experience = values.max_experience
         min_salary = values.min_salary
         max_salary = values.max_salary
-
-        for field_name, value in [("min_experience", min_experience), ("max_experience", max_experience)]:
-            if "." in str(value) and len(str(value).split(".")[-1]) > 1:
-                raise ValueError(f"{field_name} must have only one digit after the decimal")
     
         if min_experience >= max_experience:
             raise ValueError("Minimum experience cannot be greater than or equal to maximum experience")
@@ -111,8 +108,8 @@ class JobPartialUpdate(BaseModel):
     team_size: Optional[str] = None
     min_salary: Optional[float] = None
     max_salary: Optional[float] = None
-    min_experience: Optional[float] = None
-    max_experience: Optional[float] = None
+    min_experience: Optional[int] = None
+    max_experience: Optional[int] = None
     target_date: Optional[datetime] = None
     description: Optional[str] = None
     is_posted_for_client: Optional[bool] = None

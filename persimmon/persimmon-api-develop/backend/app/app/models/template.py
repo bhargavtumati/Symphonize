@@ -13,7 +13,7 @@ class Template(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     company_id: Mapped[int] = mapped_column(Integer, ForeignKey('public.company.id', ondelete='CASCADE'), nullable=False)
     template_data: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSONB), nullable=False)
-    email_id: Mapped[str] = mapped_column(String(length=255), nullable=False)
+    email_data: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSONB), nullable=False)
     meta: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSONB), nullable=False)
 
     @classmethod

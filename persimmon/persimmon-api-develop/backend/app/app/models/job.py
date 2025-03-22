@@ -8,7 +8,7 @@ from app.models.company import Company
 from sqlalchemy.ext.mutable import MutableDict
 from app.helpers.jd_helper import extract_features_from_jd
 from app.models.applicant import Applicant
-from sqlalchemy import cast, Date, Numeric
+from sqlalchemy import cast, Date
 import app.helpers.date_helper as date_helper
 
 # Enum definitions
@@ -44,8 +44,8 @@ class Job(Base):
     team_size: Mapped[str] = mapped_column(String, nullable=False)
     min_salary: Mapped[float] = mapped_column(Float, nullable=False)
     max_salary: Mapped[float] = mapped_column(Float, nullable=False)
-    min_experience: Mapped[float] = mapped_column(Numeric(3, 1), nullable=False)
-    max_experience: Mapped[float] = mapped_column(Numeric(3, 1), nullable=False)
+    min_experience: Mapped[float] = mapped_column(Float, nullable=False)
+    max_experience: Mapped[float] = mapped_column(Float, nullable=False)
     target_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
     enhanced_description: Mapped[list[str]] = mapped_column(JSONB, nullable=False)

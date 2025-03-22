@@ -1,6 +1,6 @@
 from app.models.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, Session
-from sqlalchemy.dialects.postgresql import JSONB, ARRAY
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import Integer, String, Enum, LargeBinary
 from sqlalchemy.future import select
 import enum
@@ -34,19 +34,17 @@ class Company(Base):
     website: Mapped[str] = mapped_column(String(length=2048), nullable=False)
     number_of_employees: Mapped[str] = mapped_column(String(length=50), nullable=False) 
     industry_type: Mapped[str] = mapped_column(String(length=255), nullable=False)
+    linkedin: Mapped[str] = mapped_column(String(length=2048), nullable=False)
     domain: Mapped[str] = mapped_column(String(length=255), nullable=False, unique=True)
-    company_type: Mapped[CompanyTypeEnum] = mapped_column(Enum(CompanyTypeEnum, name='CompanyType', schema='enum'), nullable=False) #change
-    tagline: Mapped[str] = mapped_column(String(length=255), nullable=True)  #new
-    business_type: Mapped[BusinessTypeEnum] = mapped_column(Enum(BusinessTypeEnum, name='BusinessType', schema='enum'), nullable=True) #new
-    about: Mapped[str] = mapped_column(String(length=1000), nullable=False, unique=True) #new
-
-    logo: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)  # new
-    company_images: Mapped[List[bytes]] = mapped_column(ARRAY(LargeBinary), nullable=True) #new
-
-    linkedin_url: Mapped[str] = mapped_column(String(length=2048), nullable=False) #change
-    instagram_url: Mapped[str] = mapped_column(String(length=2048), nullable=True)  #new
-    facebook_url: Mapped[str] = mapped_column(String(length=2048), nullable=True)  #new
-    x_url: Mapped[str] = mapped_column(String(length=2048), nullable=True) #new
+    type: Mapped[CompanyTypeEnum] = mapped_column(Enum(CompanyTypeEnum, name='CompanyType', schema='enum'), nullable=False)
+    tagline: Mapped[str] = mapped_column(String(length=255), nullable=True)
+    business_type: Mapped[BusinessTypeEnum] = mapped_column(Enum(BusinessTypeEnum, name='BusinessType', schema='enum'), nullable=True) 
+    about: Mapped[str] = mapped_column(String(length=1000), nullable=True)
+    logo: Mapped[str] = mapped_column(String, nullable=True)
+    images: Mapped[list[str]] = mapped_column(JSONB, nullable=True)
+    instagram: Mapped[str] = mapped_column(String(length=2048), nullable=True)
+    facebook: Mapped[str] = mapped_column(String(length=2048), nullable=True)
+    twitter: Mapped[str] = mapped_column(String(length=2048), nullable=True)
     meta: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSONB))
 
     @classmethod
@@ -77,6 +75,11 @@ class Company(Base):
         session.commit()
         session.refresh(self)
         return self
+
+    @classmethod
+    def remove_image(cls, session: Session, company_id: int, new_images: List[str]):
+        session.query(cls).filter(cls.id == company_id).update({cls.images: new_images})
+        session.commit()
 
     def to_dict(self):
         return {key: value for key, value in self.__dict__.items() if not key.startswith("_")}

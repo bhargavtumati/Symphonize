@@ -7,6 +7,7 @@ from app.models.job import Job
 from app.models.applicant import Applicant
 from app.models.company import Company
 from app.models.recruiter import Recruiter
+from app.models.template import Template
 from app.helpers.firebase_helper import verify_firebase_token
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -97,11 +98,20 @@ def send_email_user(
 
                 if result:
                     email_results.append({"email": email, "status": "success"})
-
+                
             except Exception as e:
                 logger.error(f"Error processing email {email}: {str(e)}", exc_info=True)
                 failed_emails.append({"email": email, "error": str(e)})
                 session.rollback()  # Rollback any database changes for this email
+
+        template:Template = Template.get_by_company_id(session=session, id=company_details.id)
+        if not template:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
+        template.email_data.update({
+            "id": template.email_data.get("id"),
+            "send_count": template.email_data.get("send_count") + len(email_results)
+        })
+        template.update(session=session)
 
         response = {
             "message": "Email processing completed",
@@ -134,7 +144,8 @@ async def send_test_email(
     body: str = Form(...),
     files: Optional[List[UploadFile]] = File(None),
     from_email: EmailStr = Form(...),
-    token : dict = Depends(verify_firebase_token)
+    token : dict = Depends(verify_firebase_token),
+    session: Session = Depends(get_db)
 ):
     if from_email != os.getenv("FROM_ADDRESS"):
         raise ValueError("The from address is not authorized")
@@ -153,6 +164,18 @@ async def send_test_email(
             result = email_helper.send_email(subject=subject, body=body, to_email=to_email, from_email=from_email, reply_to_email=reply_to_email, attachments=files)
             if result: 
                 email_results.append({"email": to_email, "status": "success"})
+                domain = regexh.get_domain_from_email(email=token['email'])
+                company_details = Company.get_by_domain(session=session, domain=domain)
+                if not company_details:
+                    raise HTTPException(status_code=404,detail="Company details not found")
+                template:Template = Template.get_by_company_id(session=session, id=company_details.id)
+                if not template:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
+                template.email_data.update({
+                    "id": template.email_data.get("id"),
+                    "send_count": template.email_data.get("send_count") + 1
+                })
+                template.update(session=session)
 
         except Exception as e:
             logger.error(f"Error processing email {to_email}: {str(e)}", exc_info=True)

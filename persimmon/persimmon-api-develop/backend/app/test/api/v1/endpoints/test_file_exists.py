@@ -7,7 +7,7 @@ SA_KEY = {
     "type": os.getenv("CLOUD_STORAGE_TYPE"),
     "project_id": os.getenv("CLOUD_STORAGE_PROJECT_ID"),
     "private_key_id": os.getenv("CLOUD_STORAGE_PRIVATE_KEY_ID"),
-    "private_key": os.getenv("CLOUD_STORAGE_PRIVATE_KEY").replace("\\n", "\n"), 
+    # "private_key": os.getenv("CLOUD_STORAGE_PRIVATE_KEY").replace("\\n", "\n"), 
     "client_email": os.getenv("CLOUD_STORAGE_CLIENT_EMAIL"),
     "client_id": os.getenv("CLOUD_STORAGE_CLIENT_ID"),
     "auth_uri": os.getenv("CLOUD_STORAGE_AUTH_URI"),

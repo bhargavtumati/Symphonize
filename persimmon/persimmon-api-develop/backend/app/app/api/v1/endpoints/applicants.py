@@ -14,11 +14,18 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from pydantic import ValidationError, EmailStr
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
-from app.api.v1.endpoints.models.applicant_model import (
-    ApplicantPartialUpdate, ApplicantRequest, FilterRequest, PayloadModel,Message, ApplicantModel, MeetingModel,
-    FeedbackPayload)
+
+from app.api.v1.endpoints.models.applicant_model import (ApplicantDetailsPartialUpdate, 
+                        ApplicantPartialUpdate, ApplicantRequest, FilterRequest,
+                        OpinionEnum,PayloadModel, ApplicantModel, MeetingModel,
+                        FeedbackPayload)
+
 from app.db.session import get_db
-from app.helpers import db_helper as dbh, gcp_helper as gcph, solr_helper as solrh, date_helper as dateh, zoom_helper as zoomh, regex_helper as regexh, email_helper as emailh
+
+from app.helpers import (db_helper as dbh, gcp_helper as gcph, solr_helper as solrh, 
+                        date_helper as dateh,zoom_helper as zoomh, regex_helper as regexh, 
+                        email_helper as emailh,data_helper as datah )
+
 from app.helpers.firebase_helper import verify_firebase_token
 from app.helpers.otlpless_helper import verify_otpless_token
 from app.helpers.math_helper import get_pagination
@@ -26,6 +33,7 @@ from app.models.applicant import Applicant, InterviewType
 from app.models.job import Job
 from app.models.stages import Stages
 from app.models.integration import Integration
+from app.models.template import Template
 import math
 from app.services import applicants as ap
 from urllib.parse import quote
@@ -230,9 +238,37 @@ async def get_applicant(
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid or Required UUID")
         applicant_exists: Applicant = Applicant.get_by_uuid(session=session, uuid=uuid)
-        applicant_exists.details['applied_date'] = dateh.convert_epoch_to_utc(applicant_exists.meta["audit"]["created_at"])
         if not applicant_exists:
             raise HTTPException(status_code=404, detail="Applicant not found")
+        applicant_exists.details['applied_date'] = dateh.convert_epoch_to_utc(applicant_exists.meta["audit"]["created_at"])
+
+        total_skills = 0
+        total_communication = 0
+        total_professionalism = 0
+        total_likes = 0
+        total_dislikes = 0
+        total_num_of_reviews = 0
+        avg_skills ,avg_communication,avg_professionalism,total_avg= 0,0,0,0
+         
+        if  applicant_exists.feedback:
+            for feedback in applicant_exists.feedback:
+                total_skills += feedback['rating']["skill"]
+                total_professionalism += feedback['rating']["professionalism"]
+                total_communication += feedback['rating']["communication"]
+                opinion = feedback.get("opinion",[])
+                if opinion == OpinionEnum.LIKE:
+                    total_likes += 1
+                elif opinion == OpinionEnum.DISLIKE:
+                    total_dislikes += 1
+
+                total_num_of_reviews += 1
+
+                avg_communication = round(total_communication/total_num_of_reviews,1)
+                avg_skills = round(total_skills/total_num_of_reviews,1)
+                avg_professionalism = round(total_professionalism/total_num_of_reviews,1)
+
+                total_avg = round((total_communication+total_skills+total_professionalism)/total_num_of_reviews,1)
+
         return {
             "message": "Applicant details retrieved successfully",
             "status": status.HTTP_200_OK,
@@ -240,13 +276,24 @@ async def get_applicant(
                 "details": applicant_exists.details,
                 "stage_uuid": applicant_exists.stage_uuid,
                 "job_id": applicant_exists.job_id,
-                "feedback": applicant_exists.feedback,
-                "uuid": applicant_exists.uuid
+                "uuid": applicant_exists.uuid,
+                "feedback": applicant_exists.feedback if applicant_exists.feedback else [],
+                "total_skills": total_skills,
+                "total_communication": total_communication,
+                "total_professionalism": total_professionalism, 
+                "total_reviews": total_num_of_reviews, 
+                "avg_skills": avg_skills,
+                "avg_communication": avg_communication, 
+                "avg_professionalism": avg_professionalism,
+                "total_avg": total_avg,
+                "total_likes": total_likes,
+                "total_dislikes": total_dislikes
             }
         }
     except HTTPException as e:
         raise e
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -430,9 +477,8 @@ async def upload_to_solr(
             "message": f"Error uploading the document: {response.text}"
             }
     
-
 @router.post('/{uuid}/create-meeting')
-def create_meeting(
+async def create_meeting(
     uuid: UUID,
     end_time: datetime,
     from_address: EmailStr,
@@ -450,19 +496,29 @@ def create_meeting(
             "message": "Interview scheduled successfully",
         }
 
+        if platform_name == "undefined":
+            platform_name = None
+
+        if platform_name and platform_name not in ["zoom","google_meet","microsoft_teams"]:
+            raise HTTPException(status_code=404,detail="Platform name is invalid")
+
+        domain = regexh.get_domain_from_email(email=email)
+        if not domain:
+            raise HTTPException(status_code=404,detail="Domain is invalid")
+
+        company_details = Company.get_by_domain(session=session,domain=domain)
+
         if interview_type == InterviewType.ONLINE and platform_name == "zoom":
-            domain = regexh.get_domain_from_email(email=email)
-            if not domain:
-                raise HTTPException(status_code=404,detail="Domain is invalid")
-
-            company_details = Company.get_by_domain(session=session,domain=domain)
-
             integration_details: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name=platform_name)
+            if not integration_details:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration details not found")
             credentials = integration_details.credentials
 
             response = zoomh.validate_access_token(credentials=credentials,integration=integration_details,email=email,session=session)
             print('response',response)
 
+            dateh.validate_future_datetime(dt=end_time,timezone_str=meeting_details.timezone,fieldName="end_time")
+            dateh.validate_future_datetime(dt=meeting_details.start_time,timezone_str=meeting_details.timezone,fieldName="start_time")
             duration = dateh.calculate_duration_in_minutes(start_time=meeting_details.start_time,end_time=end_time)
             meeting_details.duration = duration
             response = zoomh.create_meeting(data=meeting_details.model_dump_json(),user_id=user_id,token=response.get('access_token'))
@@ -497,11 +553,52 @@ def create_meeting(
             """
 
         applicant = Applicant.get_by_uuid(session=session, uuid=str(uuid))
-        to_addresses = [meeting.email for meeting in meeting_details.settings.meeting_invitees]
-        to_addresses += [email, applicant.details.get('personal_information').get('email')]
-        emailh.send_email(subject="Scheduled an Interview",body=body,to_email=to_addresses,from_email=from_address,reply_to_email=email)
+        cc_addresses = [meeting.email for meeting in meeting_details.settings.meeting_invitees]
+        to_addresses = [email, applicant.details.get('personal_information').get('email')]
 
-        return create_response
+        if from_address == os.getenv("FROM_ADDRESS"):
+            result = emailh.send_email(subject="Scheduled an Interview",body=body,to_email=to_addresses,from_email=from_address,reply_to_email=email,cc_addresses=cc_addresses)
+            create_response["email_result"] = result
+
+            if result.find("Email sent successfully") != -1:
+                template:Template = Template.get_by_company_id(session=session, id=company_details.id)
+                if not template:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found")
+                template.email_data.update({
+                    "id": template.email_data.get("id"),
+                    "send_count": template.email_data.get("send_count") + 1
+                })
+                template.update(session=session)
+            return create_response
+        else:
+            integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='email')
+            if not integration:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Integration details not found")
+            
+            credentials = integration.credentials
+            for cred in credentials.get('credentials'):
+                if cred.get('service_type') == 'sendgrid':
+                    api_key = cred['api_key']
+                    senders = await emailh.get_sendgrid_senders(api_key = api_key)
+                    if from_address in senders:
+                        response = await emailh.sendgrid_send_mail(api_key=api_key, from_email=from_address, to_email=to_addresses, subject="Scheduled an Interview", body=body, cc_addresses=cc_addresses, reply_to_email=email)
+                        if response.get("message") == "Email sent successfully!":
+                            create_response["email_result"] = response
+                            return create_response
+                    else:
+                        raise HTTPException(status_code=404, detail="Sender email not found in Sendgrid, please contact your administrator")
+                    
+                if cred.get('service_type') == 'brevo':
+                    api_key = cred['api_key']
+                    senders = await emailh.get_brevo_senders(api_key = api_key)
+                    if from_address in senders:
+                        response = await emailh.brevo_send_mail(api_key=api_key, from_email=from_address, to_email=to_addresses, subject="Scheduled an Interview", body=body, cc_addresses=cc_addresses, reply_to_email=email)
+                        if response.get("message") == "Email sent successfully!":
+                            create_response["email_result"] = response
+                            return create_response
+                    else:
+                        raise HTTPException(status_code=404, detail="Sender email not found in Brevo, please contact your administrator")
+
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -526,18 +623,25 @@ async def add_feedback(
         JSON response indicating success or failure.
     Raises:
         HTTPException: If the applicant is not found or invalid feedback format.
+        HTTPEXception: If the feedback is already given by the recruiter.
     """
     try:
         applicant_existed: Applicant = Applicant.get_by_uuid(session=session, uuid=str(applicant_uuid))
-
+                
         if not applicant_existed:
             raise HTTPException(status_code=404, detail="Applicant not found")
-
+        
+        overall_feedback = feedback.feedback[0].overall_feedback
+        feedback.feedback[0].overall_feedback=overall_feedback.strip()
+        
+            
         feedback_dict = feedback.model_dump().get("feedback", [])
-        if not isinstance(feedback_dict, list):
-            raise HTTPException(status_code=400, detail="Feedback must be a list")
 
         if applicant_existed.feedback:
+            for fd in applicant_existed.feedback:
+                if fd.get("given_by") == feedback.feedback[0].given_by:
+                    raise HTTPException(status_code=400, detail="Feedback already given by the recruiter")
+
             applicant_existed.feedback.append(feedback_dict[0])
             flag_modified(applicant_existed, "feedback")  # Ensure JSONB field is updated
         else:
@@ -552,3 +656,79 @@ async def add_feedback(
     except Exception as e:
         session.rollback()  
         raise HTTPException(status_code=500, detail=f"Unexpected Error: {str(e)}")
+
+
+@router.patch("/{applicant_id}/update_details")
+async def update_applicant(
+    applicant_id: UUID,
+    update_data: ApplicantDetailsPartialUpdate,
+    db: Session = Depends(get_db),
+    token : dict = Depends(verify_firebase_token)
+):
+    """
+    Partially updates an applicant's details.
+
+    Updates the applicant's personal, job, and social media information.
+
+    Args:
+        applicant_id (UUID): The UUID of the applicant to be updated.
+        update_data (ApplicantDetailsPartialUpdate): The data to be updated.
+
+    Returns:
+        A JSON response with a status and a message.
+
+    Raises:
+        HTTPException: If the applicant is not found, or if the update data is invalid.
+    """
+    try:
+        # Fetch database applicant
+        db_applicant = Applicant.get_by_uuid(session=db, uuid=str(applicant_id))
+        if not db_applicant:
+            raise HTTPException(status_code=404, detail="Applicant not found")
+
+        # Fetch Solr document
+        solr_data = await solrh.get_solr_applicant_by_applicant_uuid(applicant_id, details=True)
+        if not solr_data:
+            raise HTTPException(status_code=404, detail="Solr document not found")
+
+        existing_solr_doc = solr_data[0]
+
+        # Merge and validate updated data
+        try:
+            merged_details = datah.deep_update(db_applicant.details, update_data.model_dump(exclude_unset=True))
+            validated_details = ApplicantDetailsPartialUpdate(**merged_details)
+        except ValidationError as e:
+            raise HTTPException(status_code=422, detail=e.errors())
+
+        # Update database details
+        db_applicant.details = validated_details.model_dump()
+        flag_modified(db_applicant, "details")
+        db_applicant.update(session=db)
+
+        # Solr partial update preparation
+        solr_update_payload = datah.flatten_dict_solr(update_data.model_dump(exclude_unset=True))
+
+        # Update Solr document
+        try:
+            await solrh.update_applicant_document(
+                doc_id=existing_solr_doc["id"],
+                update_fields=solr_update_payload
+            )
+        except Exception as e:
+            logger.error(f"Solr update failed: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail="Database updated but Solr sync failed"
+            )
+
+        return {
+            "status": "success", 
+            "message": "Applicant details updated successfully"
+            }
+    
+    except HTTPException as e:
+        raise e
+    
+    except Exception as e:
+        logger.error(f"An error occurred: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")

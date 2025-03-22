@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from sqlalchemy import  extract, Date, cast, text
 from sqlalchemy.orm import Query
 from fastapi import HTTPException
+import pytz
 
 def date_filter_query_helper(query: Query, search_date: str, date_field, timezone: str = None):
     """Filters a SQLAlchemy query based on the provided `search_date` and the `date_field` field.
@@ -70,3 +71,22 @@ def calculate_duration_in_minutes(start_time, end_time):
     # Calculate the difference in minutes
     duration = (end_time - start_time).total_seconds() / 60  # Convert seconds to minutes
     return int(duration)
+
+def validate_future_datetime(dt: datetime, timezone_str: str, fieldName: str) -> datetime:
+    """Validates that the given datetime is greater than or equal to the current time in the given IANA timezone."""
+    if not isinstance(dt, datetime):
+        raise ValueError("Invalid input: expected a datetime object.")
+
+    try:
+        tz = pytz.timezone(timezone_str) 
+    except pytz.UnknownTimeZoneError:
+        raise ValueError(f"Invalid time zone: {timezone_str}")
+    
+    if dt.tzinfo is None:
+        dt = tz.localize(dt)
+
+    current_time_in_tz = datetime.now(tz)
+    if dt < current_time_in_tz:
+        raise ValueError(f"The {fieldName} must be greater than or equal to the current time in {timezone_str}.")
+
+    return dt 

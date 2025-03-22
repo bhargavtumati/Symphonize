@@ -17,8 +17,10 @@ import json
 import logging
 import os
 import time
+import re
 
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 
 security = HTTPBearer()
 
@@ -57,7 +59,6 @@ async def generate_job_description(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
 
 # @router.post("/extract-features-from-resumes")
 # async def gemini_response(
@@ -208,7 +209,7 @@ async def text_to_json(
                     "status": "failure",
                     "message": str(e),
                 }
-                existing_applicant.status["overall_status"] = "failure"
+                existing_applicant.status["overall_status"] = "failed"
                 existing_applicant.status["stages"].append(status)
                 existing_applicant.meta.update(
                     dbh.update_meta(existing_applicant.meta, token["email"])
@@ -389,7 +390,7 @@ async def legacy_gemini_response(
                     "status": "failure",
                     "message": str(e),
                 }
-                existing_applicant.status["overall_status"] = "failure"
+                existing_applicant.status["overall_status"] = "failed"
                 existing_applicant.status["stages"].append(status)
                 existing_applicant.meta.update(
                     dbh.update_meta(existing_applicant.meta, token["email"])

@@ -1,15 +1,19 @@
 from app.models.base import Base
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy import String, func, desc, ForeignKey, and_, or_
+from sqlalchemy import String, exists, func, desc, ForeignKey, and_, or_
 from sqlalchemy.orm import Mapped, mapped_column, Session
 from app.helpers.db_helper import get_metadata
 from sqlalchemy.ext.mutable import MutableDict
 from typing import List
 import enum
 
+from app.helpers.log_helper import log_execution_time
+
 import logging
 
 logger = logging.getLogger(__name__)
+
+
 
 class InterviewType(enum.Enum):
     ONLINE = 'ONLINE'
@@ -20,7 +24,7 @@ class Applicant(Base):
     __tablename__ = "applicant"
     __table_args__ = {'schema': 'public'}
     id: Mapped[int] = mapped_column(primary_key=True)
-    details : Mapped[list[dict]] = mapped_column(JSONB,nullable=False) 
+    details : Mapped[list[dict]] = mapped_column(MutableDict.as_mutable(JSONB),nullable=False) 
     status : Mapped[list[dict]] = mapped_column(JSONB,nullable=True) 
     uuid: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     stage_uuid : Mapped[str] = mapped_column(String,nullable=False)
@@ -49,6 +53,7 @@ class Applicant(Base):
         return session.query(cls).filter(func.jsonb_extract_path_text(cls.details, 'personal_information', 'email') == emailid, cls.job_id == job_id).first()
 
     @classmethod
+    @log_execution_time
     def get_by_uuid(cls, session: Session, uuid: str):
         return session.query(cls).filter(cls.uuid == uuid).first()
     
@@ -105,6 +110,19 @@ class Applicant(Base):
             .limit(limit)
             .all()
         )
+    
+    @classmethod
+    def get_missing_applicants(cls, session: Session, job_id: str, applicant_uuids: List[str]):
+        missing_uuids = []
+        for uuid_str in applicant_uuids:
+            subquery = exists().where(
+                cls.job_id == job_id,  
+                cls.uuid == uuid_str,  
+                cls.status['overall_status'].as_string() == 'success'
+            )
+            if not session.query(subquery).scalar():
+                missing_uuids.append(uuid_str)
+        return missing_uuids
 
     def create(self, session: Session,created_by:str):
         try:

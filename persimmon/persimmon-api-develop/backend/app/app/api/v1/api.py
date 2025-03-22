@@ -13,7 +13,11 @@ from app.api.v1.endpoints import (
     email,
     zrapplicants,
     templates,
-    share_applicants
+    share_applicants,
+    linkedin,
+    whatsappintegration,
+    watiintegration,
+    whatchimpintegration
 )
 
 api_router = APIRouter()
@@ -31,3 +35,7 @@ api_router.include_router(email.router, prefix="/email", tags=["email"])
 api_router.include_router(zrapplicants.router, prefix="/zrapplicants", tags=["zrapplicants"])
 api_router.include_router(templates.router, prefix="/template", tags=["template"])
 api_router.include_router(share_applicants.router, prefix="/share", tags=["share applicants"])
+api_router.include_router(linkedin.router, prefix="/linkedin", tags=["linkedin"])
+api_router.include_router(whatsappintegration.router, prefix="/whatsappintegration", tags=["whatsappintegration"])
+api_router.include_router(watiintegration.router, prefix="/watiintegration", tags=["watiintegration"])
+api_router.include_router(whatchimpintegration.router, prefix="/whatchimpintegration", tags=["whatchimpintegration"])

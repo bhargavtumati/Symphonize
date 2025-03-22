@@ -4,8 +4,11 @@ from google.oauth2 import service_account
 from fastapi.responses import StreamingResponse
 from fastapi import HTTPException
 import json
+import uuid
 from io import BytesIO
 from app.helpers import pdf_helper as pdfh
+from datetime import timedelta
+from pathlib import Path
 
 SA_KEY = {
     "type": os.getenv("CLOUD_STORAGE_TYPE"),
@@ -192,3 +195,38 @@ async def download_from_gcp(bucket_name: str, source_blob_name: str, destination
     blob = bucket.blob(source_blob_name)
     file_content = blob.download_as_bytes()
     return BytesIO(file_content)
+
+def save_image_to_destination(file, main_path) -> str:
+    if not file.content_type.startswith("image/"):
+        raise ValueError("Only image files are allowed.")
+    
+    unique_id = uuid.uuid4()
+    original_file_name = f"{unique_id}_{file.filename}"
+    destination = Path(main_path) / original_file_name
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        content = file.file.read()
+        with open(destination, 'wb') as writer:
+            writer.write(content)
+        print(f"Image saved at: {destination}")
+        return destination.as_posix()  # Convert to forward slashes
+
+    except Exception as e:
+        raise IOError(f"Failed to save image: {e}")
+
+def generate_signed_url(bucket_name: str, file_name: str, expiration_minutes: int = 60):
+    try:
+        credentials = service_account.Credentials.from_service_account_info(SA_KEY)
+        storage_client = storage.Client(credentials=credentials, project=SA_KEY["project_id"])
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(file_name)
+
+        # Generate signed URL
+        url = blob.generate_signed_url(expiration=timedelta(minutes=expiration_minutes))
+        print('url------',url)
+        return url
+    except Exception as e:
+        print(f"Error generating signed URL: {e}")
+        return None

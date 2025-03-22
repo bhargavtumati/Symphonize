@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 import json
 import os
 from typing import Optional, List
+from fastapi import HTTPException
 from langchain.prompts import PromptTemplate
 from langchain_core.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -310,4 +311,4 @@ def extract_features_from_jd(
         # response_json["text"] = text
         return response_json
     except json.JSONDecodeError:
-        return json.dumps({"error": "Failed to parse JSON response after retries."})
+        raise HTTPException(status_code=500, detail=f"Failed to parse JSON response after retries.")

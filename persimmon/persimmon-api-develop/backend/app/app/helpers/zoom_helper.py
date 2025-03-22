@@ -48,7 +48,7 @@ def create_meeting(data,user_id,token):
         print('zoomh response',response)
         response_json = response.json()
         print('zoomh response json',response_json)
-        if response.status_code == 404:
+        if response.status_code == 404 or response.status_code == 400:
             raise HTTPException(status_code=response.status_code, detail=response_json.get('message'))
         if response.status_code != 201:
             raise HTTPException(status_code=response.status_code, detail=response_json.get('reason'))

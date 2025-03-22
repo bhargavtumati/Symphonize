@@ -25,7 +25,7 @@ async def upload_to_solr(flattened_resume: dict) -> dict:
     f"========= uploading function to solr for applicant_uuid: {flattened_resume['applicant_uuid']}"
     try:
         # Send the JSON data to Solr
-        async with httpx.AsyncClient(verify=False) as client:
+        async with httpx.AsyncClient() as client:
             response = await client.post(solr_url,
                 headers={"Content-Type": "application/json"},
                 data=json_data
@@ -53,7 +53,7 @@ async def query_solr(job_code , stage_uuid):
          # Added to ensure a unique query each time
     }
 
-    async with httpx.AsyncClient(verify=False) as client:
+    async with httpx.AsyncClient() as client:
         response = await client.get(SOLR_URL_Query, params=query_params, headers=headers)
 
     if response.status_code != 200:
@@ -79,7 +79,7 @@ async def query_solr_with_filters(query: str, filters: Dict[str, str], rows: int
         # Applying filters separately as filter queries
     }
 
-    async with httpx.AsyncClient(verify=False) as client:
+    async with httpx.AsyncClient() as client:
         response = await client.post(SOLR_URL_Query, json=solr_payload, headers=headers)
 
     if response.status_code != 200:
@@ -96,7 +96,7 @@ async def update_solr_documents_partially(uuids: list[str],set_uuid:uuid,search_
         "wt": "json"
     }
 
-    async with httpx.AsyncClient(verify=False) as client:
+    async with httpx.AsyncClient() as client:
         solr_response = await client.get(f"{SOLR_URL_Query}", params=params, headers=headers)
         documents = solr_response.json().get("response", {}).get("docs", [])
         updates = []
@@ -127,7 +127,7 @@ async def is_applicant_exist(applicant_uuid: str):
         "rows": 20,             
         "fl": "id,applicant_uuid", 
     }
-    async with httpx.AsyncClient(verify=False) as client:
+    async with httpx.AsyncClient() as client:
         response = await client.get(SOLR_URL_Query, params=params, headers=headers)
 
     if response.status_code != 200:
@@ -145,25 +145,30 @@ async def delete_records_by_applicant_uuid(applicant_uuid: str):
 
     delete_query = {"delete": {"query": f'applicant_uuid:"{applicant_uuid}"'}}
 
-    async with httpx.AsyncClient(verify=False) as client:
+    async with httpx.AsyncClient() as client:
         url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
         response = await client.post(url, json=delete_query)
         return response.json()
 
 
-async def get_solr_applicant_by_applicant_uuid(applicant_uuid):
-    async with httpx.AsyncClient(verify=False) as client:
+async def get_solr_applicant_by_applicant_uuid(applicant_uuid,details:bool=False):
+    async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(f"{SOLR_BASE_URL}/resumes/select", params={
-                "q": f"applicant_uuid:\"{applicant_uuid}\"",
-                "rows": 50,
-                "fl": "id,applicant_uuid",
-            })
+            if details: 
+                response = await client.get(f"{SOLR_BASE_URL}/resumes/select", params={
+                    "q": f"applicant_uuid:\"{applicant_uuid}\"",
+                    "rows": 50
+                }) 
+            else:
+                response = await client.get(f"{SOLR_BASE_URL}/resumes/select", params={
+                    "q": f"applicant_uuid:\"{applicant_uuid}\"",
+                    "rows": 50,
+                    "fl": "id,applicant_uuid",
+                })
 
             if response.status_code != 200:
                 print(f"Solr request failed: {response.status_code} {response.text}")
                 return []  # Return empty list to prevent crashes
-
             return response.json().get("response", {}).get("docs", [])
         except Exception as e:
             print(f"Error fetching data from Solr: {e}")
@@ -175,7 +180,7 @@ async def delete_solr_records(doc_ids):
     if not doc_ids:
         return
 
-    async with httpx.AsyncClient(verify=False) as client:
+    async with httpx.AsyncClient() as client:
         delete_query = {"delete": [{"id": doc_id} for doc_id in doc_ids]}
         url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
         response = await client.post(url, json=delete_query)
@@ -202,3 +207,21 @@ async def delete_duplicate_records(applicant_uuid):
         print("Duplicates removed successfully.")
     else:
         print("No duplicates found.")
+
+
+async def update_applicant_document(doc_id: str, update_fields: dict):
+    
+    url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
+    headers = {"Content-Type": "application/json"}
+
+    update_fields = [ {
+        "id": doc_id,
+        **update_fields
+    } ]
+
+    print(f"the updated fields {update_fields}")
+    async with httpx.AsyncClient(verify=False) as client:
+        update_response = await client.post(url, json=update_fields)
+        update_response.raise_for_status()
+    return update_response.json()
+    
