@@ -225,7 +225,6 @@ def generate_signed_url(bucket_name: str, file_name: str, expiration_minutes: in
 
         # Generate signed URL
         url = blob.generate_signed_url(expiration=timedelta(minutes=expiration_minutes))
-        print('url------',url)
         return url
     except Exception as e:
         print(f"Error generating signed URL: {e}")

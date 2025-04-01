@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import re
 import traceback
 import uuid
 from typing import Dict, List, Optional
@@ -54,6 +55,7 @@ meta: dict[str, str] = {"api_reference": "https://github.com/symphonize/persimmo
 router = APIRouter()
 SOLR_BASE_URL=os.getenv("SOLR_BASE_URL")
 PERSIMMON_DATA_BUCKET=os.getenv("PERSIMMON_DATA_BUCKET")
+PERSIMMON_IMAGES_BUCKET = os.getenv("PERSIMMON_IMAGES_BUCKET")
 
 
 @router.post("/upload-resume")
@@ -198,7 +200,7 @@ async def get_applicants_filter(
         if stage_uuid:
             query_parts.append(f"stage_uuid:\"{stage_uuid}\"")
         if name:
-            query_parts.append(f"full_name:\"{name}\"")
+            query_parts.append(f"full_name:{name}*")
         query = " AND ".join(query_parts)  # Combine query parts with AND
 
         
@@ -249,6 +251,7 @@ async def get_applicant(
         total_dislikes = 0
         total_num_of_reviews = 0
         avg_skills ,avg_communication,avg_professionalism,total_avg= 0,0,0,0
+        image_url = None
          
         if  applicant_exists.feedback:
             for feedback in applicant_exists.feedback:
@@ -269,11 +272,16 @@ async def get_applicant(
 
                 total_avg = round((total_communication+total_skills+total_professionalism)/total_num_of_reviews,1)
 
+        if applicant_exists.details['applicant_image']:
+            logo_file_path = applicant_exists.details['applicant_image'].replace(f'/{PERSIMMON_IMAGES_BUCKET}/', '')
+            image_url = gcph.generate_signed_url(f"{PERSIMMON_IMAGES_BUCKET}",file_name=logo_file_path)
+
         return {
             "message": "Applicant details retrieved successfully",
             "status": status.HTTP_200_OK,
             "data": {
                 "details": applicant_exists.details,
+                "image_url": image_url,
                 "stage_uuid": applicant_exists.stage_uuid,
                 "job_id": applicant_exists.job_id,
                 "uuid": applicant_exists.uuid,
@@ -681,6 +689,21 @@ async def update_applicant(
         HTTPException: If the applicant is not found, or if the update data is invalid.
     """
     try:
+        solr_formatted_dob = None
+        pattern = r"^(?P<years>\d{1,2}) Years (?P<months>\d{1,2}) Months$"
+        print(f"update informations {update_data.job_information.work_experience}")
+        if update_data.job_information.work_experience:
+            match = re.match(pattern,update_data.job_information.work_experience)
+            years, months = int(match.group("years")), int(match.group("months"))
+            print(f"{years} years and {months} months")
+
+            update_data.job_information.work_experience = f"{years}.{months}"
+            print(f"update informations {update_data.job_information.work_experience}")
+
+        if update_data.personal_information.date_of_birth:
+            solr_formatted_dob = datah.convert_to_solr_date(update_data.personal_information.date_of_birth)
+
+
         # Fetch database applicant
         db_applicant = Applicant.get_by_uuid(session=db, uuid=str(applicant_id))
         if not db_applicant:
@@ -696,16 +719,18 @@ async def update_applicant(
         # Merge and validate updated data
         try:
             merged_details = datah.deep_update(db_applicant.details, update_data.model_dump(exclude_unset=True))
-            validated_details = ApplicantDetailsPartialUpdate(**merged_details)
+            validated_details =merged_details
         except ValidationError as e:
             raise HTTPException(status_code=422, detail=e.errors())
 
         # Update database details
-        db_applicant.details = validated_details.model_dump()
+        db_applicant.details = validated_details
         flag_modified(db_applicant, "details")
         db_applicant.update(session=db)
 
         # Solr partial update preparation
+        if solr_formatted_dob:
+            update_data.personal_information.date_of_birth = solr_formatted_dob
         solr_update_payload = datah.flatten_dict_solr(update_data.model_dump(exclude_unset=True))
 
         # Update Solr document
@@ -730,5 +755,6 @@ async def update_applicant(
         raise e
     
     except Exception as e:
+        traceback.print_exc()
         logger.error(f"An error occurred: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error ")

@@ -11,6 +11,8 @@ from pydantic import ValidationError
 from app.db.session import SessionLocal
 from app.models.master_data import MasterData
 from app.models.job import Job
+from secure import Secure
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,6 +51,18 @@ if settings.BACKEND_CORS_ORIGINS:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+# Add Security Headers Middleware
+secure_headers = Secure.with_default_headers()
+
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    if request.url.path.startswith("/docs") or request.url.path.startswith("/openapi.json"):
+        return await call_next(request)
+    print("Security Middleware Executed")
+    response = await call_next(request)
+    await secure_headers.set_headers_async(response)
+    return response
 
 @app.get("/")
 async def root():

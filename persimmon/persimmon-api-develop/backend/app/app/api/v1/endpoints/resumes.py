@@ -36,6 +36,7 @@ from app.helpers import solr_helper as solrh, image_helper as imageh
 from app.models.stages import Stages
 from app.schemas.response_schema import GetResponseBase, create_response
 from app.helpers.firebase_helper import verify_firebase_token,get_base_url
+from app.helpers.log_helper import log_execution_time
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -221,6 +222,7 @@ class ExtractTextRequest(BaseModel):
     uuid: str
 
 @router.post("/extract-text")
+@log_execution_time
 async def extract_text(
     request: ExtractTextRequest,
     session : Session = Depends(get_db),
@@ -480,6 +482,7 @@ async def legacy_upload_resumes(
     })
 
 @router.post("/upload")
+@log_execution_time
 async def upload_resumes(
     job_code:str,
     files: List[UploadFile] = File(...),
@@ -524,7 +527,7 @@ async def upload_resumes(
     tasks = []
     errors = []
     uploaded_files = []
-    base64_images = []
+    images = []
     job_id = None
     stage_uuid = None
 
@@ -592,20 +595,20 @@ async def upload_resumes(
             file_extension = file.filename.split('.')[-1].lower()
             try:
                 if file_extension == "pdf":
-                    image_base64 = imageh.extract_first_face_from_pdf(BytesIO(content))
+                    image_extracted = imageh.extract_first_face_from_pdf(BytesIO(content),file.filename)
                 elif file_extension == "docx":
-                    image_base64 = imageh.extract_first_face_from_docx(BytesIO(content))
+                    image_extracted = imageh.extract_first_face_from_docx(BytesIO(content),file.filename)
             except HTTPException as e:
                 logger.error(f"Failed to extract face image from document: {str(e)}")
-            base64_images.append(image_base64)
+            images.append(image_extracted)
         except Exception as e:
             print(f"exception while converting document to text: {str(e)}")
             errors.append(str(e))
 
-    if len(base64_images) < len(uploaded_files):
-        diff = len(uploaded_files) - len(base64_images)
+    if len(images) < len(uploaded_files):
+        diff = len(uploaded_files) - len(images)
         diff = [None] * diff
-        base64_images.extend(diff)
+        images.extend(diff)
 
     end_time = time.time()
     duration = round(end_time - start_time, 2)
@@ -616,7 +619,7 @@ async def upload_resumes(
             "original_resume":uploaded_file,
             "context":"document-added",
             "file_upload":uploaded_file,
-            "applicant_image":base64_images[index]
+            "applicant_image": images[index]
             }
         api_end_time = datetime.now(timezone.utc)
         status = {
@@ -861,6 +864,7 @@ class Flatten(BaseModel):
     uuid: str
 
 @router.post("/flatten")
+@log_execution_time
 async def flatten(
     request: Flatten,
     session: Session = Depends(get_db),
@@ -964,13 +968,7 @@ async def flatten(
         except Exception as e:
             logger.error(f"Exception In Exception block while deleting record from solr for applicant_uuid : {request.uuid}, Error Mesaage: {str(e)}")
             raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        try:
-            logger.info(f"========calling delete_duplicate_records for applicant_uuid : {request.uuid}")
-            time.sleep(4)
-            await solrh.delete_duplicate_records(request.uuid)
-        except Exception as e:
-            logger.error(f"Exception In Finally block while deleting duplicate records from solr for applicant_uuid : {request.uuid}, Error Mesaage: {str(e)}")
+    
 
 @router.post("/legacy-flatten-for-solr")
 async def leagacy_flattern_resume_data_from_solr(

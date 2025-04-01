@@ -71,6 +71,15 @@ def validate_facebook_url(value: str) -> str:
         raise ValueError("Please enter valid Facebook URL")
     return value
 
+
+def validate_github_url(value: str) -> str:
+    is_non_empty(value, "Github URL")
+    pattern = r'^(https://github.com/)[A-Za-z0-9-_.]{5,50}+/?$'
+    if not re.match(pattern, value):
+        raise ValueError("Please enter valid Git hub URL")
+    return value
+
+
 def validate_twitter_url(value: str) -> str:
     is_non_empty(value, "X URL")
     pattern = r'^(https://x.com/)[A-Za-z0-9-_]{4,15}+/?$'

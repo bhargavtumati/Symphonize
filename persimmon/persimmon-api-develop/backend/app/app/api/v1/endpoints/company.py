@@ -108,6 +108,9 @@ def update_company_details(
             "instagram": instagram,
         }.items() if v}
         
+        if len(form_data) == 0 and not logo and not images:
+            raise HTTPException(status_code=400, detail="No data provided for update")
+
         try:
             company_data = CompanyModel(**form_data) 
         except ValidationError as e:
@@ -140,7 +143,7 @@ def update_company_details(
             total_images = len(images) + existing_image_count
             if total_images > 10 and existing_image_count > 0:
                 raise HTTPException(status_code=400, detail=f"Total number of company images must be 10 or less. You already have {existing_image_count} images. You can upload up to {10 - existing_image_count} more images.")
-            else:
+            elif existing_image_count == 10:
                 raise HTTPException(status_code=400, detail=f"Total number of company images must be 10 or less. You already uploaded {existing_image_count} images before.")
 
             for image in images:
@@ -185,6 +188,8 @@ def remove_company_image(
             raise HTTPException(status_code=404,detail="Company not found")
 
         new_images = [path for path in company_details.images if path != image.path]
+        if len(new_images) == len(company_details.images):
+            raise HTTPException(status_code=404,detail="Image not found")
         Company.remove_image(session=session, company_id=company_details.id, new_images=new_images)
 
         return {

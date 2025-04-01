@@ -4,7 +4,11 @@ from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import Mapped, mapped_column, Session
 from app.helpers.db_helper import get_metadata
 from app.models.base import Base
+import enum
 
+class WhatsappIntegrationType(enum.Enum):
+    WATI="WATI"
+    
 class Integration(Base):
     __tablename__ = "integration"
     __table_args__ = {'schema': 'public'}

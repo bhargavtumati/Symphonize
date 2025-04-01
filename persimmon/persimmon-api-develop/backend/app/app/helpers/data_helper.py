@@ -14,6 +14,14 @@ def convert_nulls_to_empty_strings(data):
         return ""
     else:
         return data
+    
+    
+def convert_to_solr_date(dob_str):
+    # Convert from "DD-MM-YYYY" to "YYYY-MM-DDT00:00:00Z"
+    date_obj = datetime.strptime(dob_str, "%d-%m-%Y")
+    solr_date = date_obj.strftime("%Y-%m-%dT00:00:00Z")
+    return solr_date
+
 
 def reformat_date(date_str):
     try:

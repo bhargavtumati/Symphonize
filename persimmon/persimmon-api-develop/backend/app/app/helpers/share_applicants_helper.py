@@ -56,9 +56,9 @@ async def share_applicants_send_email(
             raise ValueError(f"Unsupported email service: {email_service}")
         return {"email": recipient, "status": "success"}
     except HTTPException as e:
-        return {"email": recipient, "error": str(e.detail)}
+        return {"email": recipient, "error": str(e.detail), "status": "failed"}
     except Exception as e:
-        return {"email": recipient, "error": str(e)}
+        return {"email": recipient, "error": str(e), "status": "failed"}
 
 
 def get_api_key(session: Session, email: str, service_type: str):

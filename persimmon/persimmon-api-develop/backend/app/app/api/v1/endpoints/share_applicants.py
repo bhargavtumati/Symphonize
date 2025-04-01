@@ -25,6 +25,7 @@ from app.models.company import Company
 from app.models.recruiter import Recruiter
 
 AUTHORIZED_SENDER = os.getenv("FROM_ADDRESS")
+PERSIMMON_IMAGES_BUCKET = os.getenv("PERSIMMON_IMAGES_BUCKET")
 
 router = APIRouter()
 
@@ -40,9 +41,9 @@ async def share_applicant(
         if not db_job:
             raise HTTPException(status_code=404, detail="Job not found.")
 
-        missing_applicants: list = Applicant.get_missing_applicants(session=session, job_id=db_job.id, applicant_uuids=data.applicant_uuids)
-        if missing_applicants:
-            raise HTTPException(status_code=404, detail=f"Applicants not found: {missing_applicants}")
+        nonexistent_applicant_uuids: list = Applicant.validate_applicant_uuids(session=session, job_id=db_job.id, applicant_uuids=data.applicant_uuids)
+        if nonexistent_applicant_uuids:
+            raise HTTPException(status_code=404, detail=f"Applicants not found: {nonexistent_applicant_uuids}")
         
         if data.email_type == "default" and data.sender != AUTHORIZED_SENDER:
             raise ValueError("The sender address is not authorized")
@@ -195,19 +196,35 @@ async def get_applicant(
         applicant_exists: Applicant = Applicant.get_by_uuid(session=session, uuid=str(uuid))
         if not applicant_exists:
             raise HTTPException(status_code=404, detail="Applicant not found")
-        applicant_exists.details['applied_date'] = dateh.convert_epoch_to_utc(applicant_exists.meta["audit"]["created_at"])
+        
+        applicant_exists.details['applied_date'] = dateh.convert_epoch_to_utc(
+            applicant_exists.meta["audit"]["created_at"]
+        )
+
         if decoded_data['hs']:
             applicant_exists.details['current_ctc'] = None
             applicant_exists.details['expected_ctc'] = None
-        if applicant_exists.feedback:
-            feedback = next((fb for fb in applicant_exists.feedback if fb['given_by'] == decoded_data['re']), None)
-        else:
-            feedback = None
+
+        feedback = next(
+            (fb for fb in applicant_exists.feedback if fb['given_by'] == decoded_data['re']),
+            None
+        ) if applicant_exists.feedback else None
+
+        image_url = None
+        if applicant_exists.details['applicant_image']:
+            logo_file_path: str = applicant_exists.details['applicant_image'].replace(
+                f'/{PERSIMMON_IMAGES_BUCKET}/', ''
+            )
+            image_url: str = gcph.generate_signed_url(
+                f"{PERSIMMON_IMAGES_BUCKET}",file_name=logo_file_path
+            )
+
         return {
             "message": "Applicant details retrieved successfully",
             "status": 200,
             "data": {
                 "details": applicant_exists.details,
+                "image_url":  image_url ,
                 "stage_uuid": applicant_exists.stage_uuid,
                 "job_id": applicant_exists.job_id,
                 "uuid": applicant_exists.uuid,

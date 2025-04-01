@@ -81,8 +81,8 @@ def process_resume_json(json_data):
                     'calculated_experience': experience_years
                 })
         
-        # Round total experience to 1 decimal place
-        total_experience = round(total_experience, 1)
+        # Round total experience to 2 decimal place
+        total_experience = round(total_experience, 2)
         
         return {
             'experience_details': processed_entries,
@@ -93,3 +93,15 @@ def process_resume_json(json_data):
     except Exception as e:
         print(f"Error processing resume JSON: {e}")
         return None
+    
+
+def calculate_candidate_transition_behaviour(candidate_data: dict) -> int:
+    """Calculates the average tenure per company based on the candidate's experience data."""
+    total_experience = candidate_data.get('overall_experience')
+    experience_records = candidate_data.get('experience', [])
+    
+    if not experience_records or total_experience is None:
+        return 0  
+    
+    num_companies = len(experience_records)
+    return round(total_experience / num_companies) 

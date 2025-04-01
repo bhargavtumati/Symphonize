@@ -1,3 +1,6 @@
+from pathlib import Path
+import os
+import uuid
 import fitz
 import base64
 import cv2
@@ -6,7 +9,11 @@ from docx import Document
 from io import BytesIO
 from fastapi import HTTPException
 
-def extract_first_face_from_pdf(image_bytes: BytesIO):
+
+PERSIMMON_IMAGES_BUCKET = os.getenv("PERSIMMON_IMAGES_BUCKET")
+ENVIRONMENT = os.getenv("ENVIRONMENT")
+
+def extract_first_face_from_pdf(image_bytes: BytesIO, file_name: str):
     try:
         pdf_document = fitz.open(stream=image_bytes, filetype="pdf")
         
@@ -33,13 +40,24 @@ def extract_first_face_from_pdf(image_bytes: BytesIO):
                     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
                     if len(faces) > 0:
-                        return base64.b64encode(image_data).decode("utf-8")
+                        main_path = f"/{PERSIMMON_IMAGES_BUCKET}/{ENVIRONMENT}/applicant/profile-images"
+
+                        unique_id = uuid.uuid4()
+
+                        # Generate unique filename
+                        file_name = f"{unique_id}_{file_name}.jpg"
+                        file_path = Path(main_path) / file_name
+
+                        # Save the extracted face image
+                        cv2.imwrite(str(file_path), img_cv)
+
+                        return str(file_path)
 
         return None 
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error extracting face image from PDF: {str(e)}")
 
-def extract_first_face_from_docx(docx_path: BytesIO):
+def extract_first_face_from_docx(docx_path: BytesIO,file_name: str):
     try:
         doc = Document(docx_path)
         face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -59,8 +77,19 @@ def extract_first_face_from_docx(docx_path: BytesIO):
                 faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
                 if len(faces) > 0: 
-                    return base64.b64encode(image).decode("utf-8")
+                    main_path = f"/{PERSIMMON_IMAGES_BUCKET}/{ENVIRONMENT}/applicant/profile-images"
 
+                    unique_id = uuid.uuid4()
+
+                    # Generate unique filename
+                    file_name = f"{unique_id}_{file_name}.jpg"
+                    file_path = Path(main_path) / file_name
+
+                    # Save the extracted face image
+                    cv2.imwrite(str(file_path), img_cv)
+
+                    return str(file_path)  
+                
         return None  
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error extracting face image from docx: {str(e)}")

@@ -4,7 +4,7 @@ import os
 import re
 from typing import Optional
 
-from app.helpers.work_exp_helper import process_resume_json
+from app.helpers.work_exp_helper import process_resume_json, calculate_candidate_transition_behaviour
 import google.generativeai as genai
 from dotenv import load_dotenv
 from langchain.prompts import PromptTemplate
@@ -356,6 +356,7 @@ The output must be a JSON object with these exact keys (structure shown with dou
     }}
   ],
   "overall_experience": "number",
+  "preferred_job_location": "string",
   "salary": "number",
   "Industry_type": "string",
   "availability": "number",
@@ -462,6 +463,7 @@ async def extract_features_from_resume(
             response_json = json.loads(response_content)
             exp_result = process_resume_json(response_json)
             response_json['overall_experience'] = exp_result['total_experience']
+            response_json['Transition_behaviour'] = calculate_candidate_transition_behaviour(response_json)
             print('response_json',response_json)
             # response_json["text"] = text  # Adding original text if needed
             return json.dumps(response_json, indent=2)
@@ -473,6 +475,7 @@ async def extract_features_from_resume(
         response_json = json.loads(response_content)
         exp_result = process_resume_json(response_json)
         response_json['overall_experience'] = exp_result['total_experience']
+        response_json['Transition_behaviour'] = calculate_candidate_transition_behaviour(response_json)
         response_json["text"] = text
         print('response_json',response_json)
         return json.dumps(response_json, indent=2)

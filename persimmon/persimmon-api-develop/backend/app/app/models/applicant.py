@@ -56,6 +56,10 @@ class Applicant(Base):
     @log_execution_time
     def get_by_uuid(cls, session: Session, uuid: str):
         return session.query(cls).filter(cls.uuid == uuid).first()
+
+    @classmethod
+    def get_applicants_by_uuid(cls, session: Session, uuids: List[str]):
+        return session.query(cls).filter(cls.uuid.in_(uuids)).all()
     
     @classmethod
     def get_by_gcp_path(cls, session: Session, gcp_path: str):
@@ -112,7 +116,7 @@ class Applicant(Base):
         )
     
     @classmethod
-    def get_missing_applicants(cls, session: Session, job_id: str, applicant_uuids: List[str]):
+    def validate_applicant_uuids(cls, session: Session, job_id: str, applicant_uuids: List[str]):
         missing_uuids = []
         for uuid_str in applicant_uuids:
             subquery = exists().where(

@@ -24,7 +24,7 @@ def mock_dependencies():
     with patch("app.models.shared.Shared.create", return_value=None) as mock_create, \
          patch("app.models.job.Job.get_by_code", return_value=MagicMock(title="Software Engineer")) as mock_get_by_code, \
          patch("app.models.recruiter.Recruiter.get_by_email_id", return_value=MagicMock(full_name="charanreddy", designation="Python Developer")) as get_by_email_id,\
-         patch("app.models.applicant.Applicant.get_missing_applicants", return_value=[]) as mock_get_missing_applicants, \
+         patch("app.models.applicant.Applicant.validate_applicant_uuids", return_value=[]) as mock_validate_applicant_uuids, \
          patch("app.models.company.Company.get_by_domain", return_value=MagicMock(id=1, name="Tekworks")) as mock_get_company, \
          patch("app.models.integration.Integration.get_credentials", return_value=MagicMock(
             credentials={"credentials": [{"service_type": "brevo", "api_key": "mock_api_key"}, {"service_type": "sendgrid", "api_key": "mock_api_key"}]}
@@ -36,7 +36,7 @@ def mock_dependencies():
         yield {
             "mock_create": mock_create,
             "mock_get_by_code": mock_get_by_code,
-            "mock_get_missing_applicants": mock_get_missing_applicants,
+            "mock_validate_applicant_uuids": mock_validate_applicant_uuids,
             "mock_get_company": mock_get_company,
             "mock_get_integration": mock_get_integration,
             "mock_send_email": mock_send_email,
@@ -66,7 +66,7 @@ def test_share_applicant_default_email(mock_dependencies):
     assert json_response['failure_count'] == 0
     mock_dependencies["mock_create"].assert_called_once()
     mock_dependencies["mock_get_by_code"].assert_called_once()
-    mock_dependencies["mock_get_missing_applicants"].assert_called_once()
+    mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
     mock_dependencies["mock_send_email"].assert_called_once()
 
 
@@ -89,7 +89,7 @@ def test_share_applicant_default_email_multiple_recipients(mock_dependencies):
     assert json_response['failure_count'] == 0
     mock_dependencies["mock_create"].assert_called_once()
     mock_dependencies["mock_get_by_code"].assert_called_once()
-    mock_dependencies["mock_get_missing_applicants"].assert_called_once()
+    mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
     mock_dependencies["mock_send_email"].call_count == 2
 
 
@@ -113,8 +113,8 @@ def test_share_applicant_brevo(mock_dependencies):
     mock_dependencies["mock_brevo_email"].assert_called_once()
     mock_dependencies["mock_create"].assert_called_once()
     mock_dependencies["mock_get_by_code"].assert_called_once()
-    mock_dependencies["mock_get_missing_applicants"].assert_called_once()
-    mock_dependencies["mock_get_missing_applicants"].assert_called_once()
+    mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
+    mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
     mock_dependencies["mock_get_company"].assert_called()
     mock_dependencies["mock_get_integration"].assert_called_once()
 
@@ -137,8 +137,8 @@ def test_share_applicant_sendgrid(mock_dependencies):
     assert json_response['failure_count'] == 0
     mock_dependencies["mock_sendgrid_email"].assert_called_once()
     mock_dependencies["mock_get_by_code"].assert_called_once()
-    mock_dependencies["mock_get_missing_applicants"].assert_called_once()
-    mock_dependencies["mock_get_missing_applicants"].assert_called_once()
+    mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
+    mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
     mock_dependencies["mock_get_company"].assert_called()
     mock_dependencies["mock_get_integration"].assert_called_once()
 

@@ -1,14 +1,20 @@
+import re
 from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator, model_validator
 from typing import Any, Optional, List,Dict,Union
 from sqlalchemy.dialects.postgresql import JSONB
 from uuid import UUID
 from app.utils.validators import (
-    is_non_empty, validate_email_address, validate_length, validate_linkedin_url, 
+    has_proper_characters, is_alphabetic, is_non_empty, validate_decimal_point, validate_email_address, validate_facebook_url, validate_github_url, validate_instagram_url, validate_length, validate_letters_and_numbers, validate_linkedin_url, 
     validate_mobile_number, validate_name_with_fullstop, validate_Preference,
     validate_numeric_range, validate_industry_type, validate_job_location, get_education_institutions_list)
 from datetime import datetime
 from zoneinfo import available_timezones
 from enum import Enum
+
+FULL_NAME_FIELD = "Full Name"
+JOB_TITLE_FIELD = "Job title"
+CURRENT_CTC_FIELD = "Current salary"
+EXPECTED_CTC_FIELD = "Expected salary"
 
 
 class SocialMedia(BaseModel):
@@ -16,6 +22,22 @@ class SocialMedia(BaseModel):
     facebook: Optional[str] = ""
     linkedin: Optional[str] = ""
     instagram: Optional[str] = ""
+
+    @field_validator('linkedin')
+    def validate_linkedin(cls, linkedin):
+        return validate_linkedin_url(linkedin)
+    
+    @field_validator('github')
+    def validate_github(cls, github):
+        return validate_github_url(github)
+    
+    @field_validator('facebook')
+    def validate_facebook(cls, facebook):
+        return validate_facebook_url(facebook)
+    
+    @field_validator('instagram')
+    def validate_instagram(cls, instagram):
+        return validate_instagram_url(instagram)
 
 
 class JobInformation(BaseModel):
@@ -25,17 +47,108 @@ class JobInformation(BaseModel):
     current_ctc: Optional[Union[float,str]] = None 
     expected_ctc: Optional[Union[float,str]] = None
     job_location: Optional[str] = ""
+    preferred_job_location: Optional[str] = ""
     current_work_at: Optional[str] = ""
-    work_experience: Optional[Any] = ""
+    work_experience: Optional[str] = None
 
+    @field_validator('job_title')
+    def validate_title(cls, job_title):
+        is_non_empty(value=job_title, field_name=JOB_TITLE_FIELD)
+        has_proper_characters(value=job_title, field_name=JOB_TITLE_FIELD)
+        validate_letters_and_numbers(value=job_title, field_name=JOB_TITLE_FIELD)
+        return validate_length(value=job_title, min_len=3, max_len=50, field_name=JOB_TITLE_FIELD)
+    
+    @field_validator('work_experience')
+    def validate_experience(cls, value):
+        pattern = r"^(?P<years>\d{1,2}) Years (?P<months>\d{1,2}) Months$"
+        match = re.match(pattern, value)
+        
+        if not match:
+            raise ValueError("Invalid format. Use 'X Years Y Months' (e.g., '3 Years 7 Months').")
 
+        years, months = int(match.group("years")), int(match.group("months"))
+        if not (0 <= years <= 50):
+            raise ValueError("Years must be between 0 and 50.")
+        
+        if not (0 <= months <= 11):
+            raise ValueError("Months must be between 0 and 11.")
+
+        return value
+    
+    @field_validator('job_location')
+    def validate_location(cls, job_location):
+        return validate_job_location(location=job_location)
+    
+    @field_validator('preferred_job_location')
+    def validate_preferred_location(cls, preferred_job_location):
+        return validate_job_location(location=preferred_job_location)
+    
+
+    @field_validator('current_ctc')
+    def validate_current_ctc(cls, current_ctc):
+        validate_decimal_point(value=current_ctc)
+        return validate_numeric_range(value=current_ctc, min_val=2, max_val=100, field_name=CURRENT_CTC_FIELD) 
+    
+    @field_validator('expected_ctc')
+    def validate_expected_ctc(cls, expected_ctc):
+        validate_decimal_point(value=expected_ctc)
+        return validate_numeric_range(value=expected_ctc, min_val=2, max_val=100, field_name=EXPECTED_CTC_FIELD) 
+    
+
+    @model_validator(mode='after')
+    def check_salary_range(cls, values):
+        current_ctc = values.current_ctc
+        expected_ctc = values.expected_ctc
+        
+        if current_ctc and expected_ctc and current_ctc >= expected_ctc:
+            raise ValueError("Minimum salary cannot be greater than or equal to maximum salary")
+
+        return values
+    
 class PersonalInformation(BaseModel):
-    email: Optional[str] = ""
+    email: Optional[EmailStr] = None
     phone: Optional[str] = ""
     gender: Optional[str] = ""
     address: Optional[str] = ""
-    full_name: Optional[str] = ""
+    full_name: Optional[str] = None
     date_of_birth: Optional[str] = ""
+
+    @field_validator('full_name')
+    def validate_full_name(cls, full_name):
+        is_non_empty(full_name, FULL_NAME_FIELD)
+        is_alphabetic(full_name, FULL_NAME_FIELD)
+        has_proper_characters(full_name, FULL_NAME_FIELD)
+        validate_length(full_name, 3, 20, FULL_NAME_FIELD)
+        if ' ' not in full_name:
+            raise ValueError("Please enter your Full name, in 'First name Last name' format.")
+        return full_name
+    
+    @field_validator('gender')
+    def validate_gender(cls, gender):
+        if gender not in ['Male', 'Female', 'Non-Binary' ,'Prefer Not to Say']:
+            raise ValueError("Gender should be either 'Male' or 'Female' or 'Non-Binary' or'Prefer Not to Say'.")
+        return gender
+    
+    @field_validator('date_of_birth')
+    def validate_date_of_birth(cls, date_of_birth):
+        if not re.match(r"^\d{2}-\d{2}-\d{4}$", date_of_birth):
+            raise ValueError("Date of birth should be in the format dd-mm-yyyy.")
+        return date_of_birth
+    
+    @field_validator('address')
+    def validate_address_field(cls, address):
+        validate_length(address, 0, 300, "Address")
+        if not re.match(r"^[a-zA-Z0-9 .,\-#/()\s]+$", address):
+            raise ValueError("Only letters, numbers, spaces, and common special characters (.,-#/()) are allowed.")
+        return address
+    
+    @field_validator('email')
+    def validate_email(cls,email):
+        allowed_pattern = r"^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not re.match(allowed_pattern, email):
+            raise ValueError("Invalid email format. Only letters, numbers, dot, underscore, and hyphen are allowed before '@'.")
+        return email
+
 
 
 class ApplicantDetails(BaseModel):
@@ -54,6 +167,13 @@ class ApplicantDetailsPartialUpdate(BaseModel):
     processed_resume: Optional[str] = ""
     personal_information: Optional[PersonalInformation] = PersonalInformation()
     model_config = ConfigDict(extra='ignore')
+
+    @field_validator('about')
+    def validate_about(cls, about):
+        validate_length(about,min_len=0, max_len=1000, field_name="about") #check once more . 
+        if not re.match(r"^[a-zA-Z0-9 ,.\-’]+$", about):
+            raise ValueError("Only alphanumeric characters, spaces, and , . - ’ are allowed.")
+        return about
 
 
 class ApplicantPartialUpdate(BaseModel):
@@ -476,7 +596,7 @@ class FeedbackItem(BaseModel):
     @field_validator('overall_feedback')
     def validate_overall_feedback(cls, overall_feedback):
         if not all(char.isalnum() or char.isspace() or char in ALLOWED_CHARACTERS for char in overall_feedback):
-            raise ValueError("overall_feedback must not contain special characters")
+            raise ValueError("""overall_feedback must only contain these special characters . , ? ! : ; ' - " () {} [] <> _ - & @ / \ """)
         overall_feedback = overall_feedback.strip()
         if len(overall_feedback)<50 or len(overall_feedback)>1000:
             raise ValueError("overall_feedback must be between 50 and 1000 characters")

@@ -5,13 +5,17 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.customization import Customization
 from app.helpers import db_helper as dbh
+from app.helpers import gcp_helper as gcph
 from app.helpers.firebase_helper import verify_firebase_token
 from app.api.v1.endpoints.models.customization_model import CustomizationModel
 from app.models.company import Company
-import base64
 import json
+import os
 
 router = APIRouter()
+
+PERSIMMON_IMAGES_BUCKET=os.getenv("PERSIMMON_IMAGES_BUCKET")
+ENVIRONMENT=os.getenv("ENVIRONMENT")
 
 @router.get('/extract-settings/domain/{name}')
 def get_customization_settings(
@@ -24,11 +28,19 @@ def get_customization_settings(
             raise HTTPException(status_code=404, detail="Domain is invalid")
         
         customization_settings: Customization = Customization.get_customization_settings(session=session, company_id=company.id)
+        
+        if not customization_settings:
+            raise HTTPException(status_code=404, detail="Customization settings not found")
+        
         if not customization_settings.settings.get('website_url'):
             customization_settings.settings['website_url'] = company.website
 
-        if not customization_settings:
-            raise HTTPException(status_code=404, detail="Customization settings not found")
+        if customization_settings.settings.get('image_data'):
+            customization_settings.settings['image_data'] = customization_settings.settings['image_data'].replace(f"/{PERSIMMON_IMAGES_BUCKET}/","")
+            customization_settings.settings['image_data'] = gcph.generate_signed_url(bucket_name=PERSIMMON_IMAGES_BUCKET, file_name=customization_settings.settings['image_data'])
+        if customization_settings.settings.get('logo_data'):
+            customization_settings.settings['logo_data'] = customization_settings.settings['logo_data'].replace(f"/{PERSIMMON_IMAGES_BUCKET}/","")
+            customization_settings.settings['logo_data'] = gcph.generate_signed_url(bucket_name=PERSIMMON_IMAGES_BUCKET, file_name=customization_settings.settings['logo_data'])
 
         return {
             "message": "Settings data retrieved successfully",
@@ -63,6 +75,11 @@ async def create_or_update_customization(
     """
     Update or create customization settings for a career page based on the company domain.
     """
+
+    cover_image = None
+    logo_image = None
+    main_path = f"/{PERSIMMON_IMAGES_BUCKET}/{ENVIRONMENT}/carrer-page"
+
     email = token.get("email")
     index = email.find(name)
     if index == -1:
@@ -89,14 +106,13 @@ async def create_or_update_customization(
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid header color list")
     
-    image_base64 = None
     if image:
-        image_data = await image.read()
-        image_base64 = base64.b64encode(image_data).decode("utf-8")
-    logo_base64 = None
+        image_path = f"{main_path}/company-cover-images"
+        cover_image = gcph.save_image_to_destination(image ,main_path=image_path)
+    
     if icon:
-        logo_data = await icon.read()
-        logo_base64 = base64.b64encode(logo_data).decode("utf-8")
+        logo_path = f"{main_path}/company-logos"
+        logo_image = gcph.save_image_to_destination(icon ,main_path=logo_path)
 
     form_data = {
         "career_page_url": career_page_url,
@@ -111,11 +127,11 @@ async def create_or_update_customization(
         "font_style": font_style
     }
 
-    if image_base64:
-        form_data['image_data'] = image_base64
+    if cover_image:
+        form_data['image_data'] = cover_image
 
-    if logo_base64:
-        form_data['logo_data'] = logo_base64
+    if logo_image:
+        form_data['logo_data'] = logo_image
 
     try:
         customization_data = CustomizationModel(**form_data)  
@@ -162,12 +178,11 @@ async def create_or_update_customization(
             customization.settings.update(updated_settings)
             customization.meta.update(dbh.update_meta(meta=customization.meta, email=email))
             customization_data = customization.update(session=session)
-
         else:
-            if image_base64:
-                settings['image_data'] = image_base64
-            if logo_base64:
-                settings['logo_data'] = logo_base64
+            if cover_image:
+                settings['image_data'] = cover_image
+            if logo_image:
+                settings['logo_data'] = logo_image
             customization = Customization(
                 company_id=company.id,
                 settings=settings
@@ -201,11 +216,20 @@ def get_customization_settings(
         
         customization_settings: Customization = Customization.get_customization_settings(session=session, company_id=company.id)
 
-        if not customization_settings.settings.get('website_url'):
-            customization_settings.settings['website_url'] = company.website
         if not customization_settings:
             raise HTTPException(status_code=404, detail="Customization settings not found")
-
+        
+        if not customization_settings.settings.get('website_url'):
+            customization_settings.settings['website_url'] = company.website
+        
+       
+        if customization_settings.settings.get('image_data'):
+            customization_settings.settings['image_data']=customization_settings.settings['image_data'].replace(f'/{PERSIMMON_IMAGES_BUCKET}/', '')
+            customization_settings.settings['image_data'] = gcph.generate_signed_url(bucket_name=PERSIMMON_IMAGES_BUCKET, file_name=customization_settings.settings['image_data'])
+        if customization_settings.settings.get('logo_data'):
+            customization_settings.settings['logo_data']=customization_settings.settings['logo_data'].replace(f'/{PERSIMMON_IMAGES_BUCKET}/', '')
+            customization_settings.settings['logo_data'] = gcph.generate_signed_url(bucket_name=PERSIMMON_IMAGES_BUCKET, file_name=customization_settings.settings['logo_data'])
+            
         return {
             "message": "Settings data retrieved successfully",
             "data": customization_settings.settings

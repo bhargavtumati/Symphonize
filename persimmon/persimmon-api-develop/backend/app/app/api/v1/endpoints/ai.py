@@ -5,6 +5,7 @@ from app.models.applicant import Applicant
 from pydantic import BaseModel
 from app.api.v1.endpoints.models.resume_model import ResumeParseRequest
 from app.helpers.firebase_helper import verify_firebase_token, get_base_url
+from app.helpers.log_helper import log_execution_time
 from app.helpers import solr_helper as solrh
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -70,6 +71,7 @@ class TextToJsonRequest(BaseModel):
 from pathlib import Path
 
 @router.post("/text-to-json")
+@log_execution_time
 async def text_to_json(
     request: TextToJsonRequest,
     session=Depends(get_db),

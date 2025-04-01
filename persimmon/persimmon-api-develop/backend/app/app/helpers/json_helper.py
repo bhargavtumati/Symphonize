@@ -23,6 +23,7 @@ async def flatten_resume_data(data):
             "department": "",  # Department is missing from original JSON
             "current_work_at": data["experience"][0].get("company", "") if data["experience"] else "",
             "job_location": data["experience"][0].get("location", "") if data["experience"] else "",
+            "preferred_job_location": data["preferred_job_location"] if data["preferred_job_location"] else data["experience"][0].get("location", "") if data["experience"] else "",
             "work_experience": data.get("overall_experience", 0),
             "current_ctc": data.get("salary", 0),
             "expected_ctc": data.get("salary", 0),

@@ -201,7 +201,7 @@ async def update_recruiter(
     
 
 @router.post("/profile/image")
-async def update_recruiter_profile_image(
+def update_recruiter_profile_image(
     file: UploadFile = File(...),
     token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
@@ -210,8 +210,7 @@ async def update_recruiter_profile_image(
         if file.content_type not in ["image/jpeg", "image/png"]:
             raise HTTPException(status_code=400, detail="Only JPEG and PNG images are allowed")
         
-        contents = await file.read()
-        if len(contents) > 2 * 1024 * 1024: 
+        if file.size > 2 * 1024 * 1024: 
             raise HTTPException(status_code=400, detail="File size exceeds 2MB")
         
         if not Recruiter.exists_by_email_id(session=session, email=token['email']):

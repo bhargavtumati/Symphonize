@@ -12,14 +12,14 @@ from jinja2 import Template
 from app.db.session import get_db
 from app.models.job import Job
 from app.models.company import Company
-from app.models.integration import Integration
+from app.models.integration import Integration, WhatsappIntegrationType
 from app.models.recruiter import Recruiter
 from app.models.template import Template
 from app.helpers import db_helper as dbh, regex_helper as regexh, zoom_helper as zoomh
 from app.helpers.firebase_helper import verify_firebase_token
 from app.helpers import email_helper as emailh
 from app.api.v1.endpoints.models.integration_model import IntegrationModel, APIKeyModel
-
+from app.api.v1.endpoints.models.whatsapp_model import WatiKeyModel
 
 router = APIRouter()
 
@@ -578,3 +578,112 @@ async def verify_from_address_status(
 
     except HTTPException as e:
         raise e
+
+@router.post('/whatsapp/{name}')
+async def create_whatsapp_integration(
+    name: WhatsappIntegrationType,
+    request: WatiKeyModel,
+    token: dict = Depends(verify_firebase_token),
+    session: Session = Depends(get_db)
+):   
+    try:
+        email = token['email']
+        domain = regexh.get_domain_from_email(email=email)
+
+        if not domain:
+            raise HTTPException(status_code=404,detail="Domain is invalid")
+        
+        company_details = Company.get_by_domain(session=session, domain=domain)
+        integration: Integration = Integration.get_credentials(session=session, company_id=company_details.id, platform_name='whatsapp')
+        
+        if integration:
+            credentials = integration.credentials
+            for cred in credentials.get('credentials'):
+                if cred.get('service_type') == name.value:
+                    cred['wati_api_endpoint'] = request.wati_api_endpoint
+                    cred['wati_api_token'] = request.wati_api_token
+                    break
+            else:
+                service_details = {
+                    "service_type": name.value,
+                    "wati_api_endpoint" : request.wati_api_endpoint,
+                    "wati_api_token" : request.wati_api_token
+                }
+                credentials.get('credentials').append(service_details)
+                
+            integration.credentials.update(credentials)
+            integration.meta.update(dbh.update_meta(meta=integration.meta, email=email))
+            integration.update(session=session)
+        
+        else:
+            service_credentials = {
+                "credentials" : [
+                    {
+                       "service_type": name.value,
+                       "wati_api_endpoint" : request.wati_api_endpoint,
+                       "wati_api_token" : request.wati_api_token
+                    }
+                ]
+            }
+            integration = Integration(
+                type = 'whatsapp',
+                credentials = service_credentials,
+                company_id = company_details.id
+            )
+            integration.create(session=session,created_by=email)
+
+        return {
+            "status": status.HTTP_201_CREATED,
+            "message": "Whatsapp integration is successful"
+        }
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+    
+@router.get('/whatsapp/{name}/integration')
+def whatsapp_integration(
+    name: str,
+    token: dict = Depends(verify_firebase_token),
+    session: Session = Depends(get_db)
+):
+    try:
+        name = name.lower().strip()
+        email = token['email']
+        domain = regexh.get_domain_from_email(email=email)
+        if not domain:
+            raise HTTPException(status_code=404,detail="Domain is invalid")
+
+        company_details = Company.get_by_domain(session=session,domain=domain)
+        if not company_details:
+            raise HTTPException(status_code=404,detail="Company details not found")
+
+        integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='whatsapp')
+        if not integration:
+            raise HTTPException(status_code=404,detail="Whatsapp Integration details not found")
+        
+        credentials = integration.credentials
+        wati_api_token = wati_api_endpoint=None
+        for cred in credentials.get('credentials'):
+            if cred.get('service_type') == name:
+                if "wati_api_token" in cred and "wati_api_endpoint" in cred:
+                      wati_api_token = cred['wati_api_token']
+                      wati_api_endpoint = cred ['wati_api_endpoint']
+            
+        if not wati_api_token:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{name} api token not found")
+        if not wati_api_endpoint:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{name} api endpoint not found")    
+        
+        return {
+            "message": f"{name} key and endpoint fetched successfully",
+            "status" : 200,
+            "wati_api_token": wati_api_token,
+            "wati_api_endpoint": wati_api_endpoint
+        }
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))

@@ -67,9 +67,9 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
         file_extension = file.filename.split('.')[-1].lower()
         try:
             if file_extension == "pdf":
-                base64_applicant_image = imageh.extract_first_face_from_pdf(BytesIO(content))
+                base64_applicant_image = imageh.extract_first_face_from_pdf(BytesIO(content), file.filename)
             elif file_extension == "docx":
-                base64_applicant_image = imageh.extract_first_face_from_docx(BytesIO(content))
+                base64_applicant_image = imageh.extract_first_face_from_docx(BytesIO(content), file.filename)
         except HTTPException as e:
             raise e
 

@@ -28,8 +28,6 @@ class CompanyModel(BaseModel):
 
     @field_validator('name')
     def validate_name(cls, name):
-        if not name:
-            return name
         is_non_empty(value=name, field_name=COMPANY_NAME_FIELD)
         has_proper_characters(value=name, field_name=COMPANY_NAME_FIELD)
         validate_length(value=name, min_len=3, max_len=50, field_name=COMPANY_NAME_FIELD)
@@ -50,8 +48,6 @@ class CompanyModel(BaseModel):
         Returns:
             The validated website URL if valid, else raises a ValueError.
         """
-        if not website:
-            return website
         pattern = r"^(https://www\.|www\.)[a-zA-Z0-9-]{3,}\.(in|com|net|org)$"
         
         if not (10 <= len(website) <= 100):
@@ -64,12 +60,9 @@ class CompanyModel(BaseModel):
 
     @field_validator('linkedin')
     def validate_linkedin(cls, linkedin):
-        if not linkedin:
-            return linkedin
         is_non_empty(value=linkedin, field_name=COMPANY_LINKEDIN_FIELD)
         validate_linkedin_company_url(value=linkedin)
         validate_url(url=linkedin)
-        #Is the validate_length function is required
         validate_length(value=linkedin, min_len=5, max_len=100, field_name=COMPANY_LINKEDIN_FIELD)
         if not re.match(r'^https://(www\.)?linkedin\.com/company/[a-zA-Z0-9\-_]{3,}/?$', linkedin):
             raise ValueError("Please enter a valid Company LinkedIn URL")
@@ -77,8 +70,6 @@ class CompanyModel(BaseModel):
 
     @field_validator('number_of_employees')
     def validate_size(cls, number_of_employees):
-        if not number_of_employees:
-            return number_of_employees
         valid_sizes = [
             "1-10", "11-50", "51-200", "201-500",
             "501-1000", "1001-5000", "5001-10000", "10001+"
@@ -90,41 +81,33 @@ class CompanyModel(BaseModel):
 
     @field_validator('industry_type')
     def validate_industry_type(cls, industry_type):
-        if not industry_type:
-            return industry_type
         return validate_industry_type(industry_type=industry_type)
 
     @field_validator("about")
     def validate_about(cls, about):
-        if not about: 
-            return about
         ALLOWED_PATTERN = re.compile(r'^[a-zA-Z0-9.,?!:;\'"(){}\[\]<>_\-&@/\\+\s]+$')
+        if not (50 <= len(about) <= 1000):
+            raise ValueError("The minimum limit of characters is to be 50 characters while maximum to be 1000 characters.")
         if not ALLOWED_PATTERN.match(about):
             raise ValueError("Text contains invalid characters.")
         return about
        
     @field_validator('instagram')
     def validate_instagram(cls, instagram):
-        if not instagram: 
-            return instagram
-        validate_instagram_url(value=instagram_url)
-        validate_url(url=instagram_url)
-        validate_length(value=instagram_url, min_len=5, max_len=100, field_name=COMPANY_INSTAGRAM_FIELD)
+        validate_instagram_url(value=instagram)
+        validate_url(url=instagram)
+        validate_length(value=instagram, min_len=5, max_len=100, field_name=COMPANY_INSTAGRAM_FIELD)
         return instagram
     
     @field_validator('facebook')
     def validate_facebook(cls, facebook):
-        if not facebook: 
-            return facebook
         validate_facebook_url(value=facebook)
         validate_url(url=facebook)
-        validate_length(value=facebook_url, min_len=5, max_len=100, field_name=COMPANY_FACEBOOK_FIELD)
-        return facebook_url
+        validate_length(value=facebook, min_len=5, max_len=100, field_name=COMPANY_FACEBOOK_FIELD)
+        return facebook
     
     @field_validator('twitter')
     def validate_twitter(cls, twitter):
-        if not twitter: 
-            return twitter
         validate_twitter_url(value=twitter)
         validate_url(url=twitter)
         validate_length(value=twitter, min_len=5, max_len=100, field_name=COMPANY_TWITTER_FIELD)
