@@ -105,9 +105,7 @@ async def update_stages(
 
     except HTTPException as e:
         raise e
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
     except httpx.RequestError as e:
         raise HTTPException(status_code=500, detail=f"Error connecting to Solr: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

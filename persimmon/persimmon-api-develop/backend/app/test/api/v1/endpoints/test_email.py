@@ -54,7 +54,7 @@ def send_email(subject, body, to_email, from_email, reply_to_email, template_dat
             server.starttls()
             server.login(credentials["user"], credentials["password"])
             # Rest of your email sending code
-    except Exception as e:
+    except Exception:
         pass 
 
 def test_send_email_success(mock_smtp, mock_upload_file, email_params):

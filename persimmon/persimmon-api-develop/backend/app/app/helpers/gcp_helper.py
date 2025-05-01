@@ -9,6 +9,8 @@ from io import BytesIO
 from app.helpers import pdf_helper as pdfh
 from datetime import timedelta
 from pathlib import Path
+from app.helpers.log_helper import log_execution_time
+import asyncio
 
 SA_KEY = {
     "type": os.getenv("CLOUD_STORAGE_TYPE"),
@@ -25,7 +27,7 @@ SA_KEY = {
 }
 
 
-async def upload_to_gcp(bucket_name: str, source_file, destination_path: str) -> str:
+async def upload_to_gcp(bucket_name: str, source_file, destination_path: str):
     credentials = service_account.Credentials.from_service_account_info(SA_KEY)
     storage_client = storage.Client(credentials=credentials, project=SA_KEY["project_id"])
     print("this is the type of the source file ",type(source_file))
@@ -59,7 +61,6 @@ async def upload_to_gcp(bucket_name: str, source_file, destination_path: str) ->
         
         # Verify the upload
         if blob.exists():
-            # gcp_uri = f"gs://{bucket_name}/{destination_path}"
             gcp_uri = f"{destination_path}"
             print(f"File successfully uploaded to {gcp_uri}.")
             return gcp_uri
@@ -69,41 +70,75 @@ async def upload_to_gcp(bucket_name: str, source_file, destination_path: str) ->
         print(f"Unexpected error within the if-else block: {e}")
         raise ValueError(f"The file is unable to upload {destination_path}")
 
-def retrieve_from_gcp(bucket_name: str, file_path: str, download_filename: str, action: str):
-    try:
-        credentials = service_account.Credentials.from_service_account_info(SA_KEY)
-        storage_client = storage.Client(credentials=credentials, project=SA_KEY["project_id"])
-        bucket = storage_client.bucket(bucket_name)
-        blob = bucket.blob(file_path)
 
-        if not blob.exists():
-            raise HTTPException(status_code=404, detail="File not found")
+from app.helpers import pdf_helper as  pdfh  # your internal converter module
 
-        file_data = blob.download_as_bytes()
-        file_extension = os.path.splitext(file_path)[1].lower()
+def retrieve_from_gcp(path_to_file: str, download_filename: str, action: str):
+    print("this is the path to file ",path_to_file)
+    if not os.path.exists(path_to_file):
+        raise HTTPException(status_code=404, detail="File not found")
 
-        if file_extension == ".docx":
-            pdf_file = pdfh.convert_docx_to_pdf_stream(file_data)
-        elif file_extension == ".pdf":
-            pdf_file = BytesIO(file_data)
-        else:
-            raise HTTPException(status_code=415, detail="Unsupported file type")
+    file_extension = os.path.splitext(path_to_file)[1].lower()
 
-        headers = {}
-        if action == "download":
-            headers["Content-Disposition"] = f'attachment; filename="{download_filename}"'
-            headers["Access-Control-Expose-Headers"] = "Content-Disposition"
-            headers["Access-Control-Allow-Origin"] = "*"
-        else:
-            headers["Content-Disposition"] = f'inline; filename="{download_filename}"'
+    # Read the file as bytes
+    with open(path_to_file, "rb") as f:
+        file_data = f.read()
 
-        return StreamingResponse(
-            pdf_file,  
-            media_type="application/pdf",  
-            headers=headers
-        )
-    except HTTPException as e:
-        raise e
+    # Convert or prepare the PDF stream
+    if file_extension == ".docx":
+        pdf_file = pdfh.convert_docx_to_pdf_stream(file_data)  # should return a BytesIO stream
+    elif file_extension == ".pdf":
+        pdf_file = BytesIO(file_data)
+    else:
+        raise HTTPException(status_code=415, detail="Unsupported file type")
+
+    headers = {}
+    if action == "download":
+        headers["Content-Disposition"] = f'attachment; filename="{download_filename}"'
+        headers["Access-Control-Expose-Headers"] = "Content-Disposition"
+        headers["Access-Control-Allow-Origin"] = "*"
+    else:
+        headers["Content-Disposition"] = f'inline; filename="{download_filename}"'
+
+    return StreamingResponse(
+        pdf_file,
+        media_type="application/pdf",
+        headers=headers
+    )
+
+
+# def retrieve_from_gcp(bucket_name: str, file_path: str, download_filename: str, action: str):
+#     credentials = service_account.Credentials.from_service_account_info(SA_KEY)
+#     storage_client = storage.Client(credentials=credentials, project=SA_KEY["project_id"])
+#     bucket = storage_client.bucket(bucket_name)
+#     blob = bucket.blob(file_path)
+
+#     if not blob.exists():
+#         raise HTTPException(status_code=404, detail="File not found")
+
+#     file_data = blob.download_as_bytes()
+#     file_extension = os.path.splitext(file_path)[1].lower()
+
+#     if file_extension == ".docx":
+#         pdf_file = pdfh.convert_docx_to_pdf_stream(file_data)
+#     elif file_extension == ".pdf":
+#         pdf_file = BytesIO(file_data)
+#     else:
+#         raise HTTPException(status_code=415, detail="Unsupported file type")
+
+#     headers = {}
+#     if action == "download":
+#         headers["Content-Disposition"] = f'attachment; filename="{download_filename}"'
+#         headers["Access-Control-Expose-Headers"] = "Content-Disposition"
+#         headers["Access-Control-Allow-Origin"] = "*"
+#     else:
+#         headers["Content-Disposition"] = f'inline; filename="{download_filename}"'
+
+#     return StreamingResponse(
+#         pdf_file,  
+#         media_type="application/pdf",  
+#         headers=headers
+#     )
     
 
 
@@ -127,8 +162,6 @@ async def send_message_to_pubsub(message_data: dict,topic_name:str) -> dict:
     # Configure your Google Cloud project and topic
     project_id = os.getenv("CLOUD_STORAGE_PROJECT_ID")
 
-    topic_name = topic_name
-    
     topic_path = publisher.topic_path(project_id, topic_name)
     try:
         # Convert the dictionary data to a JSON string
@@ -172,7 +205,7 @@ async def send_message_to_pubsub(message_data: dict,topic_name:str) -> dict:
 #     with open(destination_file_name, 'rb') as f:
 #         return f.read()
     
-async def download_from_gcp(bucket_name: str, source_blob_name: str, destination_file_name: str) -> str:
+async def download_from_gcp(bucket_name: str, source_blob_name: str, destination_file_name: str) -> BytesIO:
     """
     Downloads a file from the Google Cloud Storage bucket and saves it to a local file.
 
@@ -228,4 +261,19 @@ def generate_signed_url(bucket_name: str, file_name: str, expiration_minutes: in
         return url
     except Exception as e:
         print(f"Error generating signed URL: {e}")
+        return None
+
+async def read_gcs_text_file_async(bucket_name: str, blob_path: str):
+    try:
+        def _read_blob():
+            credentials = service_account.Credentials.from_service_account_info(SA_KEY)
+            storage_client = storage.Client(credentials=credentials, project=SA_KEY["project_id"])
+            bucket = storage_client.bucket(bucket_name)
+            blob = bucket.blob(blob_path)
+            return blob.download_as_text()
+
+        content = await asyncio.to_thread(_read_blob)
+        return content
+
+    except Exception as e:
         return None

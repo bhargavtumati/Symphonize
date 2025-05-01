@@ -31,3 +31,6 @@ class IntegrationModel(BaseModel):
 
 class APIKeyModel(BaseModel):
     api_key: str
+
+class GoogleMeetModel(BaseModel):
+    code: str

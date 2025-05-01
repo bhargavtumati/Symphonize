@@ -1,7 +1,4 @@
-from typing import Annotated
-from fastapi import APIRouter, Query
-from asyncer import asyncify, create_task_group, syncify
-from app.core.config import settings
+from fastapi import APIRouter
 from app.schemas.response_schema import GetResponseBase, create_response
 from app.helpers import zoho_helper
 
@@ -11,10 +8,9 @@ api_reference: dict[str, str] = {
     "api_reference": "https://github.com/symphonize/persimmon-api"
 }
 
-
 @router.get("/")
 def get_candidates() -> GetResponseBase:
-    return create_response(message=f"Get all candidates", data={}, meta=api_reference)
+    return create_response(message="Get all candidates", data={}, meta=api_reference)
 
 
 @router.post("/{candidate_id}")

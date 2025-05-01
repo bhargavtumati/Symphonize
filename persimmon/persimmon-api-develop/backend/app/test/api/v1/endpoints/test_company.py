@@ -1,7 +1,12 @@
-import pytest, io, json
+import io
+
 from unittest import mock
+
+from fastapi import status
 from fastapi.testclient import TestClient
+
 from app.main import app
+from app.models.master_data import MasterData
 from app.helpers.firebase_helper import verify_firebase_token
 
 client = TestClient(app)
@@ -96,3 +101,164 @@ def test_get_company_by_domain_not_found():
         assert response.status_code == 404
         assert response.json()["detail"] == "Company not found"
         mock_get_by_domain.assert_called_once()
+
+@mock.patch("app.models.master_data.MasterData.create", return_value=None)
+@mock.patch("app.models.master_data.MasterData.get_existing_record", return_value=None)
+@mock.patch("app.models.master_data.MasterData.get_all_by_type", return_value=[("IT",),("Healthcare",)])
+def test_add_new_industry_type_success(mock_get_all, mock_get_existing, mock_create):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/industry-type", json={"industry_type": "Healthcare"})
+    
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["message"] == "Industry type added successfully"
+    mock_create.assert_called_once()
+    mock_get_existing.assert_called_once()
+    mock_get_all.called_once()
+
+@mock.patch("app.models.master_data.MasterData.create", return_value=None)
+@mock.patch("app.models.master_data.MasterData.get_existing_record", return_value=mock.MagicMock(id=1))
+def test_add_new_industry_type_duplicte(mock_get_existing, mock_create):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/industry-type", json={"industry_type": "Healthcare"})
+    
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    mock_get_existing.assert_called_once()
+
+def test_add_new_industry_type_pydantic_error():
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/industry-type", json={"industry_type": ""})
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+@mock.patch("app.models.master_data.MasterData.get_existing_record", side_effect=Exception("DB Error"))
+def test_add_new_industry_type_db_error(mock_get_existing_record):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/industry-type", json={"industry_type": "Healthcare"})
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert "Error during database call" in response.json()["detail"]
+    mock_get_existing_record.assert_called_once()
+
+@mock.patch("app.models.master_data.MasterData.get_all_by_type", return_value=[["Healthcare"], ["Finance"]])
+def test_get_all_industry_types_success(mock_get_all):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.get("api/v1/company/industry-types")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["industry_types"] == ["Healthcare", "Finance"]
+    mock_get_all.assert_called_once()
+
+@mock.patch("app.models.master_data.MasterData.get_all_by_type", side_effect=Exception("DB Error")) 
+def test_get_all_industry_types_db_error(mock_get_all):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.get("api/v1/company/industry-types")
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert "Error during database call" in response.json()["detail"]
+    mock_get_all.assert_called_once()
+
+@mock.patch("app.models.master_data.MasterData.create", return_value=None)
+@mock.patch("app.models.master_data.MasterData.get_existing_record", return_value=None)
+@mock.patch("app.models.master_data.MasterData.get_all_by_type", return_value=[("IT",),("Healthcare",)])
+def test_add_new_department_success(mock_get_all, mock_get_existing, mock_create):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/department", json={"department": "IT"})
+    
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["message"] == "Department added successfully"
+    mock_create.assert_called_once()
+    mock_get_existing.assert_called_once()
+    mock_get_all.called_once()
+
+def test_add_new_department_pydantic_error():
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/department", json={"department": ""})
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+@mock.patch("app.models.master_data.MasterData.get_existing_record", side_effect=Exception("DB Error"))
+def test_add_new_department_db_error(mock_get_existing_record):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/department", json={"department": "IT"})
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert "Error during database call" in response.json()["detail"]
+    mock_get_existing_record.assert_called_once()
+
+@mock.patch("app.models.master_data.MasterData.get_all_by_type", return_value=[["IT"], ["Healthcare"]])
+def test_get_all_departments_success(mock_get_all):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.get("api/v1/company/departments")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["departments"] == ["IT", "Healthcare"]
+    mock_get_all.assert_called_once()
+
+@mock.patch("app.models.master_data.MasterData.get_all_by_type", side_effect=Exception("DB Error")) 
+def test_get_all_departments_db_error(mock_get_all):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.get("api/v1/company/departments")
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert "Error during database call" in response.json()["detail"]
+    mock_get_all.assert_called_once()
+
+
+#test cases for designation endpoints
+@mock.patch("app.models.master_data.MasterData.create", return_value=None)
+@mock.patch("app.models.master_data.MasterData.get_existing_record", return_value=None)
+@mock.patch("app.models.master_data.MasterData.get_all_designations", return_value=[("Manager",),("Software Engineer",), ("Associate Software Engineer",)])
+def test_add_new_designation_success(mock_get_all, mock_get_existing, mock_create):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/designation", json={"designation": "Associate Software Engineer"})   
+    
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["message"] == "Designation added successfully"
+    mock_create.assert_called_once()
+    mock_get_existing.assert_called_once()
+    mock_get_all.called_once()
+
+
+def test_add_new_designation_pydantic_error():
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/designation", json={"designation": ""})
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+@mock.patch("app.models.master_data.MasterData.get_existing_record", return_value=None)
+@mock.patch("app.models.master_data.MasterData.create", side_effect=Exception("DB Error"))
+def test_add_new_designation_db_error(mock_get_existing, mock_create):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/designation", json={"designation": "IT"})
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert "Error during database call" in response.json()["detail"]
+    mock_create.assert_called_once()
+    mock_get_existing.assert_called_once()
+
+
+@mock.patch("app.models.master_data.MasterData.get_existing_record", return_value=mock.MagicMock(id=1))
+@mock.patch("app.models.master_data.MasterData.create", side_effect=Exception("DB Error"))
+def test_add_new_designation_duplicate_name(mock_create, mock_get_existing):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.post("api/v1/company/designation", json={"designation": "IT"})
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "Designation already exists" in response.json()["detail"]
+    mock_get_existing.assert_called_once()
+
+
+@mock.patch("app.models.master_data.MasterData.get_all_designations", return_value=[["Associate Software Engineer"], ["Manager"], ["Software Engineer"]])
+def test_get_all_designations_success(mock_get_all):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.get("api/v1/company/designations")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json()["designations"] == ["Associate Software Engineer", "Manager", "Software Engineer"]
+    mock_get_all.assert_called_once()
+
+@mock.patch("app.models.master_data.MasterData.get_all_designations", side_effect=Exception("DB Error")) 
+def test_get_all_designations_db_error(mock_get_all):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    response = client.get("api/v1/company/designations")
+
+    assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+    assert "Error during database call" in response.json()["detail"]
+    mock_get_all.assert_called_once()

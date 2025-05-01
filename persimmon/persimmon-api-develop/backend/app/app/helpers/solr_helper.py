@@ -3,9 +3,10 @@ import requests
 import httpx
 import os
 import uuid
-from typing import Dict
+from typing import Dict, Optional
 from fastapi import HTTPException
 
+CONTENT_TYPE_JSON = "application/json"
 SOLR_BASE_URL=os.getenv("SOLR_BASE_URL")
 SOLR_URL = f'{SOLR_BASE_URL}/resumes/update/json/docs?overwrite=true'
 SOLR_URL_Query = f'{SOLR_BASE_URL}/resumes/select'
@@ -21,11 +22,17 @@ async def upload_to_solr(flattened_resume: dict) -> dict:
     """
     # Convert the flattened_resume to JSON format
     json_data = json.dumps(flattened_resume)
+    response = None
     solr_url = SOLR_URL
     f"========= uploading function to solr for applicant_uuid: {flattened_resume['applicant_uuid']}"
     try:
         # Send the JSON data to Solr
-        async with httpx.AsyncClient() as client:
+        api_env = os.getenv("API_ENVIRONMENT", "").lower()
+        verify_ssl = False if api_env == "qa" else True
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(60, connect=60),
+            verify=verify_ssl
+            ) as client:
             response = await client.post(solr_url,
                 headers={"Content-Type": "application/json"},
                 data=json_data
@@ -37,23 +44,30 @@ async def upload_to_solr(flattened_resume: dict) -> dict:
         else:
             return {"message": f"Error uploading document: {response.text}", "status_code": response.status_code}
     
-    except requests.exceptions.RequestException as e:
-        # Handle any exceptions during the request
-        return {"message": f"Failed to connect to Solr: {str(e)}", "status_code": response.status_code}
+    except httpx.HTTPStatusError as e:
+        return {"message": f"HTTP error occurred: {str(e)}", "status_code": e.response.status_code}
+    except httpx.ConnectTimeout:
+        return {"message": "Failed to connect to Solr: Connection timed out", "status_code": 408}
+    except httpx.RequestError as e:
+        return {"message": f"Request error occurred: {str(e)}", "status_code": 500}
+    except Exception as e:
+        return {"message": f"Unexpected error: {str(e)}", "status_code": 500}
 
-
-async def query_solr(job_code , stage_uuid):
+async def query_solr(job_code , stage_uuid:Optional[uuid.UUID] = None, rows: int = 10):
     if job_code:
         query = f"job_code:\"{job_code}\""
     if stage_uuid:
         query = f"stage_uuid:\"{stage_uuid}\""
-    headers = {"Content-Type": "application/json"}
+    headers = {"Content-Type": CONTENT_TYPE_JSON}
     query_params = {
-        "q": query
+        "q": query,
+        "rows" : rows
          # Added to ensure a unique query each time
     }
 
-    async with httpx.AsyncClient() as client:
+    api_env = os.getenv("API_ENVIRONMENT", "").lower()
+    verify_ssl = False if api_env == "qa" else True
+    async with httpx.AsyncClient(verify=verify_ssl) as client:
         response = await client.get(SOLR_URL_Query, params=query_params, headers=headers)
 
     if response.status_code != 200:
@@ -62,8 +76,8 @@ async def query_solr(job_code , stage_uuid):
     return response.json()
 
 
-async def query_solr_with_filters(query: str, filters: Dict[str, str], rows: int = 20,start :int=0,exclude:str=None):
-    headers = {"Content-Type": "application/json"}
+async def query_solr_with_filters(query: str, exclude:str=None):
+    headers = {"Content-Type": CONTENT_TYPE_JSON}
     solr_payload = {
         "params": {
             "q": query,
@@ -71,15 +85,15 @@ async def query_solr_with_filters(query: str, filters: Dict[str, str], rows: int
             "indent": "true",
             "fl": "*,score",
             "q.op": "OR",
-            "rows": str(rows),
             "fq":exclude,
-            "start":start,
-            "bq": filters  # Include filters here as fq (filter query)
+            "rows": 10000,
+            "start": 0
         }
-        # Applying filters separately as filter queries
     }
 
-    async with httpx.AsyncClient() as client:
+    api_env = os.getenv("API_ENVIRONMENT", "").lower()
+    verify_ssl = False if api_env == "qa" else True
+    async with httpx.AsyncClient(verify=verify_ssl) as client:
         response = await client.post(SOLR_URL_Query, json=solr_payload, headers=headers)
 
     if response.status_code != 200:
@@ -89,14 +103,16 @@ async def query_solr_with_filters(query: str, filters: Dict[str, str], rows: int
 
 
 async def update_solr_documents_partially(uuids: list[str],set_uuid:uuid,search_category: str):
-    headers = {"Content-Type": "application/json"}
+    headers = {"Content-Type": CONTENT_TYPE_JSON}
     params = {
         "q": f"{search_category}:({' OR '.join(uuids)})", 
         "rows": len(uuids),
         "wt": "json"
     }
 
-    async with httpx.AsyncClient() as client:
+    api_env = os.getenv("API_ENVIRONMENT", "").lower()
+    verify_ssl = False if api_env == "qa" else True
+    async with httpx.AsyncClient(verify=verify_ssl) as client:
         solr_response = await client.get(f"{SOLR_URL_Query}", params=params, headers=headers)
         documents = solr_response.json().get("response", {}).get("docs", [])
         updates = []
@@ -121,13 +137,16 @@ async def update_solr_documents_partially(uuids: list[str],set_uuid:uuid,search_
 
 
 async def is_applicant_exist(applicant_uuid: str):
-    headers = {"Content-Type": "application/json"}
+    headers = {"Content-Type": CONTENT_TYPE_JSON}
     params = {
         "q": f"applicant_uuid:\"{applicant_uuid}\"",                
         "rows": 20,             
         "fl": "id,applicant_uuid", 
     }
-    async with httpx.AsyncClient() as client:
+
+    api_env = os.getenv("API_ENVIRONMENT", "").lower()
+    verify_ssl = False if api_env == "qa" else True
+    async with httpx.AsyncClient(verify=verify_ssl) as client:
         response = await client.get(SOLR_URL_Query, params=params, headers=headers)
 
     if response.status_code != 200:
@@ -144,15 +163,18 @@ async def delete_records_by_applicant_uuid(applicant_uuid: str):
         return
 
     delete_query = {"delete": {"query": f'applicant_uuid:"{applicant_uuid}"'}}
-
-    async with httpx.AsyncClient() as client:
+    api_env = os.getenv("API_ENVIRONMENT", "").lower()
+    verify_ssl = False if api_env == "qa" else True
+    async with httpx.AsyncClient(verify=verify_ssl) as client:
         url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
         response = await client.post(url, json=delete_query)
         return response.json()
 
 
 async def get_solr_applicant_by_applicant_uuid(applicant_uuid,details:bool=False):
-    async with httpx.AsyncClient() as client:
+    api_env = os.getenv("API_ENVIRONMENT", "").lower()
+    verify_ssl = False if api_env == "qa" else True
+    async with httpx.AsyncClient(verify=verify_ssl) as client:
         try:
             if details: 
                 response = await client.get(f"{SOLR_BASE_URL}/resumes/select", params={
@@ -179,8 +201,9 @@ async def delete_solr_records(doc_ids):
     """Delete multiple records from Solr by ID."""
     if not doc_ids:
         return
-
-    async with httpx.AsyncClient() as client:
+    api_env = os.getenv("API_ENVIRONMENT", "").lower()
+    verify_ssl = False if api_env == "qa" else True
+    async with httpx.AsyncClient(verify=verify_ssl) as client:
         delete_query = {"delete": [{"id": doc_id} for doc_id in doc_ids]}
         url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
         response = await client.post(url, json=delete_query)
@@ -212,15 +235,16 @@ async def delete_duplicate_records(applicant_uuid):
 async def update_applicant_document(doc_id: str, update_fields: dict):
     
     url = f"{SOLR_BASE_URL}/resumes/update?commit=true"
-    headers = {"Content-Type": "application/json"}
 
     update_fields = [ {
         "id": doc_id,
         **update_fields
     } ]
 
-    print(f"the updated fields {update_fields}")
-    async with httpx.AsyncClient(verify=False) as client:
+    print(f"the updated fields {update_fields}")    
+    api_env = os.getenv("API_ENVIRONMENT", "").lower()
+    verify_ssl = False if api_env == "qa" else True
+    async with httpx.AsyncClient(verify=verify_ssl) as client:
         update_response = await client.post(url, json=update_fields)
         update_response.raise_for_status()
     return update_response.json()

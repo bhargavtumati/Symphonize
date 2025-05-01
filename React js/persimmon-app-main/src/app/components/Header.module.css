@@ -1,0 +1,62 @@
+.header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #282c34;
+    color: white;
+    box-shadow: 0px 4px 6px rgba(4, 29, 75, 0.5); /* Shadow effect */
+}
+
+.logo {
+    width: 50px;
+    height: 50px;
+    margin-right: 15px; /* Add some space between logo and title */
+}
+
+.title {
+    font-size: 28px;
+    margin-right: auto; /* Pushes the nav to the far right */
+}
+
+.nav {
+    display: flex;
+    gap: 20px;
+    /* Remove fixed margin-left */
+}
+
+.navLink {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+}
+
+.navLink:hover {
+    text-decoration: underline;
+}
+
+/* Media query for responsive design */
+@media (max-width: 768px) {
+    .title {
+        font-size: 24px; /* Reduce title size on smaller screens */
+    }
+  
+    .navLink {
+        font-size: 16px; /* Reduce nav link font size on smaller screens */
+    }
+  
+    .nav {
+        gap: 15px; /* Reduce gap between nav items on smaller screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 20px; /* Further reduce title size on very small screens */
+    }
+  
+    .navLink {
+        font-size: 14px; /* Further reduce nav link font size on very small screens */
+    }
+}

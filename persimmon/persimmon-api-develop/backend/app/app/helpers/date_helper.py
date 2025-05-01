@@ -72,7 +72,7 @@ def calculate_duration_in_minutes(start_time, end_time):
     duration = (end_time - start_time).total_seconds() / 60  # Convert seconds to minutes
     return int(duration)
 
-def validate_future_datetime(dt: datetime, timezone_str: str, fieldName: str) -> datetime:
+def validate_future_datetime(dt: datetime, timezone_str: str, field_name: str) -> datetime:
     """Validates that the given datetime is greater than or equal to the current time in the given IANA timezone."""
     if not isinstance(dt, datetime):
         raise ValueError("Invalid input: expected a datetime object.")
@@ -87,6 +87,6 @@ def validate_future_datetime(dt: datetime, timezone_str: str, fieldName: str) ->
 
     current_time_in_tz = datetime.now(tz)
     if dt < current_time_in_tz:
-        raise ValueError(f"The {fieldName} must be greater than or equal to the current time in {timezone_str}.")
+        raise ValueError(f"The {field_name} must be greater than or equal to the current time in {timezone_str}.")
 
     return dt 

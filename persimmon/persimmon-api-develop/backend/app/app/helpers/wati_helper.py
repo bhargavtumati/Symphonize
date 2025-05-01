@@ -38,8 +38,6 @@ def send_whatsapp_message_via_wati(applicant_uuids: list[uuid.UUID], wati_api_to
             semi_custom_params = {}
             for param_name, field_name in params_dict.items():
                 value = applicant_data.get("personal_information", {}).get(field_name, "N/A")
-                if len(value)==0:
-                    value="N/A"
                 semi_custom_params[param_name] = value
                 
             final_custom_params = [{"name": k, "value": v} for k, v in semi_custom_params.items()]
@@ -47,7 +45,7 @@ def send_whatsapp_message_via_wati(applicant_uuids: list[uuid.UUID], wati_api_to
             if phone == "Phone number not found":
                 responses.append({"applicant_id": applicant_uuid, "status": "failed", "reason": "Phone number not found"})
                 continue
-            
+
             # Remove all non-numeric characters
             clean_phone = re.sub(r"\D", "", phone)
             if len(clean_phone) <= 10:
@@ -59,7 +57,7 @@ def send_whatsapp_message_via_wati(applicant_uuids: list[uuid.UUID], wati_api_to
                 "template_name": template_name,
                 "broadcast_name": "whatsapp_broadcast"
                 }
-            clean_phone="919492241458"
+
             payload = json.dumps(payload_dict, ensure_ascii=False)
             url = f"{wati_api_endpoint}/api/v1/sendTemplateMessage?whatsappNumber={clean_phone}"
             response =requests.post(url , data=payload, headers=headers)

@@ -54,49 +54,6 @@ def test_get_linkedin_profile(mock_fetch_linkedin_profile):
     assert response.json() == {"profile": "mock_profile_data"}
 
 
-
-
-# import pytest
-# from unittest.mock import patch, AsyncMock, MagicMock
-# from fastapi.testclient import TestClient
-# from app.main import app  # Assuming your FastAPI app instance is named `app`
-
-# client = TestClient(app)
-
-# Sample payload as per your provided structure
-
-
-
-# @pytest.mark.asyncio
-# @patch("app.helpers.linkedin_helper.get_linkedin_headers", new_callable=AsyncMock)
-# @patch("httpx.AsyncClient.post", new_callable=AsyncMock)
-# async def test_post_linkedin_job_success(mock_post, mock_get_linkedin_headers):
-#     # Mock Headers for LinkedIn API
-#     mock_get_linkedin_headers.return_value = {
-#         "Authorization": "Bearer mock_access_token",
-#         "Content-Type": "application/json",
-#         "X-Restli-Protocol-Version": "2.0.0"
-#     }
-
-#     # Mock Successful LinkedIn Post Response
-#     mock_post.return_value.status_code = 201
-#     mock_post.return_value.json.return_value = {"id": "mock_post_id"}
-
-#     # Correct endpoint path
-#     response = client.post(
-#         "api/v1/linkedin/post-job/",
-#         json=sample_linkedin_payload,
-#         params={"access_token": "mock_access_token"}
-#     )
-
-#     assert response.status_code == 200
-#     assert response.json() == {
-#         "message": "Job post successfully created",
-#         "response_data": {"id": "mock_post_id"}
-#     }
-
-
-
 # @pytest.mark.asyncio
 def test_post_linkedin_job_success():
     # Mock dependencies

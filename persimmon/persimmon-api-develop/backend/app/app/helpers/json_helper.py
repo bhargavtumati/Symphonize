@@ -1,7 +1,9 @@
 from app.helpers.data_helper import reformat_date
+from app.helpers.log_helper import log_execution_time
 
 
 # Flattening function
+@log_execution_time
 async def flatten_resume_data(data):
     all_responsibilities=[]
     if data.get("experience"):
@@ -39,7 +41,7 @@ async def flatten_resume_data(data):
     
     return flattened_data
 
-
+@log_execution_time
 async def flatten_resume_data_solr(data):
     all_responsibilities=[]
     if data.get("experience"):

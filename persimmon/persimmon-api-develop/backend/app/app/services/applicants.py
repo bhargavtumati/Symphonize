@@ -15,17 +15,25 @@ from app.helpers import ai_helper as aih
 from app.helpers import gcp_helper as gcph
 from app.helpers import json_helper as jsonh
 from app.helpers import pdf_helper as pdfh
-from app.helpers import solr_helper as solrh, image_helper as imageh
+from app.helpers import match_score_helper as matchsh
+from app.helpers import (
+    solr_helper as solrh, image_helper as imageh,import_resumes_helper as imph,
+    match_score_helper as matchsh )
+                       
+from app.helpers.log_helper import log_execution_time
 from app.models.applicant import Applicant
 from app.models.stages import Stages
 from app.models.job import Job
 from app.helpers.match_score_helper import get_match_score
+from app.db.session import get_db
 import traceback
 import logging
 import math
 from io import BytesIO
 
 PDF_OUTPUT_PATH = "/tmp"  # Temporary directory for storing converted PDF files
+STAGES_NOT_FOUND = "Stages not found"
+JOB_NOT_FOUND = "Job not found"
 
 logger = logging.getLogger(__name__)
 
@@ -42,14 +50,13 @@ SOFTSKILL_WEIGHTS = {
     "Advanced": 6,
 }
 
-
+@log_execution_time
 async def process_resume(file, session: Session, created_by, job_id, job_code, phone_number: int=None, full_name:str =None, email_id:str = None, linkedin_url:str=None ) -> Tuple[bool, str, Dict]:
     file_success = True
     error_message = ""
     error_list = []
     flatten_resume = None
     temp_files_to_clean = []
-    original_pdf_name = None
 
     try:
         base64_applicant_image = None
@@ -73,7 +80,6 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
         except HTTPException as e:
             raise e
 
-        # processed_file_path = None
         flatten_resume_solr = None
         generated_json = None      
 
@@ -97,18 +103,10 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
         PERSIMMON_DATA=os.getenv("PERSIMMON_DATA", "persimmon-data")
         ENVIRONMENT = os.getenv("ENVIRONMENT","development")
         gcs_original_path = f"{ENVIRONMENT}/resumes/raw/{original_file_name}"
-        # gcs_processed_path = f"data/processed/{output_pdf_name if processed_file_path else original_file_name}"
 
         tasks=[]
         # Define tasks for uploading
         tasks.append(gcph.upload_to_gcp(PERSIMMON_DATA, file.file, gcs_original_path)) 
-
-        # if processed_file_path:
-        #     processed_file = open(processed_file_path, 'rb')
-        #     try:
-        #         tasks.append(gcph.upload_to_gcp(BUCKET_NAME, processed_file, gcs_processed_path))
-        #     except Exception as e :
-        #         print(f"Error preparing processed file upload: {str(e)}")
 
         # Upload files concurrently
         gcp_paths = {
@@ -130,10 +128,7 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                 gcp_paths['original_resume'] = results[0] 
             print(f"the gcp original resume is {gcp_paths['original_resume']}")
             print(f"the results after upload are : {results}")
-            # if processed_file_path:
-            #     processed_file.close()
-            # if processed_file_path and len(results) > 1:
-            #     gcp_paths['processed_resume'] = results[1] if isinstance(results[1],str) else '' 
+           
         except Exception as e:
             error_message += f"\nFailed to upload files to GCP: {str(e)}"
             error_list.append(error_message)
@@ -164,8 +159,8 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                             stages_existing: Stages = Stages.get_by_id(session=session, job_id=job_id)
                             if len(stages_existing.stages) > 0:
                                 stage_uuid = stages_existing.stages[0]['uuid']
-                        except: 
-                            raise HTTPException(status_code=404, detail="Stages not found")
+                        except Exception: 
+                            raise HTTPException(status_code=404, detail=STAGES_NOT_FOUND)
 
                         if full_name and len(flatten_resume['personal_information']['full_name']) == 0:
                             flatten_resume['personal_information']['full_name'] = full_name
@@ -177,7 +172,7 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                             flatten_resume['social_media']['linkedin'] = linkedin_url
 
                         db_job = Job.get_by_code(session=session, code=job_code)
-                        match = get_match_score(db_job.description, extracted_text)
+                        match = await matchsh.calculate_match_percentage(extracted_text,db_job.description)
                         flatten_resume['match'] = match
                         flatten_resume['applicant_image'] = base64_applicant_image
 
@@ -190,6 +185,7 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                             flatten_resume_solr['applicant_uuid'] = applicant_uuid
                             flatten_resume_solr['stage_uuid'] = stage_uuid
                             flatten_resume_solr['job_code'] = job_code
+                            flatten_resume_solr['persimmon_score'] = match
                             result_solr = await solrh.upload_to_solr(flatten_resume_solr)
                             logger.info(f"THE RESULT FROM SOLR IS {result_solr}") 
                             if result_solr["message"] != "Document uploaded successfully" :
@@ -213,16 +209,16 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
                             print('error',str(e))
 
                     except Exception as e:
-                        if "Stages not found" in str(e):
-                            raise HTTPException(status_code=404, detail="Stages not found")
-                        raise HTTPException(status_code=404, detail=f"Job not found")
+                        if STAGES_NOT_FOUND in str(e):
+                            raise HTTPException(status_code=404, detail=STAGES_NOT_FOUND)
+                        raise HTTPException(status_code=404, detail=JOB_NOT_FOUND)
                      
             except Exception as e:
                 file_success = False
-                if "Job not found" in str(e):
+                if JOB_NOT_FOUND in str(e):
                     raise HTTPException(status_code=404, detail="Job not found. Please ensure the job ID is correct.")
-                elif "Stages not found" in str(e):
-                    raise HTTPException(status_code=404, detail="Stages not found")
+                elif STAGES_NOT_FOUND in str(e):
+                    raise HTTPException(status_code=404, detail=STAGES_NOT_FOUND)
                 else:
                     error_message = f"Please try to upload again , Error storing flattened data for {file.filename}: {str(e)}"
                     error_list.append(error_message)
@@ -231,12 +227,12 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
     except Exception as e:
         traceback.print_exc()
         file_success = False
-        if "Job not found" in str(e):
+        if JOB_NOT_FOUND in str(e):
             raise HTTPException(status_code=404, detail="Job not found. Please ensure the job ID is correct.")
         elif "Invalid request" in str(e):
             raise HTTPException(status_code=400, detail="Invalid request or missing required fields.") 
-        elif "Stages not found" in str(e):
-            raise HTTPException(status_code=404, detail="Stages not found")
+        elif STAGES_NOT_FOUND in str(e):
+            raise HTTPException(status_code=404, detail=STAGES_NOT_FOUND)
         else:
             error_message = f"Unexpected error processing {file.filename}: {str(e)}"
             error_list.append(error_message)
@@ -254,7 +250,7 @@ async def process_resume(file, session: Session, created_by, job_id, job_code, p
     return file_success, error_list, flatten_resume
 
 
-def construct_query(filters: FilterRequest) -> str:
+def construct_query(filters: FilterRequest) -> tuple:
     filters: Filters = filters.filters
 
     # Compute industry type weights
@@ -374,7 +370,6 @@ def construct_query(filters: FilterRequest) -> str:
     weighted_softskills_query = f"(({soft_skills_query})^{overall_soft_skills_weight})" if soft_skills_query else ""
     print("the soft skills query is ",soft_skills_query) 
 
-    # Location
     location_query = ""
     if filters.location:
         location_parts = []
@@ -432,3 +427,65 @@ def construct_query(filters: FilterRequest) -> str:
     ]
     final_query = " OR ".join([q for q in combined_query_parts if q])
     return final_query , exclusion_query
+
+from datetime import datetime
+
+start_time = datetime.utcnow()
+
+@log_execution_time
+async def resume_process(created_by,text, job_description,
+                         destination, applicant_uuid) -> Tuple[bool, str, Dict]:
+    
+        # Acquire a fresh session from the dependency
+     # This will give you a session instance; remember to close it at the end.
+    file_success = True
+    error_list = []
+    flatten_resume = None
+   
+    file_upload = None
+    extract_text = None
+    text_to_json = None
+    flatten = None
+
+    try:
+        try:
+            print(f"[{applicant_uuid}] Calculating match score at {datetime.utcnow()}")
+            match_resume = await matchsh.calculate_match_percentage(text,job_description)
+            print(f"[{applicant_uuid}] Match score done at {datetime.utcnow()}")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Error generating the match score {str(e)}")
+        
+        try:
+            print(f"[{applicant_uuid}] Extracting text at {datetime.utcnow()}")
+            extract_text = await imph.extract_text(text,destination,applicant_uuid,created_by)
+            print(f"[{applicant_uuid}] Extracted text at {datetime.utcnow()}")
+        except Exception as e:
+            raise HTTPException(status_code=400 , detail=f"Error uploading the file {str(e)}")
+        destination = extract_text['file_upload']
+        try : 
+            print(f"[{applicant_uuid}] Converting text to JSON at {datetime.utcnow()}")
+            text_to_json = await imph.text_to_json(text,destination,applicant_uuid,created_by)
+            print(f"[{applicant_uuid}] Text to JSON done at {datetime.utcnow()}")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Error uploading the text-to-json {str(e)}")
+        
+        destination = text_to_json['file_upload']
+        try: 
+            print(f"[{applicant_uuid}] Flattening JSON at {datetime.utcnow()}")
+            flatten = await imph.flatten(destination,applicant_uuid,created_by,match_resume)
+            print(f"[{applicant_uuid}] Flattening done at {datetime.utcnow()}")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Error uploading the text-to-json {str(e)}")
+    except Exception as e:
+        error_list.append(e)
+    # finally:
+    #     session.close()  # Ensure you close the session
+        # Optionally, if your get_db() is integrated with context management,
+        # you could also do: next(db_gen, None) to exhaust the generator.
+
+
+    end_time = datetime.utcnow()
+    print(f"[{applicant_uuid}] resume_process COMPLETED at {end_time}, duration: {(end_time - start_time).total_seconds():.2f}s")
+    
+       
+    return file_success, error_list, flatten_resume

@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from langchain.prompts import PromptTemplate
 from langchain_core.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
+from app.helpers.log_helper import log_execution_time
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -23,14 +24,14 @@ def get_gemini_ai_response(input: str):
 
 
 
-def remove_special_characters(data):
+async def remove_special_characters(data):
     print("entered the re block",type(data))
     data_result = re.sub(r'[^\x00-\x7F]+', '', data)
-    print("the function after tehe processing ",data_result)
+    #print("the function after tehe processing ",data_result)
     return data_result
 
 
-def preprocess_resume_dates(text):
+async def preprocess_resume_dates(text):
     """Preprocess resume text to standardize date formats and handle present/current dates."""
     import re
     
@@ -408,21 +409,25 @@ Here is the resume:
 
 # if the text does not contain any range for internship and given as 3 or 6 or 9 months of internship then consider that 3 or 6 or 9 months only and assign as some range of dates to match that internship.
 
+from functools import partial
+from asyncio import get_running_loop
 
+async def run_blocking(func, *args, **kwargs):
+    loop = get_running_loop()
+    return await loop.run_in_executor(None, partial(func, *args, **kwargs))
+
+
+@log_execution_time
 async def extract_features_from_resume(
     text: str,
-    type: str = "resume",
     prompt_template: str = EXTRACT_FEATURES_FROM_RESUME_DATE2,
-    enable_parser: bool = False,
-    output_format: str = "json",
     max_retries: int = 4,
     api_key: Optional[str] = None,  # Optional parameter for flexibility
 ) -> str:
-    text = remove_special_characters(text)
-    text = preprocess_resume_dates(text)
+    text = await remove_special_characters(text)
+    text = await preprocess_resume_dates(text)
     # Initialize LLM with the provided API key
     api_key = api_key or api_key_rotator.get_next_key()
-    #print("Using API key:", api_key)
     
     llm = ChatGoogleGenerativeAI(
         google_api_key = api_key,  # Replace with your actual key
@@ -441,31 +446,25 @@ async def extract_features_from_resume(
     # Retry loop for handling transient JSON parsing issues
     for attempt in range(max_retries):
         try:
-            response = chain.invoke(input_data)
-            print('lang chain response',response)
+            response = await run_blocking(lambda: chain.invoke(input_data))
+            #print('lang chain response',response)
         except Exception as e:
+            print(f"the exception for chain invoke is : {e}")
             return e
 
         response_content = response.content
-        print('response_content', response_content)
+        #print('response_content', response_content)
         pattern = r"\{.*\}"
         match = re.search(pattern, response_content, re.DOTALL)
         if match:
             result = match.group()
         response_content = result if result else response_content
-        # try:
-        #     response_content = response.content
-        # except Exception as e :
-        #     print("this is the respnse content error ",e)
         try:
-            # cleaned_data = remove_special_characters(response_content)
-            # print("the  cleaned data :",cleaned_data)
             response_json = json.loads(response_content)
-            exp_result = process_resume_json(response_json)
+            exp_result = await process_resume_json(response_json)
             response_json['overall_experience'] = exp_result['total_experience']
-            response_json['Transition_behaviour'] = calculate_candidate_transition_behaviour(response_json)
+            response_json['Transition_behaviour'] = await calculate_candidate_transition_behaviour(response_json)
             print('response_json',response_json)
-            # response_json["text"] = text  # Adding original text if needed
             return json.dumps(response_json, indent=2)
         except json.JSONDecodeError:
             print(f"Attempt {attempt + 1} failed. Retrying...")
@@ -475,7 +474,7 @@ async def extract_features_from_resume(
         response_json = json.loads(response_content)
         exp_result = process_resume_json(response_json)
         response_json['overall_experience'] = exp_result['total_experience']
-        response_json['Transition_behaviour'] = calculate_candidate_transition_behaviour(response_json)
+        response_json['Transition_behaviour'] = await calculate_candidate_transition_behaviour(response_json)
         response_json["text"] = text
         print('response_json',response_json)
         return json.dumps(response_json, indent=2)

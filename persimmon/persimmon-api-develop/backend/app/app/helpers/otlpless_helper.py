@@ -30,7 +30,7 @@ async def verify_otpless_token(token: str = Header(...,description="Session toke
         if response.status_code == status.HTTP_200_OK:
             return response_data
 
-    except requests.RequestException as e:
+    except requests.RequestException:
         raise HTTPException(
             status_code=500,
             detail="Something went wrong. Please try again!"

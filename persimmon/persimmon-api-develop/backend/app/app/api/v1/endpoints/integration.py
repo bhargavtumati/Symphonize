@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status, Depends
@@ -15,16 +15,71 @@ from app.models.company import Company
 from app.models.integration import Integration, WhatsappIntegrationType
 from app.models.recruiter import Recruiter
 from app.models.template import Template
-from app.helpers import db_helper as dbh, regex_helper as regexh, zoom_helper as zoomh
+from app.helpers import db_helper as dbh, regex_helper as regexh, zoom_helper as zoomh, google_meet_helper as gmeeth
 from app.helpers.firebase_helper import verify_firebase_token
 from app.helpers import email_helper as emailh
-from app.api.v1.endpoints.models.integration_model import IntegrationModel, APIKeyModel
+from app.api.v1.endpoints.models.integration_model import IntegrationModel, APIKeyModel, GoogleMeetModel
 from app.api.v1.endpoints.models.whatsapp_model import WatiKeyModel
 
 router = APIRouter()
 
+EMAIL_INTEGRATION_DETAILS_NOT_FOUND = "Email Integration details not found"
+INVALID_DOMAIN = "Domain is invalid"
+COMPANY_NOT_FOUND = "Company details not found"
+
+@router.post('/google_meet')
+async def create_google_meet_integration(
+    request: GoogleMeetModel,
+    token: dict = Depends(verify_firebase_token),
+    session: Session = Depends(get_db),
+):
+    try:
+        email = token['email']
+        domain = regexh.get_domain_from_email(email=email)
+
+        if not domain:
+            raise HTTPException(status_code=404,detail=INVALID_DOMAIN)
+        
+        company_details = Company.get_by_domain(session=session,domain=domain)
+        integration: Integration = Integration.get_credentials_by_mailid(session=session, email= email, platform_name="google_meet")
+       
+        if request.code:
+            response = gmeeth.get_tokens_from_auth_code(request.code)
+        if "expires_in" not in response:
+           raise HTTPException(status_code=400,detail=response.get('error'))
+        
+        expires_in = datetime.now(timezone.utc) + timedelta(seconds=response.get('expires_in'))
+        expires_in = expires_in.isoformat()
+        credentials = {
+            "refresh_token": response.get('refresh_token'),
+            "access_token": response.get('access_token'),
+            "expires_in": expires_in
+        }
+
+        if integration:
+            integration.credentials.update(credentials)
+            integration.meta.update(dbh.update_meta(meta=integration.meta, email=email))
+            integration.update(session=session)
+        else:
+            integration = Integration(
+                type="google_meet",
+                credentials=credentials,
+                company_id=company_details.id
+            )
+            integration.create(session=session,created_by=email)
+
+        return {
+            "status": status.HTTP_201_CREATED,
+            "message": "Google Meet integration is successful"
+        }
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+        
 @router.post('/{name}')
-def create_integration(
+def create_zoom_integration(
     name: str,
     request: IntegrationModel,
     token: dict = Depends(verify_firebase_token),
@@ -35,7 +90,7 @@ def create_integration(
         domain = regexh.get_domain_from_email(email=email)
 
         if not domain:
-            raise HTTPException(status_code=404,detail="Domain is invalid")
+            raise HTTPException(status_code=404,detail=INVALID_DOMAIN)
 
         company_details = Company.get_by_domain(session=session,domain=domain)
         integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name=name)
@@ -43,7 +98,7 @@ def create_integration(
         if request.code:
             response = zoomh.get_access_token(request.client_id,request.client_secret,request.code,request.redirect_uri)
 
-        expires_in = datetime.utcnow() + timedelta(seconds=response.get('expires_in'))
+        expires_in = datetime.now(timezone.utc) + timedelta(seconds=response.get('expires_in'))
         expires_in = expires_in.isoformat()
         credentials = {
             "client_id": request.client_id,
@@ -87,11 +142,11 @@ def get_zoom_account_users(
         domain = regexh.get_domain_from_email(email=email)
 
         if not domain:
-            raise HTTPException(status_code=404,detail="Domain is invalid")
+            raise HTTPException(status_code=404,detail=INVALID_DOMAIN)
 
         company_details = Company.get_by_domain(session=session,domain=domain)
         if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
+            raise HTTPException(status_code=404,detail=COMPANY_NOT_FOUND)
 
         integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name=name)
         if not integration:
@@ -121,11 +176,11 @@ def get_zoom_account_user(
         domain = regexh.get_domain_from_email(email=email)
 
         if not domain:
-            raise HTTPException(status_code=404,detail="Domain is invalid")
+            raise HTTPException(status_code=404,detail=INVALID_DOMAIN)
 
         company_details = Company.get_by_domain(session=session,domain=domain)
         if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
+            raise HTTPException(status_code=404,detail=COMPANY_NOT_FOUND)
 
         integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name=name)
         if not integration:
@@ -154,13 +209,20 @@ def verify_integration_status(
         email = token['email']
         domain = regexh.get_domain_from_email(email=email)
         if not domain:
-            raise HTTPException(status_code=404,detail="Domain is invalid")
+            raise HTTPException(status_code=404,detail=INVALID_DOMAIN)
+        
+        if name not in ['zoom', 'google_meet']:
+            raise HTTPException(status_code=400, detail=f"Invalid online meeting service name '{name}'. Allowed values are 'zoom' and 'google_meet'")
 
         company_details = Company.get_by_domain(session=session,domain=domain)
         if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
-
-        integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name=name)
+            raise HTTPException(status_code=404,detail=COMPANY_NOT_FOUND)
+            
+        if name == 'zoom':
+            integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name=name)
+        elif name == 'google_meet':
+            integration: Integration = Integration.get_credentials_by_mailid(session=session,email=email,platform_name=name)
+                
         if integration:
             return True
         else:
@@ -188,7 +250,7 @@ async def create_email_integration(
         domain = regexh.get_domain_from_email(email=email)
 
         if not domain:
-            raise HTTPException(status_code=404,detail="Domain is invalid")
+            raise HTTPException(status_code=404,detail=INVALID_DOMAIN)
         
         if name == 'brevo':
             await emailh.get_brevo_senders(api_key = request.api_key)
@@ -253,15 +315,15 @@ async def get_email_senders(
         domain = regexh.get_domain_from_email(email=email)
 
         if not domain:
-            raise HTTPException(status_code=404, detail="Domain is invalid")
+            raise HTTPException(status_code=404, detail=INVALID_DOMAIN)
 
         company_details = Company.get_by_domain(session=session, domain=domain)
         if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
+            raise HTTPException(status_code=404,detail=COMPANY_NOT_FOUND)
 
         integration: Integration = Integration.get_credentials(session=session, company_id=company_details.id, platform_name='email')
         if not integration:
-            raise HTTPException(status_code=404,detail="Email Integration details not found")
+            raise HTTPException(status_code=404,detail=EMAIL_INTEGRATION_DETAILS_NOT_FOUND)
         
         name = name.lower().strip()
         credentials = integration.credentials
@@ -301,79 +363,17 @@ async def send_email_user(
     token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
 ):
-    to_email = to_email[0].split(",")
-    email_results = []
-    failed_emails = []
-    
-    try:
-        domain = regexh.get_domain_from_email(email=token['email'])
-        if not domain:
-            raise HTTPException(status_code=404, detail="Domain is invalid")
-        
-        if not to_email:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one recipient email is required")
-        
-        company_details = Company.get_by_domain(session=session, domain=domain)
-        if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
-        
-        job: Job = Job.get_by_code(session=session, code=job_code)
-        if not job:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Associated job not found")
-        
-        recruiter: Recruiter = Recruiter.get_by_email_id(session, token['email'])
-        if not recruiter:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Associated recuriter not found")
-
-        integration: Integration = Integration.get_credentials(session=session, company_id=company_details.id, platform_name='email')
-        if not integration:
-            raise HTTPException(status_code=404,detail="Email Integration details not found")
-        
-        name = name.lower().strip()
-        credentials = integration.credentials
-        for cred in credentials.get('credentials'):
-            if cred.get('service_type') == name:
-                api_key = cred['api_key'] 
-                break
-        else:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{name} credentials not found")
-
-        for email in to_email:
-            try:
-                email_body, email_subject = emailh.render_email_variables(session=session, to_email=email, body=body, subject=subject, company=company_details, job=job, recuriter=recruiter)
-                if name == 'brevo':
-                    response = await emailh.brevo_send_mail(api_key=api_key, from_email=from_email, to_email=[email], subject=email_subject, body=email_body, files=files)
-                elif name == 'sendgrid':
-                    response = await emailh.sendgrid_send_mail(api_key=api_key, from_email=from_email, to_email=[email], subject=email_subject, body=email_body, files=files)
-
-                email_results.append({"email": email, "status": "success"})
-
-            except HTTPException as e:
-                failed_emails.append({"email": email, "error": str(e.detail)})
-            except Exception as e:
-                failed_emails.append({"email": email, "error": str(e)})
-
-        response = {
-            "message": "Email processing completed",
-            "success_count": len(email_results),
-            "failure_count": len(failed_emails),
-            "successful_emails": email_results,
-            "failed_emails": failed_emails
-        }
-
-        if failed_emails:
-            response["message"] += " with some failures"
-
-        return response
-
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error occurred")
-    finally:
-        if files:
-            for file in files:
-                await file.close()
+    return await emailh.send_mails_via_integrations(
+        name=name,
+        job_code=job_code,
+        to_email=to_email,
+        from_email=from_email,
+        subject=subject,
+        body=body,
+        files=files,
+        token=token,
+        session=session
+    )
 
 
 @router.post("/email/{name}/test-email")
@@ -394,15 +394,15 @@ async def send_test_email(
         domain = regexh.get_domain_from_email(email=email)
 
         if not domain:
-            raise HTTPException(status_code=404, detail="Domain is invalid")
+            raise HTTPException(status_code=404, detail=INVALID_DOMAIN)
 
         company_details = Company.get_by_domain(session=session, domain=domain)
         if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
+            raise HTTPException(status_code=404,detail=COMPANY_NOT_FOUND)
 
         integration: Integration = Integration.get_credentials(session=session, company_id=company_details.id, platform_name='email')
         if not integration:
-            raise HTTPException(status_code=404,detail="Email Integration details not found")
+            raise HTTPException(status_code=404,detail=EMAIL_INTEGRATION_DETAILS_NOT_FOUND)
         
         name = name.lower().strip()
         credentials = integration.credentials
@@ -457,11 +457,11 @@ def verify_integration_status(
         email = token['email']
         domain = regexh.get_domain_from_email(email=email)
         if not domain:
-            raise HTTPException(status_code=404,detail="Domain is invalid")
+            raise HTTPException(status_code=404,detail=INVALID_DOMAIN)
 
         company_details = Company.get_by_domain(session=session,domain=domain)
         if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
+            raise HTTPException(status_code=404,detail=COMPANY_NOT_FOUND)
 
         integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='email')
         print("integration : ", integration)
@@ -469,6 +469,38 @@ def verify_integration_status(
             credentials = integration.credentials
             for cred in credentials.get('credentials'):
                 if cred.get('service_type') == name:
+                    return True
+                
+        return False
+        
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500,detail=str(e))
+ 
+
+@router.get('/whatsapp/{service_name}/verify-status')
+def verify_whatsapp_service_integration_status(
+    service_name: WhatsappIntegrationType,
+    token: dict = Depends(verify_firebase_token),
+    session: Session = Depends(get_db)
+):
+    try:
+        email = token['email']
+        domain = regexh.get_domain_from_email(email=email)
+        if not domain:
+            raise HTTPException(status_code=404,detail="Domain is invalid")
+
+        company_details = Company.get_by_domain(session=session,domain=domain)
+        if not company_details:
+            raise HTTPException(status_code=404,detail="Company details not found")
+
+        integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='whatsapp')
+
+        if integration:
+            credentials = integration.credentials
+            for cred in credentials.get('credentials'):
+                if cred.get('service_type') == service_name.value:
                     return True
                 
         return False
@@ -490,15 +522,15 @@ def get_api_key(
         email = token['email']
         domain = regexh.get_domain_from_email(email=email)
         if not domain:
-            raise HTTPException(status_code=404,detail="Domain is invalid")
+            raise HTTPException(status_code=404,detail=INVALID_DOMAIN)
 
         company_details = Company.get_by_domain(session=session,domain=domain)
         if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
+            raise HTTPException(status_code=404,detail=COMPANY_NOT_FOUND)
 
         integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='email')
         if not integration:
-            raise HTTPException(status_code=404,detail="Email Integration details not found")
+            raise HTTPException(status_code=404,detail=EMAIL_INTEGRATION_DETAILS_NOT_FOUND)
         
         credentials = integration.credentials
         api_key = ""
@@ -529,11 +561,11 @@ async def verify_from_address_status(
         email = token['email']
         domain = regexh.get_domain_from_email(email=email)
         if not domain:
-            raise HTTPException(status_code=404,detail="Domain is invalid")
+            raise HTTPException(status_code=404,detail=INVALID_DOMAIN)
 
         company_details = Company.get_by_domain(session=session,domain=domain)
         if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
+            raise HTTPException(status_code=404,detail=COMPANY_NOT_FOUND)
 
         template_details = Template.get_by_company_id(session=session, id=company_details.id)
         if not template_details:
@@ -543,7 +575,7 @@ async def verify_from_address_status(
         if not integration:
             return {
                 "status": status.HTTP_200_OK,
-                "message": "Email Integration details not found",
+                "message": EMAIL_INTEGRATION_DETAILS_NOT_FOUND,
                 "email_send_count": template_details.email_data.get('send_count'),
                 "data": False
             }
@@ -557,7 +589,9 @@ async def verify_from_address_status(
                     return {
                         "status": status.HTTP_200_OK,
                         "message": "Your email found within the sendgrid integrated email service",
-                        "data": True
+                        "data": True,
+                        "from_address": email,
+                        "email_service_type": "sendgrid"
                     }
                 
             if cred.get('service_type') == 'brevo':
@@ -567,7 +601,9 @@ async def verify_from_address_status(
                     return {
                         "status": status.HTTP_200_OK,
                         "message": "Your email found within the brevo integrated email service",
-                        "data": True
+                        "data": True,
+                        "from_address": email,
+                        "email_service_type": "brevo"
                     }
 
         return {
@@ -578,6 +614,7 @@ async def verify_from_address_status(
 
     except HTTPException as e:
         raise e
+
 
 @router.post('/whatsapp/{name}')
 async def create_whatsapp_integration(
@@ -635,52 +672,6 @@ async def create_whatsapp_integration(
         return {
             "status": status.HTTP_201_CREATED,
             "message": "Whatsapp integration is successful"
-        }
-        
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(status_code=500,detail=str(e))
-    
-@router.get('/whatsapp/{name}/integration')
-def whatsapp_integration(
-    name: str,
-    token: dict = Depends(verify_firebase_token),
-    session: Session = Depends(get_db)
-):
-    try:
-        name = name.lower().strip()
-        email = token['email']
-        domain = regexh.get_domain_from_email(email=email)
-        if not domain:
-            raise HTTPException(status_code=404,detail="Domain is invalid")
-
-        company_details = Company.get_by_domain(session=session,domain=domain)
-        if not company_details:
-            raise HTTPException(status_code=404,detail="Company details not found")
-
-        integration: Integration = Integration.get_credentials(session=session,company_id=company_details.id,platform_name='whatsapp')
-        if not integration:
-            raise HTTPException(status_code=404,detail="Whatsapp Integration details not found")
-        
-        credentials = integration.credentials
-        wati_api_token = wati_api_endpoint=None
-        for cred in credentials.get('credentials'):
-            if cred.get('service_type') == name:
-                if "wati_api_token" in cred and "wati_api_endpoint" in cred:
-                      wati_api_token = cred['wati_api_token']
-                      wati_api_endpoint = cred ['wati_api_endpoint']
-            
-        if not wati_api_token:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{name} api token not found")
-        if not wati_api_endpoint:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{name} api endpoint not found")    
-        
-        return {
-            "message": f"{name} key and endpoint fetched successfully",
-            "status" : 200,
-            "wati_api_token": wati_api_token,
-            "wati_api_endpoint": wati_api_endpoint
         }
         
     except HTTPException as e:

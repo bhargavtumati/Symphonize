@@ -3,21 +3,31 @@ from sqlalchemy.orm import sessionmaker
 
 from app.core.config import settings
 
-DB_POOL_SIZE = 83
+# Safe database connection pooling strategy
+MAX_CONNECTIONS = 60
 WEB_CONCURRENCY = 9
-POOL_SIZE = max(DB_POOL_SIZE // WEB_CONCURRENCY, 5)
+RESERVED_CONNECTIONS = 10  # for admin tools, migrations, etc.
 
-connect_args = {"check_same_thread": False}
+# Calculate safe pool size per worker
+AVAILABLE_CONNECTIONS = MAX_CONNECTIONS - RESERVED_CONNECTIONS
+POOL_SIZE = max(AVAILABLE_CONNECTIONS // WEB_CONCURRENCY, 2)
 
+# Set up SQLAlchemy engine
 engine = create_engine(
     settings.DATABASE_URI,
-    connect_args={"options": "-csearch_path=public"},
+    pool_size=POOL_SIZE,           # per-process pool size
+    max_overflow=5,                # allows short burst capacity
+    connect_args={
+        "sslmode": "disable",  #"require",      # enforce SSL connection
+        "options": "-csearch_path=public"  # set schema path
+    },
     echo=True,
 )
 
-SessionLocal = sessionmaker(engine)
+# Create session factory
+SessionLocal = sessionmaker(bind=engine)
 
-# Define a session dependency in FastAPI
+# FastAPI dependency for DB session
 def get_db():
     session = SessionLocal()
     try:

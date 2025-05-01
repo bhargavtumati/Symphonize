@@ -15,7 +15,8 @@ from app.api.v1.endpoints import (
     templates,
     share_applicants,
     linkedin,
-    wati
+    wati,
+    meta_data
 )
 
 api_router = APIRouter()
@@ -35,3 +36,4 @@ api_router.include_router(templates.router, prefix="/template", tags=["template"
 api_router.include_router(share_applicants.router, prefix="/share", tags=["share applicants"])
 api_router.include_router(linkedin.router, prefix="/linkedin", tags=["linkedin"])
 api_router.include_router(wati.router, prefix="/wati", tags=["Wati"])
+api_router.include_router(meta_data.router, prefix="/metadata", tags=["meta data"])

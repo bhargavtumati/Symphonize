@@ -61,7 +61,7 @@ def test_share_applicant_default_email(mock_dependencies):
     response = client.post("api/v1/share/applicants", json=request_data)
     json_response = response.json()
     assert response.status_code == 200
-    assert json_response["message"] == "Shared Applicants Successfully"
+    assert json_response["message"] == "Email processing completed"
     assert json_response["success_count"] == 1
     assert json_response['failure_count'] == 0
     mock_dependencies["mock_create"].assert_called_once()
@@ -84,16 +84,16 @@ def test_share_applicant_default_email_multiple_recipients(mock_dependencies):
     response = client.post("api/v1/share/applicants", json=request_data)
     json_response = response.json()
     assert response.status_code == 200
-    assert json_response["message"] == "Shared Applicants Successfully"
+    assert json_response["message"] == "Email processing completed"
     assert json_response["success_count"] == 2
     assert json_response['failure_count'] == 0
     mock_dependencies["mock_create"].assert_called_once()
     mock_dependencies["mock_get_by_code"].assert_called_once()
     mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
-    mock_dependencies["mock_send_email"].call_count == 2
 
 
-def test_share_applicant_brevo(mock_dependencies):
+@patch("app.helpers.email_helper.validate_sender_for_email_integrations", return_value=None)
+def test_share_applicant_brevo(mock_validate, mock_dependencies):
     app.dependency_overrides[verify_firebase_token] = lambda: {"user_id": "111", "email": "gunda.charanreddy@tekworks.in"}
     request_data = {
         "job_code": "J123",
@@ -107,19 +107,19 @@ def test_share_applicant_brevo(mock_dependencies):
     response = client.post("api/v1/share/applicants", json=request_data)
     assert response.status_code == 200
     json_response = response.json()
-    assert json_response["message"] == "Shared Applicants Successfully"
+    assert json_response["message"] == "Email processing completed"
     assert json_response["success_count"] == 1
     assert json_response['failure_count'] == 0
     mock_dependencies["mock_brevo_email"].assert_called_once()
     mock_dependencies["mock_create"].assert_called_once()
     mock_dependencies["mock_get_by_code"].assert_called_once()
     mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
-    mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
     mock_dependencies["mock_get_company"].assert_called()
     mock_dependencies["mock_get_integration"].assert_called_once()
+    mock_validate.assert_called_once()
 
-
-def test_share_applicant_sendgrid(mock_dependencies):
+@patch("app.helpers.email_helper.validate_sender_for_email_integrations", return_value=None)
+def test_share_applicant_sendgrid(mock_validate, mock_dependencies):
     request_data = {
         "job_code": "J123",
         "recipient_emails": ["recipient@example.com"],
@@ -132,7 +132,7 @@ def test_share_applicant_sendgrid(mock_dependencies):
     response = client.post("api/v1/share/applicants", json=request_data)
     assert response.status_code == 200
     json_response = response.json()
-    assert response.json()["message"] == "Shared Applicants Successfully"
+    assert response.json()["message"] == "Email processing completed"
     assert json_response["success_count"] == 1
     assert json_response['failure_count'] == 0
     mock_dependencies["mock_sendgrid_email"].assert_called_once()
@@ -141,6 +141,7 @@ def test_share_applicant_sendgrid(mock_dependencies):
     mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
     mock_dependencies["mock_get_company"].assert_called()
     mock_dependencies["mock_get_integration"].assert_called_once()
+    mock_validate.assert_called_once()
 
 
 def test_share_applicant_invalid_email_type():
@@ -172,11 +173,11 @@ def test_share_applicant_company_not_found(mock_dependencies):
     }
     response = client.post("api/v1/share/applicants", json=request_data)
     assert response.status_code == 404
-    assert response.json()['detail'] == 'Company details not found'
+    assert response.json()['detail'] == 'Company details not found.'
 
 
 def test_share_applicant_invalid_sender(mock_dependencies):
-    mock_dependencies['mock_get_company'].return_value = None
+    app.dependency_overrides[verify_firebase_token] = lambda: {"user_id": "111", "email": "gunda.charanreddy@tekworks.in"}
     request_data = {
         "job_code": "J123",
         "recipient_emails": ["recipient@example.com"],
@@ -187,9 +188,13 @@ def test_share_applicant_invalid_sender(mock_dependencies):
         "redirect_url": "https://localhost:8080/share-applicants"
     }
     response = client.post("api/v1/share/applicants", json=request_data)
-    print(response.json())
+    print("response", response.json())
     assert response.status_code == 500
     assert response.json()['detail'] == 'Failed to Share Applicants: The sender address is not authorized'
+    mock_dependencies["mock_validate_applicant_uuids"].assert_called_once()
+    mock_dependencies["mock_get_company"].assert_called()
+    mock_dependencies["mock_get_company"].assert_called()
+    mock_dependencies['mock_get_by_code'].assert_called_once()
 
 
 @patch("app.models.job.Job.get_by_code", return_value = MagicMock(enhanced_description={"skills":[], "availability":45}))
@@ -219,16 +224,6 @@ def test_verify_email(mock_get_by_code):
 
 def test_verify_email_with_no_token():
     app.dependency_overrides[verify_firebase_token] = lambda: {"user_id": "111", "email": "gunda.charanreddy@tekworks.in"}
-    payload = {
-        "jc": "J123",
-        "jt": "Software Engineer",
-        "re": "recipient@tekworks.in",
-        "token_uuid": "hvcvcxgqvcv", 
-        "count": 5,
-        "hs": 0,
-        "se": "pytest@tekworks.in",
-        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7) 
-    }
     response = client.get("api/v1/share/applicants/details")
     response_data = response.json()
     assert response.status_code == 401
@@ -236,16 +231,6 @@ def test_verify_email_with_no_token():
 
 
 def test_verify_email_with_no_token():
-    payload = {
-        "jc": "J123",
-        "jt": "Software Engineer",
-        "re": "recipient@tekworks.in",
-        "token_uuid": "hvcvcxgqvcv", 
-        "count": 5,
-        "hs": 0,
-        "se": "pytest@tekworks.in",
-        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7) 
-    }
     response = client.get("api/v1/share/applicants/details")
     response_data = response.json()
     assert response.status_code == 401
@@ -379,7 +364,7 @@ def test_get_applicant_success(
     """Test retrieving an applicant successfully"""
     app.dependency_overrides[verify_firebase_token] = lambda: {"user_id": "111", "email": "gunda.charanreddy@tekworks.in"}
     mock_get_by_uuid.return_value = MagicMock(
-        details={"name": "John Doe", "email": "john@example.com"},
+        details={"name": "John Doe", "email": "john@example.com", "applicant_image": None},
         stage_uuid="stage-123",
         job_id="job-456",
         uuid=VALID_UUID,
@@ -392,7 +377,7 @@ def test_get_applicant_success(
     token = jwt.encode(payload=payload, key=SECRET_KEY, algorithm="HS256")
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get(f"/api/v1/applicants/{VALID_UUID}", headers=headers)
-
+    print("response", response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Applicant details retrieved successfully"
     assert response.json()["data"]["details"]["applied_date"] == "2024-01-01T12:00:00Z"
@@ -411,8 +396,7 @@ def test_get_applicant_invalid_uuid():
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get(f"/api/v1/applicants/{INVALID_UUID}", headers=headers)
 
-    assert response.status_code == 400
-    assert response.json()["detail"] == "Invalid or Required UUID"
+    assert response.status_code == 422
 
 
 @patch("app.models.applicant.Applicant.get_by_uuid", return_value=None)

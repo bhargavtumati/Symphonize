@@ -14,6 +14,7 @@ def mock_verify_firebase_token():
 
 app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
 
+@patch("app.helpers.email_helper.validate_sender_for_email_integrations", return_value=None)
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.models.job.Job.get_by_code")
 @patch("app.models.recruiter.Recruiter.get_by_email_id")
@@ -26,7 +27,8 @@ def test_send_email_success_with_brevo(
     mock_get_credentials, 
     mock_get_recruiter, 
     mock_get_job, 
-    mock_get_company
+    mock_get_company,
+    mock_validate
 ):
     mock_get_company.return_value = MagicMock(id=1, domain="tekworks.in")
     mock_get_job.return_value = MagicMock(id=1, title="Software Engineer")
@@ -57,8 +59,10 @@ def test_send_email_success_with_brevo(
     mock_get_credentials.assert_called_once()
     mock_render_email_variables.assert_called()
     mock_send_transac_email.assert_called()
+    mock_validate.assert_called_once()
 
 
+@patch("app.helpers.email_helper.validate_sender_for_email_integrations", return_value=None)
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.models.job.Job.get_by_code")
 @patch("app.models.recruiter.Recruiter.get_by_email_id")
@@ -71,7 +75,8 @@ def test_send_email_failure_with_brevo(
     mock_get_credentials, 
     mock_get_recruiter, 
     mock_get_job, 
-    mock_get_company
+    mock_get_company,
+    mock_validate
 ):
     mock_get_company.return_value = MagicMock(id=1, domain="tekworks.in")
     mock_get_job.return_value = MagicMock(id=1, title="Software Engineer")
@@ -102,8 +107,10 @@ def test_send_email_failure_with_brevo(
     mock_get_credentials.assert_called_once()
     mock_render_email_variables.assert_called()
     mock_send_transac_email.assert_called()
+    mock_validate.assert_called_once()
 
 
+@patch("app.helpers.email_helper.validate_sender_for_email_integrations", return_value=None)
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.models.job.Job.get_by_code")
 @patch("app.models.recruiter.Recruiter.get_by_email_id")
@@ -116,7 +123,8 @@ def test_send_email_success_with_sendgrid(
     mock_get_credentials, 
     mock_get_recruiter, 
     mock_get_job, 
-    mock_get_company
+    mock_get_company,
+    mock_validate
 ):
     mock_get_company.return_value = MagicMock(id=1, domain="tekworks.in")
     mock_get_job.return_value = MagicMock(id=1, title="Software Engineer")
@@ -149,6 +157,7 @@ def test_send_email_success_with_sendgrid(
     mock_get_credentials.assert_called_once()
     mock_render_email_variables.assert_called_once()
     mock_send.assert_called_once()
+    mock_validate.assert_called_once()
 
 
 @patch("app.models.company.Company.get_by_domain")
@@ -186,6 +195,7 @@ def test_send_email_with_invalid_service(
     mock_get_credentials.assert_called_once()
 
 
+@patch("app.helpers.email_helper.validate_sender_for_email_integrations", return_value=None)
 @patch("app.models.company.Company.get_by_domain")
 @patch("app.models.job.Job.get_by_code")
 @patch("app.models.recruiter.Recruiter.get_by_email_id")
@@ -198,7 +208,8 @@ def test_send_email_with_attachments_for_multiple_candidates(
     mock_get_credentials, 
     mock_get_recruiter, 
     mock_get_job, 
-    mock_get_company
+    mock_get_company,
+    mock_validate
 ):
     mock_get_company.return_value = MagicMock(id=1, domain="tekworks.in")
     mock_get_job.return_value = MagicMock(id=1, title="Software Engineer")
@@ -237,6 +248,7 @@ def test_send_email_with_attachments_for_multiple_candidates(
     mock_get_credentials.assert_called()
     mock_render_email_variables.assert_called()
     mock_send_transac_email.assert_called()
+    mock_validate.assert_called_once()
 
 
 @pytest.fixture
@@ -263,7 +275,7 @@ def test_create_email_integration(
     mock_get_by_domain.return_value = mock_company
 
     response = client.post(
-        f"api/v1/integration/email/brevo",
+        "api/v1/integration/email/brevo",
         json={"api_key": "uxbvdhwbdhwdchclknbn"},
     )
 

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 import httpx
@@ -21,7 +21,7 @@ CLIENT_SECRET = "22cfc18e369ab7bcadce2b3cc6bd44f7b360307d20"
 REFRESH_TOKEN = "1000.c9e6d85fc38f074df5f9b0b31b75be82.16326882d52e6ad230224fc8dec6dace"
 
 # Token cache
-token_cache = {"access_token": None, "expires_at": datetime.utcnow()}
+token_cache = {"access_token": None, "expires_at": datetime.now(timezone.utc)}
 
 
 async def fetch_bearer_token() -> str:
@@ -38,7 +38,7 @@ async def fetch_bearer_token() -> str:
         if response.status_code == 200:
             token_data = response.json()
             token_cache["access_token"] = token_data.get("access_token")
-            token_cache["expires_at"] = datetime.utcnow() + timedelta(
+            token_cache["expires_at"] = datetime.now(timezone.utc) + timedelta(
                 seconds=token_data.get("expires_in", 3600) - 60
             )  # Refresh before expiration
             return token_cache["access_token"]
@@ -52,7 +52,7 @@ async def fetch_bearer_token() -> str:
 async def get_bearer_token() -> str:
     if (
         token_cache["access_token"] is None
-        or datetime.utcnow() >= token_cache["expires_at"]
+        or datetime.now(timezone.utc) >= token_cache["expires_at"]
     ):
         return await fetch_bearer_token()
     return token_cache["access_token"]

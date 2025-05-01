@@ -12,13 +12,14 @@ from app.models.recruiter import Recruiter
 from app.api.v1.endpoints.models.recruiter_model import RecruiterModel, UpdateRecruiterModel
 from app.helpers.firebase_helper import verify_firebase_token
 from app.helpers.regex_helper import get_domain_from_email
-from app.helpers.image_helper import binary_to_base64, get_initials
+from app.helpers.image_helper import get_initials
 from app.helpers import email_helper as emailh, gcp_helper as gcph
 from pydantic import EmailStr
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy import CursorResult
 from app.db.session import get_db
+import app.helpers.image_helper as imageh
 
 router = APIRouter()
 
@@ -37,7 +38,7 @@ async def create_recruiter_endpoint(
         if token['email'] != recruiter.email_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, 
-                detail=f"The logged-in email ID does not match the email ID provided in the request payload. Please ensure you are using the correct account."
+                detail="The logged-in email ID does not match the email ID provided in the request payload. Please ensure you are using the correct account."
             )
         existing_recruiter = Recruiter.get_by_whatsapp_number(session=session, whatsapp_number=recruiter.whatsapp_number)
         if existing_recruiter:
@@ -133,12 +134,12 @@ def verify_recruiter_by_gmail(
 def get_recruiter(
     token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
-) -> dict:
+):
     email_id = token['email']
     try:
         recruiter = Recruiter.get_by_email_id(session=session, email=email_id)
         if not recruiter:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Recuriter not found.")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recuriter not found.")
         if recruiter.profile_image:
             profile_image_file_path = recruiter.profile_image.replace(f"/{PERSIMMON_IMAGES_BUCKET}/", "")
             print(f"------ Profile Image File Path ------ {profile_image_file_path}")
@@ -163,7 +164,6 @@ def get_recruiter(
         return e
     except Exception as e:
         return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error during database call {str(e)}")
-    #return create_response(message=f"Get all recruiters", data=data, meta=meta)
 
 
 @router.patch("/update")
@@ -201,7 +201,7 @@ async def update_recruiter(
     
 
 @router.post("/profile/image")
-def update_recruiter_profile_image(
+async def update_recruiter_profile_image(
     file: UploadFile = File(...),
     token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
@@ -214,16 +214,16 @@ def update_recruiter_profile_image(
             raise HTTPException(status_code=400, detail="File size exceeds 2MB")
         
         if not Recruiter.exists_by_email_id(session=session, email=token['email']):
-            raise HTTPException(status_code=404, detail=f"recruiter not found")
+            raise HTTPException(status_code=404, detail="recruiter not found")
         
         main_path = f"/{PERSIMMON_IMAGES_BUCKET}/{ENVIRONMENT}/recruiter/profile-images"
-        destination = gcph.save_image_to_destination(file ,main_path=main_path)
+        destination = imageh.save_image_to_destination(file ,main_path=main_path)
         Recruiter.update_profile_image(session=session, email=token['email'], image_path=destination)
         
-        profile_image_file_path = destination.replace(f"/{PERSIMMON_IMAGES_BUCKET}/", "")
-        print(f"------ Profile Image File Path ------ {profile_image_file_path}")
-        profile_image = gcph.generate_signed_url(PERSIMMON_IMAGES_BUCKET, file_name=profile_image_file_path)
-        
+        # profile_image_file_path = destination.replace(f"/{PERSIMMON_IMAGES_BUCKET}/", "")
+        print(f"------ Profile Image File Path ------ {destination}")
+        # profile_image = gcph.generate_signed_url(PERSIMMON_IMAGES_BUCKET, file_name=profile_image_file_path)
+        profile_image = await imageh.get_base64_image(destination)
         return {
             "message": "Image uploaded successfully",
             "profile_image": profile_image
@@ -235,7 +235,7 @@ def update_recruiter_profile_image(
     
 
 @router.get("/profile/image")
-def get_recruiter_profile_image(
+async def get_recruiter_profile_image(
     token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db)
 ):
@@ -243,11 +243,11 @@ def get_recruiter_profile_image(
     try:
         recruiter = Recruiter.get_by_email_id(session=session, email=email_id)
         if not recruiter:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Recuriter not found.")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recuriter not found.")
         if recruiter.profile_image:
-            profile_image_file_path = recruiter.profile_image.replace(f"/{PERSIMMON_IMAGES_BUCKET}/", "")
+            profile_image_file_path = recruiter.profile_image #replace(f"/{PERSIMMON_IMAGES_BUCKET}/", "")
             print(f"------ Profile Image File Path ------ {profile_image_file_path}")
-            profile_image = gcph.generate_signed_url(PERSIMMON_IMAGES_BUCKET, file_name=profile_image_file_path)
+            profile_image = await imageh.get_base64_image(profile_image_file_path)
         else:
             profile_image = None
         alternative_text = get_initials(recruiter.full_name)

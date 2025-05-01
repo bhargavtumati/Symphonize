@@ -30,8 +30,6 @@ def test_create_integration_success(
     mock_get_by_domain,
 ):
     app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
-    # Mock token dependency
-    token = mock_verify_firebase_token()
     
     # Mocking helper function responses
     mock_get_domain_from_email.return_value = "example.com"

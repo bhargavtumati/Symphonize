@@ -11,6 +11,7 @@ from typing import List
 class CompanyTypeEnum(enum.Enum):
     SERVICE_BASED = 'SERVICE_BASED'
     PRODUCT_BASED = 'PRODUCT_BASED'
+    PRODUCT_AND_SERVICE_BASED = 'PRODUCT_AND_SERVICE_BASED'
 
 class BusinessTypeEnum(enum.Enum):
     B2B = "B2B"  # Business to Business
@@ -79,6 +80,11 @@ class Company(Base):
     @classmethod
     def remove_image(cls, session: Session, company_id: int, new_images: List[str]):
         session.query(cls).filter(cls.id == company_id).update({cls.images: new_images})
+        session.commit()
+    
+    @classmethod
+    def remove_logo(cls, session: Session, company_id: int):
+        session.query(cls).filter(cls.id == company_id).update({cls.logo: None})
         session.commit()
 
     def to_dict(self):

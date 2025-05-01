@@ -5,12 +5,13 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.customization import Customization
 from app.helpers import db_helper as dbh
-from app.helpers import gcp_helper as gcph
+from app.helpers import image_helper as imageh
 from app.helpers.firebase_helper import verify_firebase_token
 from app.api.v1.endpoints.models.customization_model import CustomizationModel
 from app.models.company import Company
 import json
 import os
+import traceback
 
 router = APIRouter()
 
@@ -18,7 +19,7 @@ PERSIMMON_IMAGES_BUCKET=os.getenv("PERSIMMON_IMAGES_BUCKET")
 ENVIRONMENT=os.getenv("ENVIRONMENT")
 
 @router.get('/extract-settings/domain/{name}')
-def get_customization_settings(
+async def get_customization_settings(
     name: str,
     session: Session = Depends(get_db),
 ):
@@ -36,11 +37,9 @@ def get_customization_settings(
             customization_settings.settings['website_url'] = company.website
 
         if customization_settings.settings.get('image_data'):
-            customization_settings.settings['image_data'] = customization_settings.settings['image_data'].replace(f"/{PERSIMMON_IMAGES_BUCKET}/","")
-            customization_settings.settings['image_data'] = gcph.generate_signed_url(bucket_name=PERSIMMON_IMAGES_BUCKET, file_name=customization_settings.settings['image_data'])
+            customization_settings.settings['image_data'] = await imageh.get_base64_image(file_path=customization_settings.settings['image_data'])
         if customization_settings.settings.get('logo_data'):
-            customization_settings.settings['logo_data'] = customization_settings.settings['logo_data'].replace(f"/{PERSIMMON_IMAGES_BUCKET}/","")
-            customization_settings.settings['logo_data'] = gcph.generate_signed_url(bucket_name=PERSIMMON_IMAGES_BUCKET, file_name=customization_settings.settings['logo_data'])
+            customization_settings.settings['logo_data'] = await imageh.get_base64_image(file_path=customization_settings.settings['logo_data'])
 
         return {
             "message": "Settings data retrieved successfully",
@@ -62,6 +61,7 @@ async def create_or_update_customization(
         "Explore opportunities that empower you to grow, innovate, and make an impact. Join a team where your talents are valued, your ideas are heard, and your career aspirations become a reality. Let’s build the future together!"
     ),
     enable_dark_mode: Optional[bool] = Form(False),
+    enable_header: Optional[bool] = Form(True),
     color_selected: Optional[str] = Form(None),
     primary_colors: Optional[str] = Form("[\"#F97316\", \"#0EA5E9\", \"#22C55E\", \"#EF4444\", \"#A855F7\"]"),
     selected_header_color: Optional[str] = Form(None),
@@ -108,11 +108,11 @@ async def create_or_update_customization(
     
     if image:
         image_path = f"{main_path}/company-cover-images"
-        cover_image = gcph.save_image_to_destination(image ,main_path=image_path)
+        cover_image = imageh.save_image_to_destination(image ,main_path=image_path)
     
     if icon:
         logo_path = f"{main_path}/company-logos"
-        logo_image = gcph.save_image_to_destination(icon ,main_path=logo_path)
+        logo_image = imageh.save_image_to_destination(icon ,main_path=logo_path)
 
     form_data = {
         "career_page_url": career_page_url,
@@ -120,6 +120,7 @@ async def create_or_update_customization(
         "heading": heading,
         "description": description,
         "enable_dark_mode": enable_dark_mode,
+        "enable_header": enable_header,
         "color_selected": color_selected,
         "selected_header_color": selected_header_color,
         "primary_colors": primary_colors_list,
@@ -157,6 +158,7 @@ async def create_or_update_customization(
             "heading": customization_data.heading,
             "description": customization_data.description,
             "enable_dark_mode": customization_data.enable_dark_mode,
+            "enable_header": customization_data.enable_header,
             "color_selected": customization_data.color_selected,
             "font_style": customization_data.font_style,
             "primary_colors": customization_data.primary_colors,
@@ -166,15 +168,15 @@ async def create_or_update_customization(
         
         if customization:
             updated_settings = settings
-            if customization_data.image_data:
+            if image and customization_data.image_data:
                 updated_settings['image_data'] = customization_data.image_data
             else:
-                updated_settings['image_data'] = customization.settings['image_data']
+                updated_settings['image_data'] = customization.settings.get('image_data')
 
-            if customization_data.logo_data:
+            if icon and customization_data.logo_data:
                 updated_settings['logo_data'] = customization_data.logo_data
             else:
-                updated_settings['logo_data'] = customization.settings['logo_data']
+                updated_settings['logo_data'] = customization.settings.get('logo_data')
             customization.settings.update(updated_settings)
             customization.meta.update(dbh.update_meta(meta=customization.meta, email=email))
             customization_data = customization.update(session=session)
@@ -189,10 +191,13 @@ async def create_or_update_customization(
             )
             customization_data = customization.create(session=session, created_by=email)
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
     except HTTPException as e:
         raise e
+    
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
+    
 
     return {
         "message": "Customization settings created/modified successfully",
@@ -201,7 +206,7 @@ async def create_or_update_customization(
     }
 
 @router.get('/customization/domain/{name}')
-def get_customization_settings(
+async def get_customization_settings(
     name: str,
     token: dict = Depends(verify_firebase_token),
     session: Session = Depends(get_db),
@@ -224,11 +229,9 @@ def get_customization_settings(
         
        
         if customization_settings.settings.get('image_data'):
-            customization_settings.settings['image_data']=customization_settings.settings['image_data'].replace(f'/{PERSIMMON_IMAGES_BUCKET}/', '')
-            customization_settings.settings['image_data'] = gcph.generate_signed_url(bucket_name=PERSIMMON_IMAGES_BUCKET, file_name=customization_settings.settings['image_data'])
+            customization_settings.settings['image_data'] = await imageh.get_base64_image(file_path=customization_settings.settings['image_data'])
         if customization_settings.settings.get('logo_data'):
-            customization_settings.settings['logo_data']=customization_settings.settings['logo_data'].replace(f'/{PERSIMMON_IMAGES_BUCKET}/', '')
-            customization_settings.settings['logo_data'] = gcph.generate_signed_url(bucket_name=PERSIMMON_IMAGES_BUCKET, file_name=customization_settings.settings['logo_data'])
+            customization_settings.settings['logo_data'] = await imageh.get_base64_image(file_path=customization_settings.settings['logo_data'])
             
         return {
             "message": "Settings data retrieved successfully",

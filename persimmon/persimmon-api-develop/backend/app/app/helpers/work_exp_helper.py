@@ -49,7 +49,7 @@ def parse_date_range(date_range: str):
         return 0.0
 
 
-def process_resume_json(json_data):
+async def process_resume_json(json_data):
     """
     Process resume JSON and calculate experience for each role and overall experience
     """
@@ -95,7 +95,7 @@ def process_resume_json(json_data):
         return None
     
 
-def calculate_candidate_transition_behaviour(candidate_data: dict) -> int:
+async def calculate_candidate_transition_behaviour(candidate_data: dict) -> int:
     """Calculates the average tenure per company based on the candidate's experience data."""
     total_experience = candidate_data.get('overall_experience')
     experience_records = candidate_data.get('experience', [])

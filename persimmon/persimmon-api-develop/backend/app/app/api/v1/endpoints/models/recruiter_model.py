@@ -1,9 +1,17 @@
-from pydantic import BaseModel, Field, field_validator, EmailStr
 from typing import Optional
-import re
-from typing import Optional
+
+from pydantic import BaseModel, field_validator, EmailStr
+
 from app.api.v1.endpoints.models.company_model import CompanyModel
-from app.utils.validators import is_alphabetic, is_non_empty, validate_linkedin_url, validate_professional_email, validate_whatsapp_number, validate_length, has_proper_characters 
+from app.utils.validators import (
+    is_alphabetic, is_non_empty, 
+    validate_linkedin_url, 
+    validate_professional_email, 
+    validate_length, 
+    has_proper_characters,
+    validate_mobile_number_with_country_code,
+    validate_designation
+)
 
 FULL_NAME_FIELD = "Full Name"
 DESIGNATION_FIELD = "Designation"
@@ -29,14 +37,13 @@ class RecruiterModel(BaseModel):
 
     @field_validator('whatsapp_number')
     def validate_whatsapp(cls, whatsapp_number):
-        return validate_whatsapp_number(whatsapp_number)
+        return validate_mobile_number_with_country_code(whatsapp_number, "WhatsApp Number")
 
     @field_validator('designation')
     def validate_designation(cls, designation):
         is_non_empty(designation, DESIGNATION_FIELD)
-        is_alphabetic(designation, DESIGNATION_FIELD)
-        has_proper_characters(designation, DESIGNATION_FIELD)
-        return validate_length(designation, 2, 20, DESIGNATION_FIELD)
+        validate_designation(designation)
+        return designation
 
     @field_validator('linkedin_url')
     def validate_linkedin(cls, linkedin_url):
@@ -65,14 +72,13 @@ class UpdateRecruiterModel(BaseModel):
 
     @field_validator('whatsapp_number')
     def validate_whatsapp(cls, whatsapp_number):
-        return validate_whatsapp_number(whatsapp_number)
+        return validate_mobile_number_with_country_code(whatsapp_number, "WhatsApp Number")
 
     @field_validator('designation')
     def validate_designation(cls, designation):
         is_non_empty(designation, DESIGNATION_FIELD)
-        is_alphabetic(designation, DESIGNATION_FIELD)
-        has_proper_characters(designation, DESIGNATION_FIELD)
-        return validate_length(designation, 2, 20, DESIGNATION_FIELD)
+        validate_designation(designation)
+        return designation
 
     @field_validator('linkedin_url')
     def validate_linkedin(cls, linkedin_url):

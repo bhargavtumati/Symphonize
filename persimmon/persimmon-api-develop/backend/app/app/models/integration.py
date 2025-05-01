@@ -38,3 +38,7 @@ class Integration(Base):
     @classmethod
     def get_credentials(cls, session: Session, company_id: int, platform_name: str):
         return session.query(cls).filter(and_(cls.company_id == company_id, cls.type == platform_name)).first()
+
+    @classmethod
+    def get_credentials_by_mailid(cls, session: Session, email: str, platform_name: str):
+        return session.query(cls).filter(and_(cls.meta["audit"]["created_by"]["email"].astext == email, cls.type == platform_name)).first()

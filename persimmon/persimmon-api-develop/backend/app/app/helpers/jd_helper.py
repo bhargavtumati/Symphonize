@@ -181,7 +181,7 @@ Here is the job description:
 
 def validate_and_correct_enhanced_job_description(enhanced_jd):
     # Default values
-    default_pref = "Preferred to have"
+    PREFERRED_TO_HAVE = "Preferred to have"
     default_rating = 5
     default_value = 5
     
@@ -195,11 +195,11 @@ def validate_and_correct_enhanced_job_description(enhanced_jd):
         validated_skills = []
         for skill in enhanced_jd["skills"]:
             if isinstance(skill, str):  # If skill is just a string, convert it to dict
-                validated_skills.append({"name": skill, "pref": default_pref, "value": default_value, "rating": default_rating})
+                validated_skills.append({"name": skill, "pref": PREFERRED_TO_HAVE, "value": default_value, "rating": default_rating})
             elif isinstance(skill, dict) and skill.get("name") is not None:
                 validated_skills.append({
                     "name": skill["name"],
-                    "pref": skill.get("pref", default_pref) if skill.get("pref") in ["Must have", "Good to have", "Preferred to have"] else default_pref,
+                    "pref": skill.get("pref", PREFERRED_TO_HAVE) if skill.get("pref") in ["Must have", "Good to have", PREFERRED_TO_HAVE] else PREFERRED_TO_HAVE,
                     "value": min(max(default_value if skill.get("value") is None else skill["value"], 0), 10),
                     "rating": min(max(default_rating if skill.get("rating") is None else skill["rating"], 0), 10)
                 })
@@ -212,11 +212,11 @@ def validate_and_correct_enhanced_job_description(enhanced_jd):
         validated_softskills = []
         for soft_skill in enhanced_jd["softskills"]:
             if isinstance(soft_skill, str):  # If soft skill is just a string, convert it to dict
-                validated_softskills.append({"name": soft_skill, "pref": default_pref, "rating": default_rating})
+                validated_softskills.append({"name": soft_skill, "pref": PREFERRED_TO_HAVE, "rating": default_rating})
             elif isinstance(soft_skill, dict) and soft_skill.get("name") is not None:
                 validated_softskills.append({
                     "name": soft_skill["name"],
-                    "pref": soft_skill.get("pref", default_pref) if soft_skill.get("pref") in ["Must have", "Good to have", "Preferred to have"] else default_pref,
+                    "pref": soft_skill.get("pref", PREFERRED_TO_HAVE) if soft_skill.get("pref") in ["Must have", "Good to have", PREFERRED_TO_HAVE] else PREFERRED_TO_HAVE,
                     "rating": min(max(default_rating if soft_skill.get("rating") is None else soft_skill["rating"], 0), 10)
                 })
         enhanced_jd["softskills"] = validated_softskills
@@ -248,10 +248,7 @@ def extract_features_from_jd(
     text:str,
     prompt_template: str = EXTRACT_FEATURES_FROM_JOBDESCRIPTION3,
     ai_clarifying_questions: Optional[List[QuestionAnswerDict]] = None,
-    enable_parser: bool = False,
-    output_format: str = "json",
     max_retries: int = 4,
-    api_key: Optional[str] = None,  # Optional parameter for flexibility
 ) -> str:
 
 
@@ -308,7 +305,6 @@ def extract_features_from_jd(
     try:
         response_json = json.loads(response_content)
         response_json = validate_and_correct_enhanced_job_description(response_json)
-        # response_json["text"] = text
         return response_json
     except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail=f"Failed to parse JSON response after retries.")
+        raise HTTPException(status_code=500, detail="Failed to parse JSON response after retries.")

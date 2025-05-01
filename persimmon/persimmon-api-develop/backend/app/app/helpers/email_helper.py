@@ -29,6 +29,11 @@ from app.models.company import Company
 from app.models.job import Job
 from app.models.recruiter import Recruiter
 from app.models.applicant import Applicant
+from app.models import template as temp
+from app.helpers import regex_helper as regexh
+from app.models.integration import Integration
+from app.models.customization import Customization
+from app.api.v1.endpoints.integration import EMAIL_INTEGRATION_DETAILS_NOT_FOUND
 
 
 
@@ -174,7 +179,8 @@ def render_email_variables(session: Session, to_email:str, body:str, subject: st
         "RecruiterName": recuriter.full_name,
         "Designation": recuriter.designation,
         "CompanyWebsite": company.website,
-        "RecruiterContactNumber": recuriter.whatsapp_number
+        "RecruiterContactNumber": recuriter.whatsapp_number,
+        "CareerPageJobLink": get_career_page_job_link(session=session, company=company, job_code=job.code)  
     }
     
     subject_template_date = {
@@ -188,6 +194,20 @@ def render_email_variables(session: Session, to_email:str, body:str, subject: st
     return (body, subject)
 
 
+def get_career_page_job_link(session: Session, company: Company, job_code: str):
+    FE_URL = os.getenv("FE_URL")
+    default_job_url = f"{FE_URL}/connection/{company.domain}/jobs?jobCode={job_code}"
+
+    customization: Customization = Customization.get_customization_settings(session=session, company_id=company.id)
+
+    if customization:
+        career_page_url = customization.settings.get('career_page_url')
+        if career_page_url:
+            return f"{career_page_url}?jobURL={default_job_url}"
+
+    return default_job_url
+    
+    
 async def get_brevo_senders(api_key: str):
     """Fetch verified sender emails from Brevo."""
 
@@ -261,6 +281,71 @@ async def get_sendgrid_senders(api_key: str):
 
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error: {str(e)}")
+    
+
+async def send_mails_via_integrations(
+    name: str,
+    job_code: str ,
+    to_email: List[str],
+    from_email: EmailStr,
+    subject: str,
+    body: str,
+    files: Optional[List[UploadFile]],
+    token: dict,
+    session: Session
+):
+    try:
+        to_email = parse_recipient_list(to_email)
+        job, recruiter, company_details = fetch_job_recruiter_company_info(
+            session=session, job_code=job_code, email_id=token["email"]
+        )
+
+        integration: Integration = Integration.get_credentials(session=session, company_id=company_details.id, platform_name='email')
+        if not integration:
+            raise HTTPException(status_code=404,detail=EMAIL_INTEGRATION_DETAILS_NOT_FOUND)
+        
+        name = name.lower().strip()
+        credentials = integration.credentials
+        for cred in credentials.get('credentials'):
+            if cred.get('service_type') == name:
+                api_key = cred['api_key'] 
+                break
+        else:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{name} credentials not found")
+        await validate_sender_for_email_integrations(from_email=from_email, api_key=api_key, service_type=name)
+        email_results = []
+        failed_emails = []
+        for email in to_email:
+            try:
+                email_body, email_subject = render_email_variables(
+                    session=session, to_email=email, body=body, subject=subject, company=company_details, job=job, recuriter=recruiter
+                )
+                if name == 'brevo':
+                    await brevo_send_mail(
+                        api_key=api_key, from_email=from_email.lower(), to_email=[email.lower()], subject=email_subject, body=email_body, files=files
+                    )
+                elif name == 'sendgrid':
+                    await sendgrid_send_mail(
+                        api_key=api_key, from_email=from_email.lower(), to_email=[email.lower()], subject=email_subject, body=email_body, files=files
+                    )
+
+                email_results.append({"email": email, "status": "success"})
+
+            except HTTPException as e:
+                failed_emails.append({"email": email, "error": str(e.detail)})
+            except Exception as e:
+                failed_emails.append({"email": email, "error": str(e)})
+
+        return generate_response(email_results, failed_emails)
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error occurred")
+    finally:
+        if files:
+            for file in files:
+                await file.close()
 
 
 async def brevo_send_mail(api_key: str, from_email: EmailStr, to_email: List[EmailStr], subject: str, body: str, files: Optional[List[UploadFile]] = None, reply_to_email: Optional[EmailStr] = None, cc_addresses: Optional[List[EmailStr]] = None):
@@ -368,28 +453,108 @@ async def sendgrid_send_mail(api_key: str, from_email: EmailStr, to_email: List[
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error: {str(e)}")
 
 
-# # Example usage
-# if __name__ == "__main__":
-#     recipients = ['gvkartheek9@gmail.com', 'gundacharanreddy7@gmail.com']
-#     subject = "Test Email with Template and Attachment"
-#     template_path = """
-# <html>
-#   <body>
-#     <h1>Hello {{ name }}</h1>
-#     <p>{{ message }}</p>
-#   </body>
-# </html>
+def parse_recipient_list(to_email: List[str]) -> List[str]:
+    if not to_email or to_email == [''] or to_email[0].strip().replace(',', '') == '':
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Minimum one recipient required.")
+    return to_email[0].split(",")
 
-# """
+
+def validate_sender_email(from_email: EmailStr):
+    if from_email != os.getenv("FROM_ADDRESS"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The from address is not authorized.")
+
+
+def get_user_domain(email_id: str) -> str:
+    domain = regexh.get_domain_from_email(email=email_id)
+    if not domain:
+        raise HTTPException(status_code=404, detail="Invalid domain.")
+    return domain
+
+
+def fetch_job_recruiter_company_info(session: Session, job_code: str, email_id: str):
+    job = Job.get_by_code(session=session, code=job_code)
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Associated job not found.")
     
-#     template_data = {
-#         "name": "User",
-#         "message": "This is a test email sent using Python and Sendinblue."
-#     }
-#     from_email = "careers@tekworks.ai"
-#     reply_to_email = "xyzabc@symphonize.ai"
-#     attachment_path = "C:/Users/kartheek/persimmon-email/persimmon-xp/email/MOHDAZHER[3y_8m].pdf"  # Path to the attachment file
+    domain = get_user_domain(email_id=email_id)
+    company_details = Company.get_by_domain(session=session, domain=domain)
+    if not company_details:
+        raise HTTPException(status_code=404, detail="Company details not found.")
+    
+    recruiter = Recruiter.get_by_email_id(session, email_id)
+    if not recruiter:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recruiter not found.")
+    
+    return job, recruiter, company_details,
 
-#     for recipient in recipients:
-#         send_email(subject, template_path, template_data, recipient, from_email, reply_to_email, attachment_path)
 
+def process_emails(session, to_email, from_email, body, subject, files, company_details, job, recruiter):
+    email_results, failed_emails = [], []
+    reply_to_email = "no-reply@symphonize.ai"
+    
+    for email in to_email:
+        try:
+            if "@" not in email:
+                failed_emails.append({"email": email, "error": "Invalid email format"})
+                continue
+            
+            email_body, email_subject = render_email_variables(
+                session=session, to_email=email, body=body, subject=subject, 
+                company=company_details, job=job, recuriter=recruiter
+            )
+            
+            result = send_email(
+                subject=email_subject, body=email_body, to_email=email.lower(), 
+                from_email=from_email.lower(), reply_to_email=reply_to_email, attachments=files
+            )
+            
+            if result:
+                email_results.append({"email": email, "status": "success"})
+        except Exception as e:
+            failed_emails.append({"email": email, "error": str(e)})
+            session.rollback()
+    
+    return email_results, failed_emails
+
+
+async def validate_sender_for_email_integrations(from_email: str, api_key: str, service_type: str):
+    if service_type == 'brevo':
+        senders = await get_brevo_senders(api_key)
+        if from_email.lower() not in senders:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="The sender email or from address is not authorized in the Brevo account."
+            )
+        return
+    if service_type == 'sendgrid':
+        senders = await get_sendgrid_senders(api_key)
+        if from_email.lower() not in senders:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The sender email or from address is not authorized in the sendgrid account."
+            )
+    
+
+def update_send_email_count(session, company_id: int, success_count: int):
+    template = temp.Template.get_by_company_id(session=session, id=company_id)
+    if not template:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template not found.")
+    
+    template.email_data.update({
+        "id": template.email_data.get("id"),
+        "send_count": template.email_data.get("send_count", 0) + success_count
+    })
+    template.update(session=session)
+
+
+def generate_response(email_results, failed_emails):
+    response = {
+        "message": "Email processing completed",
+        "success_count": len(email_results),
+        "failure_count": len(failed_emails),
+        "successful_emails": email_results,
+        "failed_emails": failed_emails
+    }
+    if failed_emails:
+        response["message"] += " with some failures"
+    return response

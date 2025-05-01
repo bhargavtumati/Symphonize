@@ -8,6 +8,7 @@ from reportlab.pdfgen import canvas
 import aiofiles, tempfile, textwrap
 from docx import Document
 from io import BytesIO
+from app.helpers.log_helper import log_execution_time
 
 def get_text_from_stream(stream):
     text = ""
@@ -33,7 +34,7 @@ async def extract_text_from_pdf(uploaded_file: UploadFile):
   
 
 
-
+@log_execution_time
 async def extract_text_from_file(file) -> str:
     """
     Extracts text from a DOCX or PDF file by saving it temporarily 
@@ -46,12 +47,14 @@ async def extract_text_from_file(file) -> str:
         # Create a temporary file to save the uploaded file content
         async with aiofiles.tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_file_path = temp_file.name
-            await temp_file.write(await file.read())
+            content = await file.read()
+            await temp_file.write(content)
+            await file.seek(0)
         
         # Use Tika to parse the file content via file path
         #print(f"the file path is {temp_file_path}")
         parsed = parser.from_file(temp_file_path)
-        print("this is the parsed ",parsed)
+        #print("this is the parsed ",parsed)
         text = parsed.get('content', '')
         if  text is None:
             return ""
@@ -72,7 +75,7 @@ async def convert_docx_to_pdf(text:str, output_path: str):
     try:
         
         c = canvas.Canvas(output_path, pagesize=letter)
-        width, height = letter
+        _, height = letter
         y = height - 40  # Start from the top of the page
         
         try : 
@@ -83,7 +86,7 @@ async def convert_docx_to_pdf(text:str, output_path: str):
                     c.showPage()
                     y = height - 40
         except Exception as e:
-            print(f"the exception is with the line ")
+            print("the exception is with the line ")
         c.save()  # Save the PDF file
         return output_path
 

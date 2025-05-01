@@ -33,7 +33,8 @@ def test_get_customization_settings(mock_get_company, mock_get_customization_set
 
 @patch("app.api.v1.endpoints.careerpage.Customization.get_customization_settings")
 @patch("app.api.v1.endpoints.careerpage.Company.get_by_domain")
-def test_create_or_update_customization(mock_get_company, mock_get_customization_settings):
+@patch("app.helpers.gcp_helper.save_image_to_destination", return_value = None)
+def test_create_or_update_customization(mock_save_image_to_destination, mock_get_company, mock_get_customization_settings):
     # Mock the company data and return an empty customization settings dictionary
     mock_get_company.return_value = MagicMock(id=1, domain="symphonize.com")  # Ensure domain matches
     mock_get_customization_settings.return_value = MagicMock(settings={})
@@ -81,3 +82,4 @@ def test_create_or_update_customization(mock_get_company, mock_get_customization
     # Assertions to verify the response
     assert response.status_code == 200
     assert response.json()["message"] == "Customization settings created/modified successfully"
+    assert mock_save_image_to_destination.call_count == 2

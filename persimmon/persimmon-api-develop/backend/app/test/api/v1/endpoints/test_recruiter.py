@@ -31,12 +31,13 @@ app.dependency_overrides[Company.create] = mock_create_company
 
 @mock.patch("app.models.recruiter.Recruiter.get_by_whatsapp_number", return_value=None)
 @mock.patch('app.models.recruiter.Recruiter.create', return_value=None)
-def test_create_recruiter_success(mock_get_by_whatsapp_number, mock_create):
+@mock.patch('app.utils.validators.validate_designation', return_value="Data Analyst")
+def test_create_recruiter_success(mock_validate_designation, mock_get_by_whatsapp_number, mock_create):
     app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     payload = {
         "full_name": "sema Smith",
-        "whatsapp_number": "6155552671",
-        "designation": "Senior Recruiter",
+        "whatsapp_number": "+916155552671",
+        "designation": "Data Analyst",
         "linkedin_url": "https://www.linkedin.com/in/janesmith",
         "email_id": "surendra.goluguri@symphonize.com", #change the domain 
         "company": {
@@ -58,15 +59,16 @@ def test_create_recruiter_success(mock_get_by_whatsapp_number, mock_create):
 
 
 @mock.patch("app.models.recruiter.Recruiter.get_by_whatsapp_number", return_value=None)
-def test_create_recruiter_duplicate_email(mock_get_by_whatsapp_number):
+@mock.patch('app.utils.validators.validate_designation', return_value="Data Analyst")
+def test_create_recruiter_duplicate_email(mock_validate_designation, mock_get_by_whatsapp_number):
     app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     app.dependency_overrides[Company.get_by_domain] = lambda: {"id": 1}
     app.dependency_overrides[Recruiter.create] = lambda recruiter: (_ for _ in ()).throw(IntegrityError("duplicate key value violates unique constraint", "sql", None))
 
     payload = {
         "full_name": "sema Smith",
-        "whatsapp_number": "6155552671",
-        "designation": "Senior Recruiter",
+        "whatsapp_number": "+916155552671",
+        "designation": "Data Analyst",
         "linkedin_url": "https://www.linkedin.com/in/janesmith",
         "email_id": "surendra.goluguri@symphonize.com", #change the domain 
         "company": {
@@ -90,7 +92,9 @@ def test_create_recruiter_duplicate_email(mock_get_by_whatsapp_number):
 @mock.patch("app.models.recruiter.Recruiter.get_by_whatsapp_number", return_value=None)
 @mock.patch('app.models.company.Company.get_by_domain', return_value=mock.MagicMock(id=10))
 @mock.patch('app.models.recruiter.Recruiter.create', return_value=None)
+@mock.patch('app.utils.validators.validate_designation', return_value="Data Analyst")
 def test_create_recruiter_with_existing_company(
+    mock_validate_designation,
     mock_get_by_whatsapp_number, 
     mock_get_by_domain, 
     mock_create_recruiter
@@ -99,8 +103,8 @@ def test_create_recruiter_with_existing_company(
     
     payload = {
         "full_name": "Alice Johnson",
-        "whatsapp_number": "8155552673",
-        "designation": "Lead Recruiter",
+        "whatsapp_number": "+918155552673",
+        "designation": "Data Analyst",
         "linkedin_url": "https://www.linkedin.com/in/alicejohnson",
         "email_id": "surendra.goluguri@symphonize.com",  #change the username in email_id
         "company": {
@@ -133,7 +137,7 @@ def reset_dependencies():
 def update_recruiter_valid_payload():
     return {
         "full_name": "Kane william",
-        "whatsapp_number": "9876543216",
+        "whatsapp_number": "+919876543216",
         "designation": "Python Developer",
         "linkedin_url": "https://linkedin.com/in/kane/"
     }
@@ -147,7 +151,7 @@ def test_update_recruiter_success(
     mock_get_by_whatsapp_number
 ):
     app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
-    recruiter = mock.MagicMock(full_name="ABC", whatsapp_number="9876543216")
+    recruiter = mock.MagicMock(full_name="ABC", whatsapp_number="+919876543216")
     recruiter.update = mock.MagicMock(return_value=recruiter)
     mock_recruiter.return_value = recruiter
 
@@ -170,10 +174,10 @@ def test_update_recruiter_with_already_available_whatsapp_number(
     mock_get_by_whatsapp_number
 ):
     app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
-    recruiter = mock.MagicMock(full_name="ABC", whatsapp_number="9876543214")
+    recruiter = mock.MagicMock(full_name="ABC", whatsapp_number="+919876543214")
     recruiter.update = mock.MagicMock(return_value=recruiter)
     mock_recruiter.return_value = recruiter
-    mock_get_by_whatsapp_number.return_value = mock.MagicMock(whatsapp_number="9876543218")
+    mock_get_by_whatsapp_number.return_value = mock.MagicMock(whatsapp_number="+919876543218")
 
     payload = update_recruiter_valid_payload()
 
@@ -195,7 +199,7 @@ def test_update_recruiter_database_error(
     mock_get_by_whatsapp_number,
 ):
     app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
-    recruiter = mock.MagicMock(full_name="ABC", whatsapp_number="9876543216")
+    recruiter = mock.MagicMock(full_name="ABC", whatsapp_number="+919876543216")
     mock_recruiter.return_value = recruiter
     mock_update_details.side_effect = Exception("Database Exception")
 
@@ -214,19 +218,22 @@ def test_update_recruiter_database_error(
 # Test cases for '/profile/image' (update_recruiter_profile_image) endpoint
 @mock.patch("app.models.recruiter.Recruiter.update_profile_image")
 @mock.patch("app.models.recruiter.Recruiter.exists_by_email_id", return_value=True)
-@mock.patch("app.helpers.gcp_helper.save_image_to_destination", return_value=None)
-def test_update_profile_valid_image_upload(mock_save_image_to_destination, mock_exists, mock_update, ):
+@mock.patch("app.helpers.gcp_helper.save_image_to_destination", return_value="recruiter/profile/image.jpg")
+@mock.patch("app.helpers.gcp_helper.generate_signed_url", return_value=None)
+def test_update_profile_valid_image_upload(mock_generate_signed_url, mock_save_image_to_destination, mock_exists, mock_update, ):
     app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_update.return_value.rowcount = 1 
     response = client.post(
         url = "/api/v1/recruiter/profile/image",
         files = {"file": ("test.jpg", b"0101010101101", "image/jpeg")},
     )
+    print("response", response.json())
     assert response.status_code == 200
     print("response payload", response.json())
     assert response.json()['message'] == "Image uploaded successfully"
     mock_update.assert_called_once()
     mock_save_image_to_destination.assert_called_once()
+    mock_generate_signed_url.assert_called_once()
     mock_exists.assert_called_once()
 
 @mock.patch("app.models.recruiter.Recruiter.update_profile_image", return_value=None)
@@ -321,4 +328,3 @@ def test_get_recruiter_profile_image_database_error(mock_recruiter):
     assert response.status_code == 500
     assert "Database error" in response.json()["detail"]
     mock_recruiter.assert_called_once()
-

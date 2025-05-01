@@ -1,21 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from app.schemas.response_schema import create_response
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from app.api.v1.endpoints.models.job_model import JobModel, JobPartialUpdate, JobDescription, JobResponse
 from app.helpers.firebase_helper import verify_firebase_token
-from app.helpers import math_helper as mathh, db_helper as dbh ,jd_helper as jdh, solr_helper as solrh
+from app.helpers import math_helper as mathh, db_helper as dbh ,jd_helper as jdh
 from app.models.company import Company
 from app.models.job import Job
 from app.models.applicant import Applicant
 from app.db.session import get_db
 from sqlalchemy.orm import Session
 from typing import Optional
-from app.helpers.regex_helper import get_domain_from_email
-import tldextract
 from app.models.recruiter import Recruiter
 from app.models.stages import Stages
 from app.helpers.company_helper import get_or_create_company, handle_company_association
-from app.helpers.job_helper import generate_job_code, prepare_job_data, enhance_jd
-from app.helpers.stages_helper import prepare_default_stages, create_stages
+from app.helpers.job_helper import generate_job_code, prepare_job_data, enhance_jd, generate_ai_score_with_job_description
+from app.helpers.stages_helper import create_stages
 from app.utils.validators import validate_timezone
 
 router = APIRouter()
@@ -31,7 +28,7 @@ def get_all_jobs_for_given_domain(
     try:
         jobs_data = Job.search_jobs_by_domain(session=session, domain=name, search_term=search_term)
         if not jobs_data:
-            raise HTTPException(status_code=404, detail=f'Jobs not found')
+            raise HTTPException(status_code=404, detail='Jobs not found')
         
         return {
             "jobs": jobs_data,
@@ -52,7 +49,7 @@ def get_job_by_code_in_career_page(
     try:
         job_data = Job.get_by_code(session=session, code=job_code)
         if not job_data:
-            raise HTTPException(status_code=404, detail=f'Job not found')
+            raise HTTPException(status_code=404, detail='Job not found')
         
         return {
             "job": job_data,
@@ -93,6 +90,7 @@ def create_job(
             workplace_type=job.workplace_type,
             location=job.location,
             team_size=job.team_size,
+            currency=job.currency,
             min_salary=job.min_salary,
             max_salary=job.max_salary,
             min_experience=job.min_experience,
@@ -185,7 +183,8 @@ def get_jobs(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/{id}")
-def update_job(
+async def update_job(
+    background_tasks: BackgroundTasks ,
     id: int,
     job: JobModel,
     token: dict = Depends(verify_firebase_token),
@@ -204,6 +203,8 @@ def update_job(
         job_exists.meta.update(dbh.update_meta(job_exists.meta, updated_by))
         company_data = handle_company_association(job, job_exists, session, updated_by)
         job_data = job_exists.update(session=session)
+
+        background_tasks.add_task(generate_ai_score_with_job_description, job_exists.code, job.description)
 
         return {
             "message": "Job updated successfully",

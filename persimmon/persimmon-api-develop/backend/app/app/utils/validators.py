@@ -2,11 +2,21 @@ import json
 import os
 import re
 from typing import List
-from fastapi import HTTPException
-from pytz import all_timezones
 import validators
 import tldextract
+
+from pytz import all_timezones
+
+import phonenumbers
+from phonenumbers import NumberParseException
+
+import pycountry
+
+from fastapi import HTTPException
+
 from app.models.master_data import MasterData
+
+URL_VALIDATION_ERROR = "Please enter a valid URL"
 
 def is_non_empty(value: str, field_name: str) -> str:
     if not value.strip():
@@ -49,24 +59,36 @@ def validate_whatsapp_number(value: str) -> str:
         raise ValueError("Please enter a valid Whatsapp number")
     return value
 
+def validate_mobile_number_with_country_code(mobile_number: int, field_name: str):
+    if not mobile_number.startswith("+"):
+        raise ValueError(f"Please enter a valid {field_name} that includes the country code starting with '+'.")
+    try:
+        parsed_number = phonenumbers.parse(mobile_number, None)
+        if phonenumbers.is_valid_number(parsed_number):
+            return mobile_number
+        else:
+            raise ValueError(f"Please enter a valid {field_name} with country code")  
+    except NumberParseException as e:
+        raise ValueError(f"Please enter a valid {field_name} with country code")  
+
 
 def validate_linkedin_url(value: str) -> str:
     is_non_empty(value, "LinkedIn URL")
-    pattern = r'^(https://www.linkedin.com/in/|https://linkedin.com/in/)[A-Za-z0-9-_]+/?$'
+    pattern = r'^(https://www\.linkedin\.com/in/|https://linkedin\.com/in/|www\.linkedin\.com/in/)[A-Za-z0-9-_]{3,100}/?$'
     if not re.match(pattern, value):
         raise ValueError("Please enter valid LinkedIn URL")
     return value
 
 def validate_instagram_url(value: str) -> str:
     is_non_empty(value, "Instagram URL")
-    pattern = r'^(https://www.instagram.com/)[A-Za-z0-9-_.]{1,30}+/?$'
+    pattern = r'^(https://www\.instagram\.com/|https://instagram\.com/|www\.instagram\.com/)[A-Za-z0-9-_.]{1,30}/?$'
     if not re.match(pattern, value):
         raise ValueError("Please enter valid Instagram URL")
     return value
 
 def validate_facebook_url(value: str) -> str:
     is_non_empty(value, "Facebook URL")
-    pattern = r'^(https://www.facebook.com/)[A-Za-z0-9-_.]{5,50}+/?$'
+    pattern = r'^(https://www\.facebook\.com/|https://facebook\.com/|www\.facebook\.com/)[A-Za-z0-9-_.]{5,50}/?$'
     if not re.match(pattern, value):
         raise ValueError("Please enter valid Facebook URL")
     return value
@@ -74,7 +96,7 @@ def validate_facebook_url(value: str) -> str:
 
 def validate_github_url(value: str) -> str:
     is_non_empty(value, "Github URL")
-    pattern = r'^(https://github.com/)[A-Za-z0-9-_.]{5,50}+/?$'
+    pattern = r'^(https://www\.github\.com/|https://github\.com/|www\.github\.com/)[A-Za-z0-9-_.]{5,50}/?$'
     if not re.match(pattern, value):
         raise ValueError("Please enter valid Git hub URL")
     return value
@@ -82,13 +104,14 @@ def validate_github_url(value: str) -> str:
 
 def validate_twitter_url(value: str) -> str:
     is_non_empty(value, "X URL")
-    pattern = r'^(https://x.com/)[A-Za-z0-9-_]{4,15}+/?$'
+    pattern = r'^(https://(www\.)?(x\.com|twitter\.com)/)[A-Za-z0-9_]{4,15}/?$'
     if not re.match(pattern, value):
         raise ValueError("Please enter valid X URL")
     return value
 
 def validate_linkedin_company_url(value: str) -> str:
-    if not (value.startswith("https://www.linkedin.com/company/") or value.startswith("https://linkedin.com/company/")):
+    pattern = r'^(https://www\.linkedin\.com/company/|https://linkedin\.com/company/|www\.linkedin\.com/company/)[a-zA-Z0-9\-_]{3,}/?$'
+    if not re.match(pattern, value):
         raise ValueError("Please enter a valid LinkedIn Company URL")
     return value
 
@@ -108,25 +131,31 @@ def validate_url(url: str):
     if ' ' in url:
         raise ValueError("The URL cannot contain spaces")
     if not validators.url(url):
-        raise ValueError("Please enter a valid URL")
+        raise ValueError(URL_VALIDATION_ERROR)
 
     extracted = tldextract.extract(url)
     if extracted.domain == 'www':
-        raise ValueError("Please enter a valid URL")
+        raise ValueError(URL_VALIDATION_ERROR)
     if extracted.subdomain == 'www':
         if extracted.domain and extracted.suffix:
             return url
         else:
-            raise ValueError("Please enter a valid URL")
+            raise ValueError(URL_VALIDATION_ERROR)
     if extracted.domain and extracted.suffix:
         return url
-    raise ValueError("Please enter a valid URL")
+    raise ValueError(URL_VALIDATION_ERROR)
 
 def validate_industry_type(industry_type: str):
     industry_type_exists = MasterData.validate_value_by_type(key="name", value=industry_type, type="Industry Type")
     if not industry_type_exists:
         raise ValueError("Industry Type is not valid")
     return industry_type
+
+def validate_designation(designation: str):
+    industry_type_exists = MasterData.validate_value_by_type(key="title", value=designation, type="designation")
+    if not industry_type_exists:
+        raise ValueError("designation is not valid")
+    return designation
 
 def validate_job_location(location: str):
     location_exists = MasterData.validate_value_by_type(key="city", value=location, type="location")
@@ -150,7 +179,7 @@ def validate_name_with_fullstop(value: str, field_name: str) -> str:
     if len(value) > 20:
         raise ValueError(f"{field_name} cannot be more than 20 characters")
     if value.startswith(" ") or value.endswith(" ") or "  " in value:
-        raise ValueError(f"Please check for improper spaces")
+        raise ValueError("Please check for improper spaces")
     if not value.replace(" ", "").isalpha():
         raise ValueError(f"{field_name} should only contain alphabets")
     pattern = r"^[A-Za-z]+ [A-Za-z]+$"
@@ -181,7 +210,7 @@ def validate_email_address(email_id:str, allowed_domains: list[str], field_name)
 
 
 #filter applicants
-def validate_Preference(value: str):
+def validate_preference(value: str):
     if value.lower() in {"good to have", "must have", "preferred to have"}:
         return value
     raise ValueError("The value for 'pref' must be one of the following: 'Good to have', 'Must have', or 'Preferred to have'.")
@@ -203,3 +232,11 @@ def validate_timezone(tz: str) -> str:
     if tz.title() not in all_timezones:
         raise HTTPException(status_code=400, detail=f"Invalid timezone: {tz}")
     return tz 
+
+def validate_currency_code(code: str) -> bool:
+    try:
+        code = code.upper()
+        pycountry.currencies.lookup(code)
+        return code
+    except LookupError:
+        raise ValueError("please provide a valid currency code")

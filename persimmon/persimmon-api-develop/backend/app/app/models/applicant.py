@@ -2,6 +2,7 @@ from app.models.base import Base
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import String, exists, func, desc, ForeignKey, and_, or_
 from sqlalchemy.orm import Mapped, mapped_column, Session
+from sqlalchemy import update, text
 from app.helpers.db_helper import get_metadata
 from sqlalchemy.ext.mutable import MutableDict
 from typing import List
@@ -74,7 +75,7 @@ class Applicant(Base):
         return session.query(cls).filter(Applicant.details["original_resume"].astext.in_(file_paths)).all()
     
     @classmethod
-    def get_by_mobile_number(cls, session: Session, mobile_number: str,job_id: int):
+    async def get_by_mobile_number(cls, session: Session, mobile_number: str,job_id: int):
         #print("mobile number is ",mobile_number,job_id)
         return (
             session.query(cls)
@@ -82,7 +83,7 @@ class Applicant(Base):
             .filter(cls.details["personal_information"]["phone"].astext == mobile_number ).first()
         )
     @classmethod
-    def get_by_email_id(cls, session: Session, email_id: str,job_id: int):
+    async def get_by_email_id(cls, session: Session, email_id: str,job_id: int):
         #print("emial_id  ",email_id,job_id)
         return (
             session.query(cls)
@@ -127,20 +128,63 @@ class Applicant(Base):
             if not session.query(subquery).scalar():
                 missing_uuids.append(uuid_str)
         return missing_uuids
+     
+    @classmethod
+    def update_details_jsonb_key(cls, session: Session, applicant_uuid: str, key: str, value: str) -> None:
+        """
+        Update a single key in the JSONB 'details' column for a specific applicant.
 
-    def create(self, session: Session,created_by:str):
+        Args:
+            session (Session): SQLAlchemy DB session
+            applicant_id (str): ID of the applicant to update
+            key (str): JSON key to update inside 'details'
+            value (str): New value to set (as a plain Python string)
+
+        Returns:
+            None
+        """
+        stmt = (
+            update(cls)
+            .where(cls.uuid == applicant_uuid)
+            .values(
+                details=func.jsonb_set(
+                    cls.details,
+                    text(f"'{{{key}}}'"),
+                    f'"{value}"',  # JSON-encoded string
+                    True  # create key if it doesn't exist
+                )
+            )
+        )
+        session.execute(stmt)
+        session.commit()
+
+    @log_execution_time
+    def create(self, session: Session, created_by: str, commit=True):
+        """
+        Creates an applicant entry in the database.
+        Args:
+            session (Session): Database session
+            created_by (str): User creating the entry
+            commit (bool): If True, commits the transaction. If False, calling function should commit/rollback.
+        """
         try:
             self.meta = get_metadata()
             self.meta['audit']['created_by']['email'] = created_by
             session.add(self)
-            session.commit()
-            session.refresh(self)
+
+            # Commit only if specified
+            if commit:
+                session.commit()
+                session.refresh(self)
+
         except Exception as e:
-            session.rollback()
-            logger.error(f"Transaction failed, rolled back: {e}", exc_info=True) 
+            # Only rollback if commit was intended
+            if commit:
+                session.rollback()
+            logger.error(f"Transaction failed, rolled back: {e}", exc_info=True)
             raise
+
         return self
-    
       
     def update(self, session: Session):
         try:

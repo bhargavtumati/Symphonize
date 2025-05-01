@@ -102,9 +102,30 @@ def handle_company_association(
         )
         job_exists.company_id = company_data["id"]
 
-    elif (job_exists.is_posted_for_client and not job.is_posted_for_client) or (
-        not job_exists.is_posted_for_client and not job.is_posted_for_client
-    ):
-        if company_exists:
-            job_exists.company_id = company_exists.id
+    elif (
+        (job_exists.is_posted_for_client and not job.is_posted_for_client) 
+        or (not job_exists.is_posted_for_client and not job.is_posted_for_client)
+    ) and company_exists:
+        job_exists.company_id = company_exists.id
+
     return company_data
+
+def update_enhanced_description(jobs: list[Job], session: Session, updated_by: str, industry_type: str, number_of_employees: str) -> None:
+    """
+    Updates the enhanced description for a list of jobs.
+    """
+    for job in jobs:
+        enhanced_description = job.enhanced_description
+        if enhanced_description:
+            change=False
+            if "company_size" in enhanced_description and number_of_employees:
+                enhanced_description["company_size"]["value"] = number_of_employees
+                change=True
+            if "industry_type" in enhanced_description and isinstance(enhanced_description["industry_type"], list) and industry_type:
+                enhanced_description["industry_type"][0]["name"] = industry_type
+                change=True
+            if change:
+                job.enhanced_description.update(enhanced_description)
+                job.meta.update(dbh.update_meta(job.meta, updated_by))
+                job.update(session=session)
+

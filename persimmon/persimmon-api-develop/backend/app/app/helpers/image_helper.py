@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import os
 import uuid
@@ -9,9 +10,19 @@ from docx import Document
 from io import BytesIO
 from fastapi import HTTPException
 
+from app.helpers.data_helper import read_any_file
+
 
 PERSIMMON_IMAGES_BUCKET = os.getenv("PERSIMMON_IMAGES_BUCKET")
 ENVIRONMENT = os.getenv("ENVIRONMENT")
+
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(name)s:%(lineno)d (%(funcName)s): %(message)s"
+)
+
+logger = logging.getLogger(__name__)
 
 def extract_first_face_from_pdf(image_bytes: BytesIO, file_name: str):
     try:
@@ -94,6 +105,36 @@ def extract_first_face_from_docx(docx_path: BytesIO,file_name: str):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error extracting face image from docx: {str(e)}")
     
+
+def save_image_to_destination(file, main_path) -> str:
+    if not file.content_type.startswith("image/"):
+        raise ValueError("Only image files are allowed.")
+    
+    unique_id = uuid.uuid4()
+    original_file_name = f"{unique_id}_{file.filename}"
+    destination = Path(main_path) / original_file_name
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        content = file.file.read()
+        with open(destination, 'wb') as writer:
+            writer.write(content)
+        print(f"Image saved at: {destination}")
+        return destination.as_posix()  # Convert to forward slashes
+
+    except Exception as e:
+        raise IOError(f"Failed to save image: {e}")
+    
+
+async def get_base64_image(file_path: str):
+    try:
+        content = await read_any_file(file_path=file_path)
+        return binary_to_base64(content)
+    except Exception as e:
+        logger.error(f"Failed to get base64 image: {e}")
+        return None
+
 
 def binary_to_base64(binary_data: bytes) -> str:
     """

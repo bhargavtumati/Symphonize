@@ -1,11 +1,12 @@
-from app.models.base import Base
-from sqlalchemy.orm import Mapped, mapped_column, Session
-from sqlalchemy import Integer, String, exists, func
-from sqlalchemy.dialects.postgresql import JSONB
-from typing import List
-from app.db.session import SessionLocal
 import os
 import json
+
+from sqlalchemy.orm import Mapped, mapped_column, Session
+from sqlalchemy import Integer, String, func
+from sqlalchemy.dialects.postgresql import JSONB
+
+from app.models.base import Base
+from app.db.session import SessionLocal
 
 class MasterData(Base):
     __tablename__ = 'master_data'
@@ -27,9 +28,31 @@ class MasterData(Base):
             ).first()
             session.close()
             return value_exists    
+
+    @classmethod
+    def get_all_by_type(cls, session: Session, type: str):
+        return session.query(cls.value['name'].astext).filter_by(type=type).all()
     
+    @classmethod
+    def get_all_designations(cls, session: Session):
+        return session.query(cls.value['title'].astext).filter_by(type='designation').all()
+    
+    def get_existing_record(self, session: Session, key: str = "name"):
+        # Extract name from JSONB value
+        name_value = self.value.get(key, "").strip().lower()
+
+        # Check if the record already exists
+        existing_record = session.query(MasterData).filter(
+            MasterData.type == self.type,
+            func.jsonb_exists(MasterData.value, key),
+            func.lower(MasterData.value[key].astext) == name_value
+        ).first()
+        return existing_record
+        
     def create(self, session: Session):
         session.add(self)
+        session.commit()
+        session.refresh(self)
 
     @classmethod
     def seed_master_data(cls, session: Session):
@@ -70,3 +93,105 @@ class MasterData(Base):
 
         if new_entries:
             session.commit() 
+
+
+    @classmethod
+    def add_default_department_names(cls, session: Session):
+        # inserting default department names 
+        department_exists = session.query(cls).filter_by(type='department').all()
+        names = {entry.value['name'] for entry in department_exists if 'name' in entry.value}
+
+        department_names = MasterData.get_default_department_names()
+        new_entries = []
+        for department in department_names:
+            if department not in names:
+                department = cls(value={"name": department}, type="department")
+                department.create(session=session)
+                new_entries.append(department)
+                
+        if new_entries:
+            session.commit() 
+
+    @classmethod
+    def insert_default_designations(cls, session: Session):
+        """
+        Add default designations to the database.
+        """
+        current_dir = os.path.dirname(__file__)
+        designations_json_file = os.path.join(current_dir, '..', 'datasets', 'designations_names.json')
+
+        with open(designations_json_file, mode='r') as file:
+            designations = json.load(file)
+
+        # --- Fetch all existing designations ---
+        existing_designations = set(
+            (row.value["title"], row.value["domain"])
+            for row in session.query(MasterData)
+            .filter(MasterData.type == "designation")
+            .all()
+        )
+
+        # --- Insert only new records ---
+        for domain, titles in designations["domains"].items():
+            for title in titles:
+                key = (title, domain)
+                if key not in existing_designations:
+                    record = MasterData(
+                        value={"title": title, "domain": domain},
+                        type="designation"
+                    )
+                    session.add(record)
+
+        # --- Commit and close ---
+        session.commit()
+        session.close()
+
+    @classmethod
+    def insert_default_job_titles(cls, session: Session):
+        """
+        insert default job titles to the database.
+        """
+        current_dir = os.path.dirname(__file__)
+        job_titles_json_file = os.path.join(current_dir, '..', 'datasets', 'job_titles.json')
+
+        with open(job_titles_json_file, mode='r') as file:
+            job_titles = json.load(file)
+
+        # --- Fetch all existing job titles ---
+        existing_designations = set(
+            row.value["name"]
+            for row in session.query(cls)
+            .filter(cls.type == "job title")
+            .all()
+        )
+
+        for job_title in job_titles:
+            if job_title not in existing_designations:
+                record = MasterData(
+                    value={"name": job_title},
+                    type="job title"
+                )
+                session.add(record) 
+
+        # --- Commit and close ---
+        session.commit()
+        session.close()
+
+    @staticmethod
+    def get_default_department_names():
+        department_names = [
+            "Software Development",
+            "IT Support",
+            "Human Resources",
+            "Sales & Marketing",
+            "Finance & Accounting",
+            "Customer Support",
+            "Operations",
+            "Product Management",
+            "Business Development",
+            "Supply Chain & Logistics",
+            "Quality Assurance",
+            "Legal & Compliance",
+            "Other"
+            ]
+        return department_names

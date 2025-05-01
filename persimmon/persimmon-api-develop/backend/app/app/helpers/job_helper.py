@@ -1,7 +1,15 @@
+import asyncio
+import traceback
+from app.db.session import get_db
+from app.helpers.log_helper import log_execution_time
+from app.models.applicant import Applicant
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from app.models.job import Job
 from app.api.v1.endpoints.models.job_model import JobModel
-from app.helpers import jd_helper as jdh
+from app.helpers import jd_helper as jdh , db_helper as dbh
+from app.helpers import solr_helper as solrh
+from app.helpers import match_score_helper as matchh
 
 def generate_job_code(session: Session, company_code: str):
     """
@@ -28,6 +36,7 @@ def prepare_job_data(job: JobModel, job_exists: Job, updated_by: str) -> dict:
         "workplace_type": job.workplace_type.value,
         "location": job.location,
         "team_size": job.team_size,
+        "currency": job.currency,
         "min_salary": job.min_salary,
         "max_salary": job.max_salary,
         "min_experience": job.min_experience,
@@ -39,7 +48,7 @@ def prepare_job_data(job: JobModel, job_exists: Job, updated_by: str) -> dict:
         "ai_clarifying_questions": [q.model_dump() for q in job.ai_clarifying_questions],
         "publish_on_career_page": job.publish_on_career_page,
         "publish_on_job_boards": job.publish_on_job_boards,
-        "meta": job_exists.meta,
+        "meta": dbh.update_meta(job_exists.meta, updated_by)
     }
 
 def enhance_jd(jd: str, job: Job):
@@ -48,7 +57,7 @@ def enhance_jd(jd: str, job: Job):
     jd.setdefault("team_size", {})
     jd.setdefault("location", {})
     jd.setdefault("workmode", {})
-    jd.setdefault("industry_type", [])
+    jd['salary']['currency'] = job.currency
     jd["salary"]["max_value"] = job.max_salary
     jd["salary"]["min_value"] = job.min_salary
     jd["company_size"]["value"] =  job.company.number_of_employees
@@ -65,3 +74,91 @@ def enhance_jd(jd: str, job: Job):
         "max": job.max_experience
     }]
     return jd
+
+
+@log_execution_time
+async def generate_ai_score_with_job_description(
+    job_code: str,
+    job_description: str,
+):
+    try:
+        db_gen = get_db()
+        session = next(db_gen) 
+        job_details = Job.get_by_code(session=session, code=job_code)
+        if not job_details:
+            raise HTTPException(status_code=404, detail="Job not found")
+
+        response = await solrh.query_solr(job_code=job_code, rows=10000)
+        documents = response.get("response", {}).get("docs", [])
+        print("solr documents length : ", len(documents))
+        if not documents:
+            raise HTTPException(status_code=404, detail="No records found in Solr")
+
+        semaphore = asyncio.Semaphore(20)
+        async def fetch_resume(applicant_uuid: str, doc_id: str):
+            async with semaphore:
+                try:
+                    applicant = Applicant.get_by_uuid(session=session, uuid=applicant_uuid)
+                    stage_info = applicant.status.get("stages", [])[1]
+                    message = stage_info.get("message", "")
+                    gcs_path = message.split("is converted to")[1].strip()
+
+                    resume_text = await read_gcs_text_file_local(gcs_path)
+                    match_score = await matchh.calculate_match_percentage(
+                        resume_text=resume_text,
+                        jd_text=job_description
+                    )
+
+                    full_name = applicant.details["personal_information"]["full_name"]
+
+                    # Update in DB
+                    applicant.details["persimmon_score"] = match_score
+                    Applicant.update_details_jsonb_key(
+                        session=session,
+                        applicant_uuid=applicant_uuid,
+                        key="persimmon_score",
+                        value=match_score
+                    )
+
+                    # Update in Solr
+                    await solrh.update_applicant_document(doc_id, {
+                        "persimmon_score": {"set": match_score}
+                    })
+
+                    return (full_name, match_score)
+                except Exception:
+                    traceback.print_exc()
+                    return None
+
+        all_results = []
+
+        for chunk in chunkify(documents, 100): 
+            tasks = [fetch_resume(doc["applicant_uuid"], doc["id"]) for doc in chunk if doc.get("applicant_uuid")]
+            results = await asyncio.gather(*tasks)
+            all_results.extend(filter(None, results))  
+
+        all_results.sort(key=lambda x: x[1], reverse=True)
+
+        return {
+            "match_scores": all_results
+        }
+
+    except HTTPException:
+        traceback.print_exc()
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+
+def chunkify(lst, size):
+    for i in range(0, len(lst), size):
+        yield lst[i:i + size]
+
+
+async def read_gcs_text_file_local(file_path: str):
+    try:
+        with open(file_path, "r") as f:
+            return f.read()
+    except Exception as e:
+        return str(e)

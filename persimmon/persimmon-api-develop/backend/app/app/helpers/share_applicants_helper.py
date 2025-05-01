@@ -1,4 +1,5 @@
 import os
+import datetime
 from typing import Optional
 
 import jwt
@@ -9,16 +10,45 @@ from fastapi import HTTPException, Header
 
 from sqlalchemy.orm import Session
 
-from app.helpers import email_helper as emailh, regex_helper as regexh
-from app.models.company import Company
+from app.helpers import email_helper as emailh
 from app.models.integration import Integration
-from app.models.recruiter import Recruiter
-from app.models.job import Job
+from app.models.applicant import Applicant
+from app.models.shared import Shared
 
 # Secret key for signing JWT | python -c "import secrets; print(secrets.token_hex(32))"
 SECRET_KEY = os.getenv("SECRET_KEY")
 DEFAULT_REPLY_TO = "no-reply@symphonize.ai"
 AUTHORIZED_SENDER = os.getenv("FROM_ADDRESS")
+
+def validate_applicants(session, job_id, applicant_uuids):
+    nonexistent_applicants = Applicant.validate_applicant_uuids(
+        session=session, job_id=job_id, applicant_uuids=applicant_uuids
+    )
+    if nonexistent_applicants:
+        raise HTTPException(status_code=404, detail=f"Applicants not found: {nonexistent_applicants}")
+    
+
+def validate_sender(email_type, sender):
+    if email_type == "default" and sender != AUTHORIZED_SENDER:
+        raise ValueError("The sender address is not authorized")
+    
+
+def create_shared_record(session, email, token_uuid, applicant_uuids):
+    shared_applicants = Shared(uuid=token_uuid, details=applicant_uuids)
+    shared_applicants.create(session=session, created_by=email)
+    
+    
+def generate_payload(db_job, email, data, token_uuid):
+    return {
+        "jc": data.job_code,
+        "jt": db_job.title,
+        "se": email,
+        "token_uuid": token_uuid,
+        "count": len(data.applicant_uuids),
+        "hs": 1 if data.hide_salary else 0,
+        "exp": datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=7),
+    }
+
 
 def generate_shareable_link(payload: dict, redirect_url: str) -> str:
     """Generates a shareable link with a JWT token."""
@@ -26,7 +56,19 @@ def generate_shareable_link(payload: dict, redirect_url: str) -> str:
     return f"{redirect_url}?token={jwt_token}"
 
 
-async def share_applicants_send_email(
+def get_api_key(session: Session, company_id: int, service_type: str):
+    integration: Integration = Integration.get_credentials(session=session, company_id=company_id, platform_name='email')
+    if not integration:
+        raise HTTPException(status_code=404,detail="Email Integration details not found")
+    credentials = integration.credentials
+    for cred in credentials.get('credentials'):
+        if cred.get('service_type') == service_type:
+            api_key = cred['api_key'] 
+            return api_key
+    raise HTTPException(status_code=404, detail=f"{service_type} credentials not found")
+
+
+async def send_email_via_service(
     email_service: str,
     api_key: str,
     sender: str,
@@ -38,8 +80,6 @@ async def share_applicants_send_email(
     """Sends an email using the specified service."""
     try:
         if email_service == "default":
-            if sender != AUTHORIZED_SENDER:
-                raise ValueError("The sender address is not authorized")
             emailh.send_email(
                 subject=subject, body=body, to_email=recipient, from_email=sender, reply_to_email=reply_to
             )
@@ -61,40 +101,46 @@ async def share_applicants_send_email(
         return {"email": recipient, "error": str(e), "status": "failed"}
 
 
-def get_api_key(session: Session, email: str, service_type: str):
-    domain = regexh.get_domain_from_email(email = email)
-    if not domain:
-        raise HTTPException(status_code=404, detail="Domain is invalid")
+async def dispatch_applicant_emails(session, data, payload, company, recruiter):
+    success_emails, failed_emails = [], []
+    api_key = None
+    if data.email_type != "default":
+        api_key = get_api_key(session=session, company_id=company.id, service_type=data.email_type)
+        await emailh.validate_sender_for_email_integrations(from_email=data.sender, api_key=api_key, service_type=data.email_type)
 
-    company_details = Company.get_by_domain(session=session, domain=domain)
-    if not company_details:
-        raise HTTPException(status_code=404,detail="Company details not found")
+    body_template_data = {
+        "CompanyName": company.name,
+        "JobTitle": payload["jt"],
+        "RecruiterName": recruiter.full_name,
+        "Designation": recruiter.designation,
+    }
 
-    integration: Integration = Integration.get_credentials(session=session, company_id=company_details.id, platform_name='email')
-    if not integration:
-        raise HTTPException(status_code=404,detail="Email Integration details not found")
+    for recipient_email in data.recipient_emails:
+        payload["re"] = recipient_email
+        body_template_data["Link"] = generate_shareable_link(payload, data.redirect_url)
+        subject, body = get_share_applicants_email_templates(body_template_data)
+        email_result = await send_email_via_service(
+            email_service=data.email_type,
+            api_key=api_key,
+            sender=data.sender.lower(),
+            recipient=recipient_email.lower(),
+            subject=subject,
+            body=body,
+        )
+        (success_emails if email_result["status"] == "success" else failed_emails).append(email_result)
     
-    credentials = integration.credentials
-    for cred in credentials.get('credentials'):
-        if cred.get('service_type') == service_type:
-            api_key = cred['api_key'] 
-            return api_key
-        
-    raise HTTPException(status_code=404, detail=f"{service_type} credentials not found")
+    return success_emails, failed_emails
 
 
 def get_current_user(authorization: Optional[str] = Header(None)):
     if not authorization:
         raise HTTPException(status_code=401, detail="Authorization header missing")
-
     try:
         scheme, token = authorization.split()
         if scheme.lower() != "bearer":
             raise HTTPException(status_code=401, detail="Invalid authentication scheme")
-        
         decoded_data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return decoded_data 
-    
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
     except (jwt.DecodeError, ValueError):
@@ -146,7 +192,7 @@ def get_share_applicants_email_templates(body_template_data: dict) -> tuple:
         <div class="email-container">
             <div class="content">
                 <p>Dear Hiring team,</p>
-                <p>{{RecruiterName}} has shared a list of applicants who applied for {{JobTitle}} for your review. You can access the list using the link below and provide your feedback.</p>
+                <p>{{RecruiterName}} has shared a list of applicants, applied for {{JobTitle}} for your review. You can access the list using the link below and provide your feedback.</p>
                 <div class="button-container">
                     <a href="{{Link}}" class="button">View Applicants</a>
                 </div>

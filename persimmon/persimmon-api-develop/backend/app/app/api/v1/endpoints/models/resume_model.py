@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
 
 class ResumeParseRequest(BaseModel):
@@ -15,3 +15,12 @@ class EmailTemplate(BaseModel):
     subject : str
     body: str
     is_edited: bool = False
+
+class FilePath(BaseModel):
+    file_path: str
+
+    @field_validator("file_path")
+    def validate_file_path(cls, file_path):
+        if not file_path:
+            raise ValueError("File path is required")
+        return file_path

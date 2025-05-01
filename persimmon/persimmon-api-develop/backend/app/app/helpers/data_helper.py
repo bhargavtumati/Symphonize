@@ -1,5 +1,21 @@
+import logging
+import os
+import aiofiles
+from io import BytesIO
 from datetime import datetime
 
+from fastapi import HTTPException
+
+import app.helpers.pdf_helper as pdfh
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)-5s %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+
+# Example logger usage
+logger = logging.getLogger(__name__)
 
 # Function to extract candidate's name from resume text
 def get_candidate_name(file_name):
@@ -7,9 +23,9 @@ def get_candidate_name(file_name):
     return candidate_name
 
 
-def convert_nulls_to_empty_strings(data):
+async def convert_nulls_to_empty_strings(data):
     if isinstance(data, dict):  # If the data is a dictionary
-        return {key: convert_nulls_to_empty_strings(value) for key, value in data.items()}
+        return {key: await convert_nulls_to_empty_strings(value) for key, value in data.items()}
     elif data is None or data == "Not Provided":  # If the value is None (null)
         return ""
     else:
@@ -73,9 +89,10 @@ def flatten_dict_solr(data: dict, parent_key: str = "", sep: str = ".") -> dict:
             continue  # Ignore specified keys
 
         # Direct key assignment for nested objects like 'social_media' or 'personal_information'
-        new_key = k if parent_key in ["personal_information", "job_information", "social_media"] else (
-            f"{parent_key}{sep}{k}" if parent_key else k
-        )
+        if parent_key in ["personal_information", "job_information", "social_media"]:
+            new_key = k 
+        else:
+            new_key = f"{parent_key}{sep}{k}" if parent_key else k
 
         # Handle nested dictionaries
         if isinstance(v, dict) and parent_key in ["social_media", "personal_information", "job_information"]:
@@ -88,3 +105,29 @@ def flatten_dict_solr(data: dict, parent_key: str = "", sep: str = ".") -> dict:
             items[new_key] = {"set": v}
 
     return items
+
+
+async def read_file_as_pdf(file_path: str) -> BytesIO:
+    content = await read_any_file(file_path=file_path)
+    file_extension = os.path.splitext(file_path)[1].lower()
+    if file_extension == ".docx":
+        pdf_file = pdfh.convert_docx_to_pdf_stream(content)  
+    elif file_extension == ".pdf":
+        pdf_file = BytesIO(content)
+    else:
+        raise HTTPException(status_code=415, detail="Unsupported file type")
+
+    pdf_file.seek(0)
+    return pdf_file
+
+
+async def read_any_file(file_path: str) -> BytesIO:
+    if not os.path.isfile(file_path):
+        logger.debug(f"file path not found : {file_path}")
+        raise HTTPException(status_code=404, detail="File not found")
+
+    async with aiofiles.open(file_path, mode='rb') as f:
+        content = await f.read()
+        return content
+
+    # return BytesIO(content)

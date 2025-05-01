@@ -8,13 +8,14 @@ from app.helpers.firebase_helper import verify_firebase_token
 client = TestClient(app)
 
 mock_job_data = {
-    "id": 1,
+    "id": 10,
     "title": "Software Engineer",
     "type": JobTypeEnum.FULL_TIME.value,
     "status": JobStatusTypeEnum.ACTIVE.value,
     "workplace_type": WorkplaceTypeEnum.REMOTE.value,
     "location": "Hyderabad",
     "team_size": '6-10',
+    "currency": "USD",
     "min_salary": 7,
     "max_salary": 12,
     "min_experience": 2,
@@ -47,6 +48,7 @@ mock_job_data = {
     "ai_clarifying_questions": [{"question": "Are you proficient in Python?","answer": "Yes"}],
     "publish_on_career_page": True,
     "publish_on_job_boards": ["LinkedIn", "Indeed"],
+    "published_on_other_domains": False,
     "enhanced_description": {},
     "meta": {
         "audit": {
@@ -69,6 +71,7 @@ mock_job_update_data = {
     "workplace_type": WorkplaceTypeEnum.REMOTE.value,
     "location": "Hyderabad",
     "team_size": '6-10',
+    "currency": "USD",
     "min_salary": 7,
     "max_salary": 12,
     "min_experience": 2,
@@ -101,6 +104,7 @@ mock_job_update_data = {
     "enhanced_description": {},
     "publish_on_career_page": True,
     "publish_on_job_boards": ["LinkedIn", "Indeed"],
+    "published_on_other_domains": False,
     "meta": {
         "audit": {
             "created_at": "",
@@ -121,7 +125,6 @@ def mock_verify_firebase_token():
         "email": "surendra.goluguri@symphonize.com"
     }
 
-app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
 
 @patch("app.helpers.company_helper.get_or_create_company")
 @patch("app.models.recruiter.Recruiter.get_by_email_id")
@@ -130,9 +133,13 @@ app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
 @patch("app.helpers.jd_helper.extract_features_from_jd")
 @patch("app.helpers.job_helper.enhance_jd")
 @patch("app.models.job.Job.create")
+@patch("app.models.stages.Stages.create")
 @patch("app.helpers.stages_helper.create_stages")
+@patch("app.models.job.Job.get_next_sequence_number", return_value=1)
 def test_create_job_success(
+    mock_get_next_sequence_number,
     mock_create_stages,
+    mock_db_create_stages,
     mock_create_job,
     mock_enhance_jd,
     mock_extract_features,
@@ -141,10 +148,11 @@ def test_create_job_success(
     mock_get_recruiter,
     mock_get_or_create_company,
 ):
-    mock_recruiter = MagicMock(id=1, company_id=2)
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
+    mock_recruiter = MagicMock(id=1, company_id=2, name="Symphonize")
     mock_get_recruiter.return_value = mock_recruiter
     
-    mock_company = MagicMock(id=2, name="TestCorp")
+    mock_company = MagicMock(id=2, name="Symphonize")
     mock_get_company.return_value = mock_company
     mock_generate_code.return_value = "Sym0001"
     
@@ -156,10 +164,13 @@ def test_create_job_success(
     mock_get_or_create_company.return_value = mock_company
     
     mock_create_stages.return_value = None
+
+    mock_db_create_stages.return_value = None
     
     # API call
     response = client.post("/api/v1/jobs", json=mock_job_data)
     
+    print(response.json())
     # Assertions
     assert response.status_code == 200
     assert response.json()["message"] == "Job created successfully"
@@ -170,6 +181,7 @@ def test_create_job_success(
     mock_get_recruiter.assert_called_once()
     mock_extract_features.assert_called_once()
     mock_create_job.assert_called_once()
+    mock_get_next_sequence_number.call_count == 1
 
 @patch("app.models.job.Job.update")
 @patch("app.models.job.Job.get_by_id")
@@ -190,13 +202,16 @@ def test_partial_update_job(mock_get_job_by_id, mock_partial_update_job):
 @patch("app.helpers.db_helper.update_meta")
 @patch("app.helpers.company_helper.handle_company_association")
 @patch("app.models.job.Job.update")
+@patch("fastapi.BackgroundTasks.add_task")
 def test_update_job_success(
+    mock_add_task,
     mock_update_job,
     mock_handle_company,
     mock_update_meta,
     mock_prepare_job_data,
     mock_get_job
 ):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_job = MagicMock(id=1, title="Software Engineer", meta={})
     mock_get_job.return_value = mock_job
     
@@ -214,12 +229,13 @@ def test_update_job_success(
     # Assertions
     assert response.status_code == 200
     assert response.json()["message"] == "Job updated successfully"
-    
+    mock_add_task.assert_called_once()
     mock_get_job.assert_called_once()
 
 @patch("app.models.job.Job.get_by_id")
 @patch("app.models.company.Company.get_by_id")
 def test_get_job_by_id(mock_get_company_by_id, mock_get_job_by_id):
+    app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_get_job_by_id.return_value = MagicMock(id=1, title="Software Engineer", location="Hyderabad", status="ACTIVE", company_id=1)
     mock_get_company_by_id.return_value = MagicMock(id=1, name="symphonize")
 

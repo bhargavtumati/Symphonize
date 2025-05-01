@@ -21,13 +21,13 @@ class CreateZrApplicantRequest(BaseModel):
 
 @router.get("/")
 def get_applicants() -> GetResponseBase:
-    return create_response(message=f"Get all applicants", data={}, meta=meta)
+    return create_response(message="Get all applicants", data={}, meta=meta)
 
 
 @router.post("/")
 def create_applicant(create_applicant_request: CreateZrApplicantRequest):
     return create_response(
-        message=f"Created applicant", data=create_applicant_request, meta=meta
+        message="Created applicant", data=create_applicant_request, meta=meta
     )
 
 
@@ -43,7 +43,7 @@ async def classify_applicant(
     await sa.classify(candidate_id=candidate_id, applicant_id=applicant_id, job_id=job_id, session=session)
     meta["context"] = context
     meta["id"] = uuid.uuid4()
-    return create_response(message=f"Classified applicants", data=data, meta=meta)
+    return create_response(message="Classified applicants", data=data, meta=meta)
 
 
 @router.get("/{applicant_id}")

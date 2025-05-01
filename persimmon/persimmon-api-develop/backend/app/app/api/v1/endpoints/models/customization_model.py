@@ -17,6 +17,7 @@ class CustomizationModel(BaseModel):
     description: Optional[str] = Field(default='''Explore opportunities that empower you to grow, innovate, and make an impact. 
     Join a team where your talents are valued, your ideas are heard, and your career aspirations become a reality. Let’s build the future together!''')
     enable_dark_mode: Optional[bool] = Field(default=False)
+    enable_header: Optional[bool] = Field(default=True)
     color_selected: Optional[str] = None
     primary_colors: Optional[List[str]] = None
     selected_header_color: Optional[str] = None

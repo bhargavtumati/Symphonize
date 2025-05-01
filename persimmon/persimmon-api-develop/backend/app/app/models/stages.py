@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, Session
 from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from app.helpers.db_helper import get_metadata
+from app.helpers.log_helper import log_execution_time
 
 class Stages(Base):
     __tablename__ = 'stages'
@@ -17,6 +18,7 @@ class Stages(Base):
         return f"Stages(id={self.id!r}, stages={self.stages!r}, ...)"
 
     @classmethod
+    @log_execution_time
     def get_by_id(cls, session: Session, job_id: int):
         return session.query(cls).filter(cls.job_id == job_id).first()
 

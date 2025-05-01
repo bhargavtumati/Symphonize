@@ -12,9 +12,9 @@ import string
 import pandas as pd
 import numpy as np
 import spacy
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import load_model
+#from tensorflow.keras.preprocessing.text import Tokenizer
+#from tensorflow.keras.preprocessing.sequence import pad_sequences
+#from tensorflow.keras.models import load_model
 import subprocess
 import sys
 
@@ -80,9 +80,9 @@ def load_model_classifier(version):
 def load_vectorizer(version):
     return load("vectorizer", version=version)
 
-def load_lstm_model(version):
+def load_lstm_model():
     current_directory = os.getcwd()
-    file_to_be_loaded = os.path.join(current_directory, "app", "ml", "models", "classifiers", f"lstm_model.h5")
+    file_to_be_loaded = os.path.join(current_directory, "app", "ml", "models", "classifiers", "lstm_model.h5")
     if os.path.exists(file_to_be_loaded):
         return load_model(file_to_be_loaded)  # Keras model loading
     else:
@@ -115,7 +115,7 @@ def classify_lstm(message,selected_model_classifier):
     sequences = tokenizer.texts_to_sequences([input_text])
     max_sequence_length = 500
     data = pad_sequences(sequences, maxlen=max_sequence_length)
-    model = load_lstm_model(selected_model_classifier)
+    model = load_lstm_model()
     prediction = model.predict(data)
     return prediction
 

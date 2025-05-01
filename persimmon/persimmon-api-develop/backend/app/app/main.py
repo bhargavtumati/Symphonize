@@ -32,13 +32,18 @@ async def lifespan(app: FastAPI):
     #     # shutdown
     print("shutdown fastapi")
     
-
+root_path_map = {
+    "development": "/api-dev",
+    "qa": "/api-qa",
+    "production": "",
+}
 
 # Core Application Instance
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.API_VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    root_path=root_path_map.get(settings.API_PREFIX, ""),
     lifespan=lifespan,
 )
 
@@ -57,7 +62,7 @@ secure_headers = Secure.with_default_headers()
 
 @app.middleware("http")
 async def add_security_headers(request, call_next):
-    if request.url.path.startswith("/docs") or request.url.path.startswith("/openapi.json"):
+    if request.url.path.startswith("/docs") or request.url.path.startswith("/openapi.json") or request.url.path.startswith("/api-dev/docs") or request.url.path.startswith("/api-qa/docs"):
         return await call_next(request)
     print("Security Middleware Executed")
     response = await call_next(request)

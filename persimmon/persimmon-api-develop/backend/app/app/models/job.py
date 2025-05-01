@@ -10,6 +10,7 @@ from app.helpers.jd_helper import extract_features_from_jd
 from app.models.applicant import Applicant
 from sqlalchemy import cast, Date
 import app.helpers.date_helper as date_helper
+from app.helpers.log_helper import log_execution_time
 
 # Enum definitions
 class JobTypeEnum(enum.Enum):
@@ -42,13 +43,15 @@ class Job(Base):
     workplace_type: Mapped[WorkplaceTypeEnum] = mapped_column(Enum(WorkplaceTypeEnum, name='WorkplaceType', schema='enum'), nullable=False)
     location: Mapped[str] = mapped_column(String, nullable=False)
     team_size: Mapped[str] = mapped_column(String, nullable=False)
+    currency : Mapped[str] = mapped_column(String, nullable=True)
     min_salary: Mapped[float] = mapped_column(Float, nullable=False)
     max_salary: Mapped[float] = mapped_column(Float, nullable=False)
     min_experience: Mapped[float] = mapped_column(Float, nullable=False)
     max_experience: Mapped[float] = mapped_column(Float, nullable=False)
     target_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
     description: Mapped[str] = mapped_column(String, nullable=False)
-    enhanced_description: Mapped[list[str]] = mapped_column(JSONB, nullable=False)
+    published_on_other_domains: Mapped[bool] = mapped_column(Boolean, default=False)
+    enhanced_description: Mapped[dict] = mapped_column(MutableDict.as_mutable(JSONB),nullable=False)
 
     #Toggle field for client posting
     is_posted_for_client: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -102,7 +105,7 @@ class Job(Base):
 
     @classmethod
     def get_all(cls, session: Session, limit: int, offset: int, code: str, title: str, location: str, companies: list[Company], client_name: str, target_date: str, posted_on: str, time_zone: str, created_by_email: str,sort_order:str,sort_column:str):
-        CompanyAlias = aliased(Company)
+        company_alias = aliased(Company)
         applicant_count_subquery = (
             session.query(
                 Applicant.job_id,
@@ -117,10 +120,10 @@ class Job(Base):
             session.query(
                 cls,
                 label("applicant_count", func.coalesce(applicant_count_subquery.c.applicant_count, 0)),
-                CompanyAlias.name.label("client_name")
+                company_alias.name.label("client_name")
             )
             .outerjoin(applicant_count_subquery, cls.id == applicant_count_subquery.c.job_id)
-            .outerjoin(CompanyAlias, cls.company_id == CompanyAlias.id) 
+            .outerjoin(company_alias, cls.company_id == company_alias.id) 
         )
 
         if sort_order=="asc":
@@ -181,6 +184,7 @@ class Job(Base):
         return job.id 
 
     @classmethod
+    @log_execution_time
     def get_by_code(cls, session: Session, code: str):
         job = session.query(cls).filter(cls.code == code).first()
         return job
@@ -264,7 +268,15 @@ class Job(Base):
         )
         return result
     
-    
+    @classmethod
+    def get_company_jobs(cls,session,company_id:int):
+        result = (
+               session.query(cls)
+              .filter(cls.company_id == company_id)
+              .all()
+         )
+        return result
+
     def create(self, session: Session, created_by: str):
         self.meta = get_metadata()
         self.meta['audit']['created_by']['email'] = created_by

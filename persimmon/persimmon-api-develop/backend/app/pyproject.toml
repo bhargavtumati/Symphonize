@@ -78,6 +78,8 @@ opencv-python = "^4.11.0.86"
 pyjwt = "^2.10.1"
 deepdiff = "^8.3.0"
 secure = "^1.0.1"
+phonenumbers = "^9.0.2"
+pycountry = "^24.6.1"
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = [ "F401",]

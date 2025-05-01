@@ -35,7 +35,8 @@ def convert_uuids_to_strings(data):
     return data
 
 @patch("app.models.stages.Stages.get_by_id")
-def test_get_stages(mock_get_stages):
+@patch("app.models.job.Job.get_by_id")
+def test_get_stages(mock_get_job_by_id, mock_get_stages):
     app.dependency_overrides[verify_firebase_token] = mock_verify_firebase_token
     mock_stages_instance = MagicMock()
     mock_stages_instance.stages = [
@@ -45,9 +46,12 @@ def test_get_stages(mock_get_stages):
     ]
     mock_get_stages.return_value = mock_stages_instance
 
+    mock_get_job_by_id.return_value = MagicMock(id=1, code="Tek001")
+
     job_id = 1
 
     response = client.get(f"/api/v1/stages?job_id={job_id}")
+    print("stages response", response.json())
     
     assert response.status_code == 200
     print("response", response.json())
@@ -59,6 +63,8 @@ def test_get_stages(mock_get_stages):
         "message": "Stages list retrieved successfully",
         "status": 200
     }
+    assert mock_get_stages.call_count == 1
+    assert mock_get_job_by_id.call_count == 1
 
 @patch("app.models.job.Job.get_by_id")
 @patch("app.models.stages.Stages.get_by_id")
@@ -97,7 +103,7 @@ def test_update_stages_success(
     request_body = convert_uuids_to_strings(mock_stages_partial_update.model_dump())
 
     response = client.patch(
-        f"/api/v1/stages?job_id=1",
+        "/api/v1/stages?job_id=1",
         json=request_body,
         headers={"Authorization": "Bearer test_token"}
     )
@@ -117,7 +123,7 @@ def test_update_stages_job_not_found(mock_get_by_id):
     ]))
 
     response = client.patch(
-        f"/api/v1/stages?job_id=1",
+        "/api/v1/stages?job_id=1",
         json=convert_uuids_to_strings(mock_stages_partial_update.model_dump()),
         headers={"Authorization": "Bearer test_token"}
     )

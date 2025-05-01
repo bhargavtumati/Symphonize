@@ -220,7 +220,6 @@ def extract_features_from_jd(
     # Final attempt outside of retries, or error handling if all attempts fail
     try:
         response_json = json.loads(response_content)
-        # response_json["text"] = text
         return json.dumps(response_json, indent=2)
     except json.JSONDecodeError:
         return json.dumps({"error": "Failed to parse JSON response after retries."})

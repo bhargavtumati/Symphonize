@@ -1,15 +1,32 @@
 import re
-from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator, model_validator
-from typing import Any, Optional, List,Dict,Union
-from sqlalchemy.dialects.postgresql import JSONB
 from uuid import UUID
-from app.utils.validators import (
-    has_proper_characters, is_alphabetic, is_non_empty, validate_decimal_point, validate_email_address, validate_facebook_url, validate_github_url, validate_instagram_url, validate_length, validate_letters_and_numbers, validate_linkedin_url, 
-    validate_mobile_number, validate_name_with_fullstop, validate_Preference,
-    validate_numeric_range, validate_industry_type, validate_job_location, get_education_institutions_list)
 from datetime import datetime
-from zoneinfo import available_timezones
 from enum import Enum
+from zoneinfo import available_timezones
+from typing import Optional, List,Dict,Union
+
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator, model_validator
+
+from app.utils.validators import (
+    has_proper_characters, 
+    is_alphabetic, 
+    is_non_empty, 
+    validate_decimal_point, 
+    validate_email_address, 
+    validate_facebook_url, 
+    validate_github_url, 
+    validate_instagram_url, 
+    validate_length, 
+    validate_letters_and_numbers, 
+    validate_linkedin_url, 
+    validate_name_with_fullstop, 
+    validate_preference,
+    validate_numeric_range, 
+    validate_industry_type, 
+    validate_job_location, 
+    get_education_institutions_list,
+    validate_mobile_number_with_country_code
+)
 
 FULL_NAME_FIELD = "Full Name"
 JOB_TITLE_FIELD = "Job title"
@@ -44,12 +61,12 @@ class JobInformation(BaseModel):
     skills: Optional[List[str]] = []
     job_title: Optional[str] = ""
     department: Optional[str] = ""
-    current_ctc: Optional[Union[float,str]] = None 
-    expected_ctc: Optional[Union[float,str]] = None
+    current_ctc: Optional[int] = None
+    expected_ctc: Optional[int] = None
     job_location: Optional[str] = ""
     preferred_job_location: Optional[str] = ""
     current_work_at: Optional[str] = ""
-    work_experience: Optional[str] = None
+    work_experience: Optional[str] = ""
 
     @field_validator('job_title')
     def validate_title(cls, job_title):
@@ -86,15 +103,16 @@ class JobInformation(BaseModel):
 
     @field_validator('current_ctc')
     def validate_current_ctc(cls, current_ctc):
-        validate_decimal_point(value=current_ctc)
-        return validate_numeric_range(value=current_ctc, min_val=2, max_val=100, field_name=CURRENT_CTC_FIELD) 
+        if current_ctc <= 0:
+            raise ValueError("Current salary must be greater than 0")
+        return current_ctc
     
     @field_validator('expected_ctc')
     def validate_expected_ctc(cls, expected_ctc):
-        validate_decimal_point(value=expected_ctc)
-        return validate_numeric_range(value=expected_ctc, min_val=2, max_val=100, field_name=EXPECTED_CTC_FIELD) 
+        if expected_ctc <= 0:
+            raise ValueError("Expected salary must be greater than 0")
+        return expected_ctc
     
-
     @model_validator(mode='after')
     def check_salary_range(cls, values):
         current_ctc = values.current_ctc
@@ -112,6 +130,10 @@ class PersonalInformation(BaseModel):
     address: Optional[str] = ""
     full_name: Optional[str] = None
     date_of_birth: Optional[str] = ""
+
+    @field_validator('phone')
+    def validate_phone(cls, phone):
+        return validate_mobile_number_with_country_code(phone, "phone") 
 
     @field_validator('full_name')
     def validate_full_name(cls, full_name):
@@ -138,7 +160,7 @@ class PersonalInformation(BaseModel):
     @field_validator('address')
     def validate_address_field(cls, address):
         validate_length(address, 0, 300, "Address")
-        if not re.match(r"^[a-zA-Z0-9 .,\-#/()\s]+$", address):
+        if not re.match(r"^[a-zA-Z0-9.,\-#/()\s]+$", address):
             raise ValueError("Only letters, numbers, spaces, and common special characters (.,-#/()) are allowed.")
         return address
     
@@ -195,7 +217,7 @@ class IndustryType(BaseModel):
 
     @field_validator('pref')
     def validate_pref(cls, pref):
-        validate_Preference(pref)
+        validate_preference(pref)
         return pref
     
     @field_validator('min')
@@ -230,8 +252,6 @@ class Remuneration(BaseModel):
     @model_validator(mode="after")
     def validate_min_and_max(self):
         if self.name:
-            validate_numeric_range(self.max, 2, 100, "max")
-            validate_numeric_range(self.min, 1, 99, "min")
             if self.min >= self.max:
                 raise ValueError("min must be less than max.")
             return self
@@ -246,7 +266,7 @@ class Skill(BaseModel):
     # @field_validator('pref')
     @classmethod
     def validate_pref(cls, pref: str):
-        validate_Preference(pref)
+        validate_preference(pref)
         return pref
     
     # @field_validator('value')
@@ -272,7 +292,7 @@ class SoftSkill(BaseModel):
     # @field_validator('pref')
     @classmethod
     def validate_pref(cls, pref: str):
-        validate_Preference(pref)
+        validate_preference(pref)
         return pref
 
     @model_validator(mode="after")
@@ -280,11 +300,6 @@ class SoftSkill(BaseModel):
         if not self.name :
             return self
         SoftSkill.validate_pref(self.pref)
-        # if f"{self.min_value}-{self.max_value}" not in ["0-4", "4-7", "8-10"]:
-        #     raise ValueError(
-        #         f"Invalid range: {self.min_value}-{self.max_value}. "
-        #         "Please enter a valid range. Allowed ranges are: 0-4, 4-7, or 8-10."
-        #     )
         return self
 
 
@@ -330,16 +345,17 @@ class Pedigree(BaseModel):
                 "institutions": get_education_institutions_list() # {"University of Example", "Example State University", "Technical Institute", "Community College"},
             },
             "company": {
-                "qualifications": {"example corp", "tech solutions", "global industries", "innovation ltd"},
-                "institutions": {"Technology", "Healthcare", "Finance", "Education", "Manufacturing"}
+                "qualifications": {"example corp", "tech solutions", "global industries", "innovation ltd"}
             }
         }
         for spec in self.specifications:
             Specification.validate_spec(spec.spec)
             if spec.qualification.strip().lower() not in RULES[self.name]["qualifications"]:
                 raise ValueError("Please enter a valid qualification")
-            if spec.institution_name not in RULES[self.name]["institutions"]:
-                raise ValueError("Please enter a valid institution name")
+            if self.name == "company":
+                validate_industry_type(spec.institution_name)
+            elif spec.institution_name not in RULES[self.name]["institutions"]:
+                    raise ValueError("Please enter a valid institution name")
         return self
 
 
@@ -406,7 +422,7 @@ class TransitionBehaviour(BaseModel):
     @model_validator(mode="after")
     def validate_preference(self):
         if self.name:
-            validate_Preference(self.preference)
+            validate_preference(self.preference)
         return self
     
     @field_validator('value')
@@ -430,7 +446,7 @@ class AdvancedFilter(BaseModel):
     # @field_validator('preference')
     @classmethod
     def validate_pref(cls, preference: str):
-        validate_Preference(preference)
+        validate_preference(preference)
         return preference
 
     @model_validator(mode="after")
@@ -459,24 +475,6 @@ class Filters(BaseModel):
     soft_skills: Optional[List[SoftSkill]] =None
     transition_behaviour: Optional[List[TransitionBehaviour]] =None
     advanced_filters: Optional[List[AdvancedFilter]] =None
-
-    # @field_validator('responsibilities')
-    # def validate_responsibilities_count(cls, responsibilities):
-    #     if len(responsibilities)>20:
-    #         raise ValueError("responsibilities must not be greater than 20")
-    #     return responsibilities
-    
-    # @field_validator('skills')
-    # def validate_skills_count(cls, skills):
-    #     if len(skills)>10:
-    #         raise ValueError("skills must not be greater than 10")
-    #     return skills
-    
-    # @field_validator('soft_skills')
-    # def validate_softskills_count(cls, soft_skills):
-    #     if len(soft_skills)>10:
-    #         raise ValueError("soft_skills must not be greater than 10")
-    #     return soft_skills
 
 
 # Root Model
@@ -509,20 +507,20 @@ allowed_domains_for_applicant_email = [
 ]
 
 class ApplicantModel(BaseModel):
-    phone_number: int
+    phone_number: str
     full_name: str
     email_id: EmailStr
     linkedin_url: str
 
     @field_validator('phone_number')
     def validate_phone_number(cls, phone_number):
-        validate_mobile_number(phone_number, "phone number")
+        validate_mobile_number_with_country_code(phone_number, "phone number")
         return phone_number
 
     @field_validator('full_name')
     def validate_full_name(cls, full_name):
-        is_non_empty(full_name, "Full Name")
-        validate_name_with_fullstop(full_name, "Full Name")
+        is_non_empty(full_name, FULL_NAME_FIELD)
+        validate_name_with_fullstop(full_name, FULL_NAME_FIELD)
         return full_name
 
     @field_validator('linkedin_url')
@@ -638,3 +636,6 @@ class ShareRequest(BaseModel):
         if len(applicant_uuids) == 0:
             raise ValueError("applicant_uuids must me atleast one")
         return applicant_uuids
+
+class FeedbackPromptRequest(BaseModel):
+    feedback_prompt: str
